@@ -37,7 +37,7 @@ describe("Utils", () => {
     describe("getConnectorOpacity", () => {
         const minOpacity = 0.2;
         const call = (i: number, n: number) =>
-            utils.getConnectorOpacity({ connectorIndex: i, totalConnectors: n, minConnectorOpacity: minOpacity });
+            utils.getConnectorOpacity({ dynamicLineStyle: true, connectorIndex: i, totalConnectors: n, minConnectorOpacity: minOpacity });
 
         it("Should return 1 for the only connector in a single-connector path", () => {
             expect(call(0, 1)).toBe(1);
@@ -69,10 +69,18 @@ describe("Utils", () => {
                 }
             }
         });
+
+        it("Should return 1 for every connector when dynamicLineStyle is false", () => {
+            for (let n = 1; n <= 11; n++) {
+                for (let i = 0; i < n; i++) {
+                    expect(utils.getConnectorOpacity({ dynamicLineStyle: false, connectorIndex: i, totalConnectors: n, minConnectorOpacity: minOpacity })).toBe(1);
+                }
+            }
+        });
     });
 
     describe("getDynamicConnectorThickness", () => {
-        const base = { connectorThickness: 4, minConnectorThickness: 2 };
+        const base = { dynamicLineStyle: true, connectorThickness: 4, minConnectorThickness: 2 };
         const call = (i: number, n: number) =>
             utils.getDynamicConnectorThickness({ ...base, connectorIndex: i, totalConnectors: n });
 
@@ -115,6 +123,14 @@ describe("Utils", () => {
                     const t = call(i, n);
                     expect(t).toBeGreaterThanOrEqual(2);
                     expect(t).toBeLessThanOrEqual(4);
+                }
+            }
+        });
+
+        it("Should return connectorThickness for every connector when dynamicLineStyle is false", () => {
+            for (let n = 1; n <= 11; n++) {
+                for (let i = 0; i < n; i++) {
+                    expect(utils.getDynamicConnectorThickness({ dynamicLineStyle: false, connectorThickness: 6, minConnectorThickness: 2, connectorIndex: i, totalConnectors: n })).toBe(6);
                 }
             }
         });

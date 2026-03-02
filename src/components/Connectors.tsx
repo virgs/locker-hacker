@@ -67,12 +67,8 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
     const totalConnectors  = Math.max(0, path.length - 1) + (hasLiveConnector ? 1 : 0);
 
     const buildConnector = (index: number, from: Point, rawTo: Point | null): Connector => {
-        const thickness = dynamicLineStyle
-            ? getDynamicConnectorThickness({ connectorThickness, minConnectorThickness, connectorIndex: index, totalConnectors })
-            : connectorThickness;
-        const opacity = dynamicLineStyle
-            ? getConnectorOpacity({ connectorIndex: index, totalConnectors, minConnectorOpacity })
-            : 1;
+        const thickness = getDynamicConnectorThickness({ dynamicLineStyle, connectorThickness, minConnectorThickness, connectorIndex: index, totalConnectors });
+        const opacity   = getConnectorOpacity({ dynamicLineStyle, connectorIndex: index, totalConnectors, minConnectorOpacity });
         return {
             from     : getConnectorPoint(from, pointActiveSize, thickness),
             to       : rawTo ? getConnectorPoint(rawTo, pointActiveSize, thickness) : mouse as Point,

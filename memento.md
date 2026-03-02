@@ -143,6 +143,17 @@ Both functions are pure, fully tested (21 tests), and use the same monotonically
 - Tests must cover new/changed logic; run `pnpm test` to verify.
 - ESLint config is flat (eslint 10): `eslint.config.js`. Run `pnpm lint`.
 
+### `dynamicLineStyle=false` Bug Fix: Stale CSS Override Removed
+
+**Root Cause:** `src/App.scss` contained a SCSS mixin that applied `:nth-child(1..9)` rules with `!important` to `.react-pattern-lock__connector`, overriding the component's inline `height` and `opacity` for the first 9 connectors. This made every connector appear with a different thickness and opacity regardless of the `dynamicLineStyle` prop — explaining why "it stabilizes at ~10 lines" (no CSS rule existed beyond `:nth-child(9)`).
+
+**Fix:**
+1. Removed the stale CSS from `App.scss` entirely (it predated the React prop-based implementation).
+2. Added `dynamicLineStyle: boolean` as a required parameter to `getDynamicConnectorThickness` and `getConnectorOpacity` in `math.ts`. When `false`, both return the constant values (`connectorThickness` / `1`) immediately, making the invariant explicit at the function level.
+3. Simplified `Connectors.tsx` `buildConnector` to always call the math functions (no more ternary guard), since the functions now own both code paths.
+
+---
+
 ## Trade-offs
 
 - `containerSize` default of `"100%"` means the CSS height is also `"100%"` when neither `width` nor `height` is provided. This differs from the old behavior where height was always set to a pixel value equal to `offsetWidth`. In practice all current usages pass an explicit pixel value so this has no visible impact.

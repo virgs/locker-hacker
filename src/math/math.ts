@@ -55,29 +55,35 @@ export const getConnectorPoint = (
 });
 
 export const getConnectorOpacity = ({
+    dynamicLineStyle,
     connectorIndex,
     totalConnectors,
     minConnectorOpacity,
 }: {
+    dynamicLineStyle: boolean;
     connectorIndex: number;
     totalConnectors: number;
     minConnectorOpacity: number;
 }): number => {
+    if (!dynamicLineStyle) return 1;
     const ratio = 1 - connectorIndex / Math.max(1, totalConnectors - 1);
     return minConnectorOpacity + (1 - minConnectorOpacity) * ratio;
 };
 
 export const getDynamicConnectorThickness = ({
+    dynamicLineStyle,
     connectorThickness,
     minConnectorThickness,
     connectorIndex,
     totalConnectors,
 }: {
+    dynamicLineStyle: boolean;
     connectorThickness: number;
     minConnectorThickness: number;
     connectorIndex: number;
     totalConnectors: number;
 }): number => {
+    if (!dynamicLineStyle) return connectorThickness;
     const ratio = 1 - connectorIndex / Math.max(1, totalConnectors - 1);
     return minConnectorThickness + (connectorThickness - minConnectorThickness) * ratio;
 };
