@@ -7,13 +7,13 @@ export const App = (): ReactElement => {
     const [pathHistory, setPathHistory] = useState<number[][]>([])
 
     const onFinish = () => {
-        if (path.length === 4) {
+        // if (path.length === 4) {
             pathHistory.push(path);
             setPathHistory(pathHistory)
             setPath([])
-        } else {
-            setPath([])
-        }
+        // } else {
+        //     setPath([])
+        // }
     }
 
     return (
@@ -21,10 +21,10 @@ export const App = (): ReactElement => {
             <PatternLock
                 containerSize={200}
                 pointSize={20}
-                width={4}
-                height={3}
+                width={5}
+                height={5}
                 path={path}
-                dynamicLineWidth={false}
+                dynamicLineStyle={false}
                 allowJumping={false}
                 invisible={false}
                 onChange={(pattern) => setPath(pattern)}
@@ -36,10 +36,10 @@ export const App = (): ReactElement => {
                     containerSize={200}
                     pointSize={20}
                     disabled={true}
-                    width={4}
-                    height={3}
+                    width={5}
+                    height={5}
                     path={historyPath}
-                    dynamicLineWidth={true}
+                    dynamicLineStyle={true}
                     arrowHeads={true}
                     arrowHeadSize={20}
                     allowJumping={false}

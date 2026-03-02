@@ -20,8 +20,9 @@ interface PatternLockProps {
     allowJumping?: boolean;
     arrowHeads?: boolean;
     arrowHeadSize?: number;
-    dynamicLineWidth?: boolean;
+    dynamicLineStyle?: boolean;
     minConnectorThickness?: number;
+    minConnectorOpacity?: number;
     style?: React.CSSProperties;
     className?: string;
     noPop?: boolean;
@@ -45,8 +46,9 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     allowJumping = false,
     arrowHeads = false,
     arrowHeadSize = 10,
-    dynamicLineWidth = false,
+    dynamicLineStyle = false,
     minConnectorThickness = 2,
+    minConnectorOpacity = 0.2,
     className = "",
     style = {},
     onChange,
@@ -89,10 +91,9 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                         connectorThickness={connectorThickness}
                         arrowHeads={arrowHeads}
                         arrowHeadSize={arrowHeadSize}
-                        dynamicLineWidth={dynamicLineWidth}
+                        dynamicLineStyle={dynamicLineStyle}
                         minConnectorThickness={minConnectorThickness}
-                        cols={width}
-                        rows={height}
+                        minConnectorOpacity={minConnectorOpacity}
                     />
                 )}
             </div>

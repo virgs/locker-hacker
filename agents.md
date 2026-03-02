@@ -1,5 +1,10 @@
 # Engineering Guidelines for AI Agent
 
+## 0. Pre work Checklist
+* Read the rules.md file to understand the constraints and requirements for valid patterns.
+* Familiarize yourself with the existing codebase, especially the `PatternLock` component and its related files.
+* Review the `memento.md` file for any relevant architectural decisions or design choices.
+
 ## 1. Think Before Coding
 
 * Always reason step by step before writing code.
@@ -169,4 +174,5 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [x] The `dynamicLineWidth` doesn't work when is set to false. The lines shouldn't get finner. but they do. We need to fix this. Also, this props make they get less opaque, which is good. But there sees to be a bug when many lines are rendered, after a few get more opaque again. We need to fix this as well.
+1. [ ] It's still very obvious to me the line thickness/opacity still changes as the line increases even when `dynamicLineStyle` is set to false. Only when it reaches about 10 lines does it seem to stabilize. Read every project file. Every css. Maybe the `getDynamicConnectorThickness` function is still being called and returning a value that changes as the number of lines increases, even when `dynamicLineStyle` is false. To fix this, we should modify the logic in `getDynamicConnectorThickness` to return a constant thickness equal to `connectorThickness` when `dynamicLineStyle` is false, regardless of the number of lines. This way, the line thickness will remain consistent and won't change as more lines are added, providing a more stable visual experience for users who prefer a fixed line style.
+2. [ ] Create classes and methods to both create a bew valid hidden code and validate a guess against the code. This will allow us to generate new codes for the game and check if the user's guesses are correct, providing feedback on their progress. The code generation should ensure that the generated code is valid according to the game's rules, while the validation method should accurately compare the user's guess with the hidden code and return appropriate feedback (e.g., number of bulls and cows). This will enhance the functionality of the game and provide a more engaging experience for users as they try to crack the code. Additionally, it will allow for dynamic gameplay where users can play multiple rounds with different codes, increasing replayability and enjoyment.

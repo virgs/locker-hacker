@@ -48,17 +48,34 @@
 
 ---
 
-### Per-Connector Opacity with `dynamicLineWidth`
+### `dynamicLineStyle` Direction: Oldest = Thickest/Most-Opaque
 
-**Decision:** When `dynamicLineWidth=true`, each connector gets per-connector opacity `(i+1)/N` (oldest = `1/N`, newest = `1`). When `dynamicLineWidth=false`, all connectors have `opacity: 1` — no visual change at all.
+**Decision:** Index 0 (oldest/first-drawn) gets `connectorThickness` and opacity `1.0`. The last index (newest/live) gets `minConnectorThickness` and `minConnectorOpacity`. Both use the same linear ratio: `1 - i / max(1, N-1)`.
 
-**Rationale:** Opacity variation makes older path segments fade, reinforcing the sense of direction. Without the `dynamicLineWidth` guard, semi-transparent older lines visually appeared thinner even though their CSS `height` was unchanged — the fix ensures both thickness *and* opacity are static when `dynamicLineWidth=false`.
+**Rationale:** The user specified exact examples — 5 lines with min=2, max=4 → `[4, 3.5, 3, 2.5, 2]`. This requires a descending linear sequence with no rounding (exact floats for smooth sub-pixel rendering). The previous implementation was ascending (oldest=thinnest), which was the opposite of the required behavior.
 
-**Cyclic bug prevention:** The formula `(i+1)/N` is strictly monotonic in `[1/N, 1]` with no modular arithmetic, so it never wraps around regardless of path length.
-
-**`getConnectorOpacity`** extracted to `math.ts` and fully tested.
+**Tests include the three spec examples verbatim**, plus boundary/monotonicity checks (25 tests total).
 
 ---
+
+### Per-Connector Thickness and Opacity (`dynamicLineStyle` redesign)
+
+**Decision:** Both thickness and opacity are now **per-connector**, not global. The `Connector` type carries its own `thickness` and `opacity`. `buildConnector` computes them at construction time using `connectorIndex/totalConnectors` as the ratio, so `getConnectorPoint` receives the correct centering offset for each individual line.
+
+**Rationale:** The previous global-thickness approach applied the same width to all connectors, making the "trail" effect visible only as a single uniform change when the path grew. Per-connector values create a smooth gradient: oldest connector = `minConnectorThickness` + `minConnectorOpacity`, newest = `connectorThickness` + full opacity. This also eliminates the visual "thinning" artefact when `dynamicLineStyle=false` because opacity is now strictly guarded by the flag.
+
+**New prop `minConnectorOpacity?: number`** (default `0.2`) — ensures the oldest connector is never invisible.
+
+**`cols`/`rows` removed from `ConnectorsProps`** — the old `maxPossibleLines` cap is no longer needed; the per-connector ratio is bounded to `[1/N, 1]` by construction.
+
+**Function signatures updated:**
+- `getDynamicConnectorThickness`: `{connectorIndex, totalConnectors, connectorThickness, minConnectorThickness}`
+- `getConnectorOpacity`: `{connectorIndex, totalConnectors, minConnectorOpacity}`
+
+Both functions are pure, fully tested (21 tests), and use the same monotonically increasing ratio formula — no cyclic behavior possible.
+
+---
+
 
 ### Arrow Head Always on Last Connector
 
@@ -66,9 +83,9 @@
 
 ---
 
-### `dynamicLineWidth` and `minConnectorThickness` Props
+### `dynamicLineStyle` and `minConnectorThickness` Props
 
-**Decision:** Added `dynamicLineWidth?: boolean` (default `false`) and `minConnectorThickness?: number` (default `2`) to `PatternLockProps`. When `dynamicLineWidth=true`, connector thickness scales linearly from `connectorThickness` (1 line) down to `minConnectorThickness` (max possible lines for the grid). When `false`, thickness is always `connectorThickness`.
+**Decision:** Added `dynamicLineStyle?: boolean` (default `false`) and `minConnectorThickness?: number` (default `2`) to `PatternLockProps`. When `dynamicLineStyle=true`, connector thickness scales linearly from `connectorThickness` (1 line) down to `minConnectorThickness` (max possible lines for the grid). When `false`, thickness is always `connectorThickness`.
 
 **Implementation:** Logic extracted into `getDynamicConnectorThickness` in `math.ts` (pure, tested). Formula: linear interpolation based on `numLines / maxPossibleLines`. No cyclic behavior — `Math.max(minConnectorThickness, ...)` ensures the floor is respected even if `numLines` exceeds the theoretical maximum.
 

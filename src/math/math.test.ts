@@ -35,26 +35,36 @@ describe("Utils", () => {
 
 
     describe("getConnectorOpacity", () => {
-        it("Should return 1 for the single connector in a 1-connector path", () => {
-            expect(utils.getConnectorOpacity(0, 1)).toBe(1);
+        const minOpacity = 0.2;
+        const call = (i: number, n: number) =>
+            utils.getConnectorOpacity({ connectorIndex: i, totalConnectors: n, minConnectorOpacity: minOpacity });
+
+        it("Should return 1 for the only connector in a single-connector path", () => {
+            expect(call(0, 1)).toBe(1);
         });
 
-        it("Should return 1 for the last (most recent) connector", () => {
-            expect(utils.getConnectorOpacity(9, 10)).toBe(1);
+        it("Should return 1 for the oldest (first) connector — it is the most opaque", () => {
+            expect(call(0, 5)).toBe(1);
+            expect(call(0, 11)).toBe(1);
         });
 
-        it("Should return progressively higher opacity for more recent connectors", () => {
-            const opacities = [0, 1, 2, 3, 4].map(i => utils.getConnectorOpacity(i, 5));
+        it("Should return minConnectorOpacity for the newest (last) connector with multiple lines", () => {
+            expect(call(4, 5)).toBe(minOpacity);
+            expect(call(10, 11)).toBe(minOpacity);
+        });
+
+        it("Should produce monotonically decreasing opacity for more recent connectors", () => {
+            const opacities = [0, 1, 2, 3, 4].map(i => call(i, 5));
             for (let i = 1; i < opacities.length; i++) {
-                expect(opacities[i]).toBeGreaterThan(opacities[i - 1]);
+                expect(opacities[i]).toBeLessThan(opacities[i - 1]);
             }
         });
 
-        it("Should never exceed 1 or go below a positive value regardless of count", () => {
+        it("Should never go below minConnectorOpacity or exceed 1", () => {
             for (let n = 1; n <= 11; n++) {
                 for (let i = 0; i < n; i++) {
-                    const opacity = utils.getConnectorOpacity(i, n);
-                    expect(opacity).toBeGreaterThan(0);
+                    const opacity = call(i, n);
+                    expect(opacity).toBeGreaterThanOrEqual(minOpacity);
                     expect(opacity).toBeLessThanOrEqual(1);
                 }
             }
@@ -62,32 +72,50 @@ describe("Utils", () => {
     });
 
     describe("getDynamicConnectorThickness", () => {
-        const base = { connectorThickness: 6, minConnectorThickness: 2, maxPossibleLines: 11 };
+        const base = { connectorThickness: 4, minConnectorThickness: 2 };
+        const call = (i: number, n: number) =>
+            utils.getDynamicConnectorThickness({ ...base, connectorIndex: i, totalConnectors: n });
 
-        it("Should return connectorThickness when there is 1 line (minimum lines)", () => {
-            expect(utils.getDynamicConnectorThickness({ ...base, numLines: 1 })).toBe(6);
+        it("Should match the spec example: 5 lines → [4, 3.5, 3, 2.5, 2]", () => {
+            expect([0, 1, 2, 3, 4].map(i => call(i, 5))).toEqual([4, 3.5, 3, 2.5, 2]);
         });
 
-        it("Should return minConnectorThickness when numLines equals maxPossibleLines", () => {
-            expect(utils.getDynamicConnectorThickness({ ...base, numLines: 11 })).toBe(2);
+        it("Should match the spec example: 2 lines → [4, 2]", () => {
+            expect([0, 1].map(i => call(i, 2))).toEqual([4, 2]);
         });
 
-        it("Should return a value between min and max for intermediate line counts", () => {
-            const mid = utils.getDynamicConnectorThickness({ ...base, numLines: 6 });
-            expect(mid).toBeGreaterThanOrEqual(2);
-            expect(mid).toBeLessThanOrEqual(6);
+        it("Should match the spec example: 3 lines → [4, 3, 2]", () => {
+            expect([0, 1, 2].map(i => call(i, 3))).toEqual([4, 3, 2]);
         });
 
-        it("Should never go below minConnectorThickness even when numLines exceeds maxPossibleLines", () => {
-            expect(utils.getDynamicConnectorThickness({ ...base, numLines: 100 })).toBe(2);
+        it("Should return connectorThickness for any single connector", () => {
+            expect(call(0, 1)).toBe(4);
         });
 
-        it("Should produce monotonically decreasing or equal values as numLines increases", () => {
-            const thicknesses = [1, 3, 6, 9, 11].map(n =>
-                utils.getDynamicConnectorThickness({ ...base, numLines: n })
+        it("Should return connectorThickness for the oldest (first) connector", () => {
+            expect(call(0, 11)).toBe(4);
+        });
+
+        it("Should return minConnectorThickness for the newest (last) connector with multiple lines", () => {
+            expect(call(10, 11)).toBe(2);
+        });
+
+        it("Should produce monotonically decreasing thickness for more recent connectors", () => {
+            const thicknesses = [0, 2, 5, 8, 10].map(i =>
+                utils.getDynamicConnectorThickness({ ...base, connectorIndex: i, totalConnectors: 11 })
             );
             for (let i = 1; i < thicknesses.length; i++) {
                 expect(thicknesses[i]).toBeLessThanOrEqual(thicknesses[i - 1]);
+            }
+        });
+
+        it("Should always stay within [minConnectorThickness, connectorThickness]", () => {
+            for (let n = 1; n <= 11; n++) {
+                for (let i = 0; i < n; i++) {
+                    const t = call(i, n);
+                    expect(t).toBeGreaterThanOrEqual(2);
+                    expect(t).toBeLessThanOrEqual(4);
+                }
             }
         });
     });

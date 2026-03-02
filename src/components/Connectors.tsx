@@ -4,8 +4,10 @@ import { getAngle, getDistance, getConnectorPoint, getDynamicConnectorThickness,
 import { Point } from "../math/point.ts";
 
 type Connector = {
-    from : Point;
-    to   : Point;
+    from      : Point;
+    to        : Point;
+    thickness : number;
+    opacity   : number;
 };
 
 interface ConnectorsProps {
@@ -18,10 +20,9 @@ interface ConnectorsProps {
     initialMousePosition    : Point | null;
     arrowHeads              : boolean;
     arrowHeadSize           : number;
-    dynamicLineWidth        : boolean;
+    dynamicLineStyle        : boolean;
     minConnectorThickness   : number;
-    cols                    : number;
-    rows                    : number;
+    minConnectorOpacity     : number;
 }
 
 const Connectors: React.FunctionComponent<ConnectorsProps> = ({
@@ -34,10 +35,9 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
     initialMousePosition,
     arrowHeads,
     arrowHeadSize,
-    dynamicLineWidth,
+    dynamicLineStyle,
     minConnectorThickness,
-    cols,
-    rows,
+    minConnectorOpacity,
 }) => {
     const [mouse, setMouse] = React.useState<Point | null>(null);
 
@@ -64,33 +64,36 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
     });
 
     const hasLiveConnector = mouse !== null && path.length > 0;
-    const numLines = Math.max(1, path.length - 1 + (hasLiveConnector ? 1 : 0));
-    const maxPossibleLines = Math.max(1, cols * rows - 1);
-    const effectiveThickness = dynamicLineWidth
-        ? getDynamicConnectorThickness({ connectorThickness, minConnectorThickness, numLines, maxPossibleLines })
-        : connectorThickness;
+    const totalConnectors  = Math.max(0, path.length - 1) + (hasLiveConnector ? 1 : 0);
+
+    const buildConnector = (index: number, from: Point, rawTo: Point | null): Connector => {
+        const thickness = dynamicLineStyle
+            ? getDynamicConnectorThickness({ connectorThickness, minConnectorThickness, connectorIndex: index, totalConnectors })
+            : connectorThickness;
+        const opacity = dynamicLineStyle
+            ? getConnectorOpacity({ connectorIndex: index, totalConnectors, minConnectorOpacity })
+            : 1;
+        return {
+            from     : getConnectorPoint(from, pointActiveSize, thickness),
+            to       : rawTo ? getConnectorPoint(rawTo, pointActiveSize, thickness) : mouse as Point,
+            thickness,
+            opacity,
+        };
+    };
 
     const connectors: Connector[] = [];
     for (let i = 0; i < path.length - 1; i += 1) {
-        const current = points[path[i]];
-        const next    = points[path[i + 1]];
-        connectors.push({
-            from : getConnectorPoint(current, pointActiveSize, effectiveThickness),
-            to   : getConnectorPoint(next, pointActiveSize, effectiveThickness)
-        });
+        connectors.push(buildConnector(i, points[path[i]], points[path[i + 1]]));
     }
     if (hasLiveConnector) {
-        connectors.push({
-            from : getConnectorPoint(points[path[path.length - 1]], pointActiveSize, effectiveThickness),
-            to   : mouse
-        });
+        connectors.push(buildConnector(totalConnectors - 1, points[path[path.length - 1]], null));
     }
     const arrowHeadIndex = arrowHeads && connectors.length > 0 ? connectors.length - 1 : -1;
 
     return (
         <div className="react-pattern-lock__connector-wrapper">
             {
-                connectors.map(({ from, to }, i) => (
+                connectors.map(({ from, to, thickness, opacity }, i) => (
                     <div
                         className="react-pattern-lock__connector"
                         key={ i }
@@ -99,9 +102,9 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
                             width        : `${getDistance(from, to)}px`,
                             left         : `${from.x}px`,
                             top          : `${from.y}px`,
-                            height       : effectiveThickness,
-                            borderRadius : connectorRoundedCorners ? Math.round(effectiveThickness / 2) : 0,
-                            opacity      : dynamicLineWidth ? getConnectorOpacity(i, connectors.length) : 1
+                            height       : thickness,
+                            borderRadius : connectorRoundedCorners ? Math.round(thickness / 2) : 0,
+                            opacity,
                         }}
                     >
                         {i === arrowHeadIndex && (

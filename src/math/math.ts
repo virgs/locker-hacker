@@ -54,25 +54,32 @@ export const getConnectorPoint = (
     y : p.y + Math.floor(pointActiveSize / 2) - Math.floor(connectorThickness / 2)
 });
 
-export const getConnectorOpacity = (connectorIndex: number, totalConnectors: number): number =>
-    (connectorIndex + 1) / Math.max(1, totalConnectors);
+export const getConnectorOpacity = ({
+    connectorIndex,
+    totalConnectors,
+    minConnectorOpacity,
+}: {
+    connectorIndex: number;
+    totalConnectors: number;
+    minConnectorOpacity: number;
+}): number => {
+    const ratio = 1 - connectorIndex / Math.max(1, totalConnectors - 1);
+    return minConnectorOpacity + (1 - minConnectorOpacity) * ratio;
+};
 
 export const getDynamicConnectorThickness = ({
     connectorThickness,
     minConnectorThickness,
-    numLines,
-    maxPossibleLines,
+    connectorIndex,
+    totalConnectors,
 }: {
     connectorThickness: number;
     minConnectorThickness: number;
-    numLines: number;
-    maxPossibleLines: number;
+    connectorIndex: number;
+    totalConnectors: number;
 }): number => {
-    const ratio = Math.max(0, 1 - (numLines - 1) / maxPossibleLines);
-    return Math.max(
-        minConnectorThickness,
-        Math.round(minConnectorThickness + (connectorThickness - minConnectorThickness) * ratio)
-    );
+    const ratio = 1 - connectorIndex / Math.max(1, totalConnectors - 1);
+    return minConnectorThickness + (connectorThickness - minConnectorThickness) * ratio;
 };
 
 export const exclusiveRange = (rawStart: number, stop: number): number[] => {
