@@ -1,6 +1,39 @@
 import * as utils from "./math.ts";
 
 describe("Utils", () => {
+    describe("getPoints", () => {
+        it("Should place 9 points evenly in a 3x3 square grid", () => {
+            const points = utils.getPoints({ pointActiveSize: 10, containerWidth: 300, containerHeight: 300, cols: 3, rows: 3 });
+            expect(points).toHaveLength(9);
+            expect(points[0]).toEqual({ x: 45, y: 45 });   // top-left
+            expect(points[2]).toEqual({ x: 245, y: 45 });  // top-right
+            expect(points[4]).toEqual({ x: 145, y: 145 }); // center
+            expect(points[8]).toEqual({ x: 245, y: 245 }); // bottom-right
+        });
+
+        it("Should place points correctly in a rectangular container with a square grid", () => {
+            const points = utils.getPoints({ pointActiveSize: 10, containerWidth: 200, containerHeight: 100, cols: 2, rows: 2 });
+            expect(points).toHaveLength(4);
+            expect(points[0]).toEqual({ x: 45, y: 20 });   // top-left  (cellW=100, cellH=50)
+            expect(points[1]).toEqual({ x: 145, y: 20 });  // top-right
+            expect(points[2]).toEqual({ x: 45, y: 70 });   // bottom-left
+            expect(points[3]).toEqual({ x: 145, y: 70 });  // bottom-right
+        });
+
+        it("Should place 6 points correctly for a 2-column × 3-row non-square grid", () => {
+            // containerWidth=200, containerHeight=300 → cellW=100, cellH=100
+            const points = utils.getPoints({ pointActiveSize: 10, containerWidth: 200, containerHeight: 300, cols: 2, rows: 3 });
+            expect(points).toHaveLength(6);
+            expect(points[0]).toEqual({ x: 45, y: 45 });   // col=0, row=0
+            expect(points[1]).toEqual({ x: 145, y: 45 });  // col=1, row=0
+            expect(points[2]).toEqual({ x: 45, y: 145 });  // col=0, row=1
+            expect(points[3]).toEqual({ x: 145, y: 145 }); // col=1, row=1
+            expect(points[4]).toEqual({ x: 45, y: 245 });  // col=0, row=2
+            expect(points[5]).toEqual({ x: 145, y: 245 }); // col=1, row=2
+        });
+    });
+
+
     describe("exclusiveRange", () => {
         it("Should return an empty range if start & end are the same number", () => {
             expect(utils.exclusiveRange(1, 1)).toEqual([]);

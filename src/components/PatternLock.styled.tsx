@@ -63,6 +63,30 @@ export const PatternLockStyles = createGlobalStyle`
         background: red;
     }
 
+    .react-pattern-lock__arrow-head {
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-top-color: transparent;
+        border-bottom-color: transparent;
+        border-right-width: 0;
+        border-right-color: transparent;
+        border-left-color: white;
+    }
+    .react-pattern-lock__pattern-wrapper.disabled .react-pattern-lock__arrow-head {
+        border-left-color: grey;
+    }
+    .react-pattern-lock__pattern-wrapper.success .react-pattern-lock__arrow-head {
+        border-left-color: #00ff00;
+    }
+    .react-pattern-lock__pattern-wrapper.error .react-pattern-lock__arrow-head {
+        border-left-color: red;
+    }
+
     @keyframes pop {
         from { transform: scale(1); }
         50% { transform: scale(2); }

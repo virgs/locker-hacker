@@ -4,7 +4,8 @@ interface PointProps {
     index           : number;
     pointSize       : number;
     pointActiveSize : number;
-    size            : number;
+    cols            : number;
+    rows            : number;
     pop             : boolean;
     selected        : boolean;
 }
@@ -13,19 +14,21 @@ const Point: React.FunctionComponent<PointProps> = ({
     index,
     pointSize,
     pointActiveSize,
-    size,
+    cols,
+    rows,
     selected,
     pop
-}) => {
-    const percentPerItem = 100 / size;
+}): React.ReactElement => {
+    const colPercent = 100 / cols;
+    const rowPercent = 100 / rows;
 
     return (
         <div
             className={ `react-pattern-lock__point-wrapper${selected ? " selected" : ""}` }
             style={{
-                width  : `${percentPerItem}%`,
-                height : `${percentPerItem}%`,
-                flex   : `1 0 ${percentPerItem}%`
+                width  : `${colPercent}%`,
+                height : `${rowPercent}%`,
+                flex   : `1 0 ${colPercent}%`
             }}
             data-index={ index }
         >
@@ -47,6 +50,5 @@ const Point: React.FunctionComponent<PointProps> = ({
         </div>
     );
 };
-
 
 export default Point;

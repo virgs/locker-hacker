@@ -169,4 +169,4 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [ ] 
+1. [x] The arrow head should be present only in the most recent "live" line. The previous lines should not have the arrow head, but should still be connected to the next line with a straight line. Also add an optional prop called arrowHeadSize to control the size of the arrow head. The default size should be easily visible but not too large, such as 10px.

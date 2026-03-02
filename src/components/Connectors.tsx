@@ -16,6 +16,8 @@ interface ConnectorsProps {
     points                  : Point[];
     wrapperPosition         : Point;
     initialMousePosition    : Point | null;
+    arrowHeads              : boolean;
+    arrowHeadSize           : number;
 }
 
 const Connectors: React.FunctionComponent<ConnectorsProps> = ({
@@ -25,7 +27,9 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
     pointActiveSize,
     connectorThickness,
     connectorRoundedCorners,
-    initialMousePosition
+    initialMousePosition,
+    arrowHeads,
+    arrowHeadSize
 }) => {
     const [mouse, setMouse] = React.useState<Point | null>(null);
 
@@ -60,13 +64,14 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
             to   : getConnectorPoint(next, pointActiveSize, connectorThickness)
         });
     }
-    if (mouse && path.length) {
-        
+    const hasLiveConnector = mouse !== null && path.length > 0;
+    if (hasLiveConnector) {
         connectors.push({
             from : getConnectorPoint(points[path[path.length - 1]], pointActiveSize, connectorThickness),
             to   : mouse
         });
     }
+    const liveConnectorIndex = hasLiveConnector ? connectors.length - 1 : -1;
 
     return (
         <div className="react-pattern-lock__connector-wrapper">
@@ -83,7 +88,18 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
                             height       : connectorThickness,
                             borderRadius : connectorRoundedCorners ? Math.round(connectorThickness / 2) : 0
                         }}
-                    />
+                    >
+                        {arrowHeads && i === liveConnectorIndex && (
+                            <div
+                                className="react-pattern-lock__arrow-head"
+                                style={{
+                                    borderTopWidth    : `${arrowHeadSize}px`,
+                                    borderBottomWidth : `${arrowHeadSize}px`,
+                                    borderLeftWidth   : `${Math.round(arrowHeadSize * 1.5)}px`,
+                                }}
+                            />
+                        )}
+                    </div>
                 ))
             }
         </div>

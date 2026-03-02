@@ -1,37 +1,45 @@
-import {useEffect, useState, type ReactElement} from 'react'
+import {useState, type ReactElement} from 'react'
 import './App.scss'
-import PatternLock from "react-pattern-lock";
+import PatternLock from "./components/PatternLock.tsx";
 
 export const App = (): ReactElement => {
     const [path, setPath] = useState<number[]>([])
 
-    useEffect(() => {
-        console.log(path)
-    }, [path])
+    const onFinish = () => {
+        if (path.length === 4) {
+            console.log("Right path")
+            console.log(path)
+        } else {
+            setPath([])
+        }
+    }
 
     return (
         <>
             <PatternLock
-                width={200}
+                containerSize={200}
                 pointSize={20}
-                size={3}
+                width={4}
+                height={3}
+                arrowHeads={false}
                 path={path}
-                allowJumping={true}
+                allowJumping={false}
                 onChange={(pattern) => setPath(pattern)}
-                onFinish={() => {
-                    console.log('finish')
-                    // check if the pattern is correct
-                }}
+                onFinish={() => onFinish()}
             />
             <PatternLock
-                width={100}
+                containerSize={200}
                 pointSize={20}
-                size={3}
+                disabled={true}
+                width={4}
+                height={3}
                 path={path}
-                allowJumping={true}
-                onChange={(pattern) => setPath(pattern)}
+                arrowHeads={true}
+                allowJumping={false}
+                onChange={() => {
+
+                }}
                 onFinish={() => {
-                    console.log('finish')
                     // check if the pattern is correct
                 }}
             />

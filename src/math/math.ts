@@ -12,15 +12,17 @@ export const usePrevious = <T>(val: T): T | undefined => {
 
 export const getPoints = ({
     pointActiveSize,
-    height,
-    size
-}: { pointActiveSize : number, height : number, size : number }): Point[] => {
-    const halfSize        = pointActiveSize / 2;
-    const sizePerItem     = height / size;
-    const halfSizePerItem = sizePerItem / 2;
-    return Array.from({ length : size ** 2 }).map((_x, i) => ({
-        x : ((sizePerItem * (i % size)) + halfSizePerItem) - halfSize,
-        y : ((sizePerItem * Math.floor(i / size)) + halfSizePerItem) - halfSize
+    containerWidth,
+    containerHeight,
+    cols,
+    rows
+}: { pointActiveSize: number, containerWidth: number, containerHeight: number, cols: number, rows: number }): Point[] => {
+    const halfPointSize = pointActiveSize / 2;
+    const cellWidth     = containerWidth  / cols;
+    const cellHeight    = containerHeight / rows;
+    return Array.from({ length: cols * rows }).map((_x, i) => ({
+        x: cellWidth  * (i % cols)           + cellWidth  / 2 - halfPointSize,
+        y: cellHeight * Math.floor(i / cols) + cellHeight / 2 - halfPointSize
     }));
 };
 
@@ -60,22 +62,22 @@ export const exclusiveRange = (rawStart: number, stop: number): number[] => {
         .map((_, i) => start + i * step);
 }
 
-export const getPointsInTheMiddle = (index1: number, index2: number, size: number): number[] => {
-    const x1 = index1 % size;
-    const x2 = index2 % size;
+export const getPointsInTheMiddle = (index1: number, index2: number, cols: number): number[] => {
+    const x1 = index1 % cols;
+    const x2 = index2 % cols;
 
-    const y1 = Math.floor(index1 / size);
-    const y2 = Math.floor(index2 / size);
+    const y1 = Math.floor(index1 / cols);
+    const y2 = Math.floor(index2 / cols);
     const deltaX = Math.abs(x1 - x2);
     const deltaY = Math.abs(y1 - y2);
 
     if (y1 === y2) { // Horizontal
-        return exclusiveRange(size * y1 + x1, size * y2 + x2);
+        return exclusiveRange(cols * y1 + x1, cols * y2 + x2);
     } else if (x1 === x2) { // Vertical
-        return exclusiveRange(y1, y2).map(x => x * size + x1);
+        return exclusiveRange(y1, y2).map(x => x * cols + x1);
     } else if (deltaX === deltaY) { // Diagonal
         const m = x1 < x2 ? 1 : -1;
-        return exclusiveRange(y1, y2).map((x, i) => x * size + x1 + ((i + 1) * m));
+        return exclusiveRange(y1, y2).map((x, i) => x * cols + x1 + ((i + 1) * m));
     }
     return [];
 };
