@@ -1,19 +1,32 @@
-import {useState, type ReactElement} from 'react'
+import { useState, type ReactElement } from 'react'
 import './App.scss'
 import PatternLock from "./components/PatternLock.tsx";
+import PatternHistory from "./components/PatternHistory.tsx";
+import { CodeGenerator } from "./game/CodeGenerator.ts";
+import { GuessValidator } from "./game/GuessValidator.ts";
+
+const config: { cols: number; rows: number; length: number } = {
+    cols: 3,
+    rows: 3,
+    length: 4
+}
 
 export const App = (): ReactElement => {
+    const [code] = useState<number[]>(new CodeGenerator(config).generate())
     const [path, setPath] = useState<number[]>([])
     const [pathHistory, setPathHistory] = useState<number[][]>([])
 
     const onFinish = () => {
-        // if (path.length === 4) {
+        console.log(path, code)
+        if (path.length === 4) {
+            const feedback = new GuessValidator(code).validate(path)
+            console.log(feedback)
             pathHistory.unshift(path);
             setPathHistory(pathHistory)
             setPath([])
-        // } else {
-        //     setPath([])
-        // }
+        } else {
+            setPath([])
+        }
     }
 
     return (
@@ -21,29 +34,15 @@ export const App = (): ReactElement => {
             <PatternLock
                 containerSize={200}
                 pointSize={20}
-                width={5}
-                height={5}
+                cols={config.cols}
+                rows={config.rows}
                 path={path}
                 allowJumping={false}
                 invisible={false}
                 onChange={(pattern) => setPath(pattern)}
                 onFinish={() => onFinish()}
             />
-            {pathHistory.map((historyPath, index) => {
-                return <PatternLock
-                    key={`history-${index}`}
-                    containerSize={200}
-                    pointSize={20}
-                    disabled={true}
-                    width={5}
-                    height={5}
-                    path={historyPath}
-                    dynamicLineStyle={true}
-                    arrowHeads={true}
-                    arrowHeadSize={20}
-                    allowJumping={false}
-                />
-            })}
+            <PatternHistory pathHistory={pathHistory} cols={config.cols} rows={config.rows} />
         </>
     )
 }

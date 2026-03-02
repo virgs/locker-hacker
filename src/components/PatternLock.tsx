@@ -9,8 +9,8 @@ import { usePatternLock } from "./usePatternLock.ts";
 interface PatternLockProps {
     path: number[];
     containerSize?: number | string;
-    width?: number;
-    height?: number;
+    cols?: number;
+    rows?: number;
     pointActiveSize?: number;
     connectorThickness?: number;
     connectorRoundedCorners?: boolean;
@@ -33,8 +33,8 @@ interface PatternLockProps {
 
 const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     containerSize = "100%",
-    width = 5,
-    height = 5,
+    cols = 5,
+    rows = 5,
     pointActiveSize = 30,
     pointSize = 20,
     connectorThickness = 6,
@@ -56,7 +56,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     path,
 }): React.ReactElement => {
     const { wrapperRef, points, wrapperPosition, isMouseDown, initialMousePosition, onHold, onTouch } =
-        usePatternLock({ path, cols: width, rows: height, pointActiveSize, disabled, allowOverlapping, allowJumping, onChange, onFinish });
+        usePatternLock({ path, cols, rows, pointActiveSize, disabled, allowOverlapping, allowJumping, onChange, onFinish });
 
     return (
         <>
@@ -68,12 +68,12 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                 onTouchStart={onTouch}
                 ref={wrapperRef}
             >
-                {Array.from({ length: width * height }).map((_, i) => (
+                {Array.from({ length: cols * rows }).map((_, i) => (
                     <Point
                         key={i}
                         index={i}
-                        cols={width}
-                        rows={height}
+                        cols={cols}
+                        rows={rows}
                         pointSize={pointSize}
                         pointActiveSize={pointActiveSize}
                         pop={!noPop && isMouseDown && path[path.length - 1] === i}

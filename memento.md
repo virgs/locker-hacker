@@ -176,6 +176,24 @@ Both functions are pure, fully tested (21 tests), and use the same monotonically
 
 ---
 
+### `cols`/`rows` Prop Rename (was `width`/`height`)
+
+**Decision:** Renamed `PatternLockProps.width` → `cols` and `PatternLockProps.height` → `rows`.
+
+**Rationale:** `width`/`height` are CSS dimension concepts. The props control the grid structure (number of columns and rows), which is the same vocabulary used everywhere else: `usePatternLock`, `CodeGenerator`, `getPoints`, `getPointsInTheMiddle`, and the `config` object in `App.tsx`. Aligning the prop names eliminates the translation layer (`cols: width, rows: height`) that existed inside `PatternLock`.
+
+---
+
+### `PatternHistory` Component
+
+**Decision:** Extracted the history-entries rendering from `App.tsx` into `src/components/PatternHistory.tsx`.
+
+**Rationale:** The `pathHistory.map(...)` block in `App.tsx` was inline configuration + rendering mixed together. `PatternHistory` owns the display of past guesses (disabled, `dynamicLineStyle`, arrow heads) and keeps `App.tsx` focused on game-state management only.
+
+**Props:** `{ pathHistory: number[][], cols: number, rows: number }`
+
+---
+
 ## Trade-offs
 
 - `containerSize` default of `"100%"` means the CSS height is also `"100%"` when neither `width` nor `height` is provided. This differs from the old behavior where height was always set to a pixel value equal to `offsetWidth`. In practice all current usages pass an explicit pixel value so this has no visible impact.

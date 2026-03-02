@@ -22,9 +22,10 @@ See [rules.md](./rules.md) for the full specification.
 
 ```
 src/
-├── components/          # PatternLock React component
-│   ├── PatternLock.tsx
-│   ├── PatternLock.styled.tsx
+├── components/          # React components
+│   ├── PatternLock.tsx        — main grid + drawing component
+│   ├── PatternLock.styled.tsx — global CSS-in-JS styles
+│   ├── PatternHistory.tsx     — renders the list of past guesses
 │   ├── Connectors.tsx
 │   ├── Point.tsx
 │   └── usePatternLock.ts
