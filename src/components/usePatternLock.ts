@@ -11,8 +11,8 @@ interface UsePatternLockOptions {
     disabled: boolean;
     allowOverlapping: boolean;
     allowJumping: boolean;
-    onChange: (path: number[]) => void;
-    onFinish: () => void;
+    onChange?: (path: number[]) => void;
+    onFinish?: () => void;
 }
 
 export interface UsePatternLockResult {
@@ -57,13 +57,13 @@ export const usePatternLock = ({
         if (~index && path[path.length - 1] !== index) {
             if (allowOverlapping || path.indexOf(index) === -1) {
                 if (allowJumping || !path.length) {
-                    onChange([...path, index]);
+                    onChange?.([...path, index]);
                 } else {
                     const mid = getPointsInTheMiddle(path[path.length - 1], index, cols);
                     if (allowOverlapping) {
-                        onChange([...path, ...mid, index]);
+                        onChange?.([...path, ...mid, index]);
                     } else {
-                        onChange([...path, ...mid.filter(p => path.indexOf(p) === -1), index]);
+                        onChange?.([...path, ...mid.filter(p => path.indexOf(p) === -1), index]);
                     }
                 }
             }
@@ -123,7 +123,7 @@ export const usePatternLock = ({
         const onRelease = (): void => {
             setIsMouseDown(false);
             setInitialMousePosition(null);
-            if (!disabled && path.length) onFinish();
+            if (!disabled && path.length) onFinish?.();
         };
         window.addEventListener("mouseup", onRelease);
         window.addEventListener("touchend", onRelease);

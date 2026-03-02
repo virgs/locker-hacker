@@ -21,7 +21,7 @@ export const App = (): ReactElement => {
                 pointSize={20}
                 width={4}
                 height={3}
-                arrowHeads={false}
+                arrowHeads={true}
                 path={path}
                 allowJumping={false}
                 onChange={(pattern) => setPath(pattern)}
@@ -40,7 +40,6 @@ export const App = (): ReactElement => {
 
                 }}
                 onFinish={() => {
-                    // check if the pattern is correct
                 }}
             />
         </>

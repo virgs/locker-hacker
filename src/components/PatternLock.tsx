@@ -26,8 +26,8 @@ interface PatternLockProps {
     className?: string;
     noPop?: boolean;
     invisible?: boolean;
-    onChange(path: number[]): void;
-    onFinish(): void;
+    onChange?: (path: number[]) => void;
+    onFinish?: () => void;
 }
 
 const PatternLock: React.FunctionComponent<PatternLockProps> = ({
