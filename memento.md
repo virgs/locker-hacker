@@ -154,6 +154,28 @@ Both functions are pure, fully tested (21 tests), and use the same monotonically
 
 ---
 
+### Game Logic Layer (`src/game/`)
+
+**Decision:** Added a `src/game/` directory to house pure, framework-agnostic game logic, separate from the React component layer (`src/components/`) and shared geometry utilities (`src/math/`).
+
+**Files:**
+- `src/game/CodeGenerator.ts` — `CodeGenerator` class that generates a valid hidden code.
+- `src/game/GuessValidator.ts` — `GuessValidator` class + `Feedback` type that computes bulls/cows.
+
+**`CodeGenerator` design:**
+- Constructor takes `{ cols, rows, length }` and throws immediately if `length > cols * rows`.
+- `generate()` uses a random-restart loop: `tryGenerate()` starts at a random dot and extends the path by picking a random valid next dot (via `validNextDots`) until `length` is reached. If stuck (no valid next dots), it returns `null` and the loop retries.
+- `validNextDots` reuses `getPointsInTheMiddle` from `math.ts` to enforce the no-jumping constraint: a candidate dot is valid only if every intermediate dot on the straight-line path to it has already been visited.
+
+**`GuessValidator` design:**
+- Constructor stores an immutable copy of the code.
+- `validate(guess)` computes bulls (exact-position matches) and cows (dots in both, but at wrong positions). No dot double-counts: `cows = inBoth - bulls`.
+- `isSolved(guess)` returns true when `bulls === code.length`.
+
+**Reuse of `getPointsInTheMiddle`:** The geometry function already used by the PatternLock component enforces move validity during code generation — no duplication of logic.
+
+---
+
 ## Trade-offs
 
 - `containerSize` default of `"100%"` means the CSS height is also `"100%"` when neither `width` nor `height` is provided. This differs from the old behavior where height was always set to a pixel value equal to `offsetWidth`. In practice all current usages pass an explicit pixel value so this has no visible impact.

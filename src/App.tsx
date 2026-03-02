@@ -8,7 +8,7 @@ export const App = (): ReactElement => {
 
     const onFinish = () => {
         // if (path.length === 4) {
-            pathHistory.push(path);
+            pathHistory.unshift(path);
             setPathHistory(pathHistory)
             setPath([])
         // } else {
@@ -24,7 +24,6 @@ export const App = (): ReactElement => {
                 width={5}
                 height={5}
                 path={path}
-                dynamicLineStyle={false}
                 allowJumping={false}
                 invisible={false}
                 onChange={(pattern) => setPath(pattern)}

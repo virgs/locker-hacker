@@ -1,30 +1,67 @@
-# React + TypeScript + Vite
+# locker-hacker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A *Bulls and Cows* code-breaking game played with pattern lock paths over a grid of dots.
 
-Currently, two official plugins are available:
+## How It Works
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+A hidden code is a **sequence of distinct dots** drawn on a rectangular grid. Players submit guesses and receive feedback:
 
-## Expanding the ESLint configuration
+* **Bulls** — dots correct in both identity and position
+* **Cows** — dots present in the code but in the wrong position
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+The game ends when Bulls == code length.
 
-- Configure the top-level `parserOptions` property like this:
+## Game Rules
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+* No dot may appear twice in a code or guess.
+* A move is invalid if the straight line to the target passes through an unvisited dot (same as `allowJumping=false` in the pattern lock component).
+
+See [rules.md](./rules.md) for the full specification.
+
+## Architecture
+
+```
+src/
+├── components/          # PatternLock React component
+│   ├── PatternLock.tsx
+│   ├── PatternLock.styled.tsx
+│   ├── Connectors.tsx
+│   ├── Point.tsx
+│   └── usePatternLock.ts
+├── game/                # Game logic (pure TypeScript, framework-agnostic)
+│   ├── CodeGenerator.ts   — generates a valid hidden code
+│   └── GuessValidator.ts  — computes bulls/cows feedback
+└── math/                # Geometry utilities shared by game and component
+    ├── math.ts
+    └── point.ts
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+### `CodeGenerator`
+
+```ts
+import { CodeGenerator } from './src/game/CodeGenerator';
+
+const gen  = new CodeGenerator({ cols: 5, rows: 5, length: 4 });
+const code = gen.generate(); // e.g. [0, 12, 7, 18]
+```
+
+### `GuessValidator`
+
+```ts
+import { GuessValidator } from './src/game/GuessValidator';
+
+const validator = new GuessValidator(code);
+const feedback  = validator.validate(guess); // { bulls: 1, cows: 2 }
+const solved    = validator.isSolved(guess); // true when bulls === code.length
+```
+
+## Development
+
+```bash
+pnpm install   # install dependencies
+pnpm dev       # start dev server
+pnpm test      # run tests
+pnpm lint      # lint
+pnpm lint:fix  # auto-fix lint issues
+pnpm build     # production build
+```
