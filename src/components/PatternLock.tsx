@@ -16,12 +16,12 @@ interface PatternLockProps {
     connectorRoundedCorners?: boolean;
     pointSize?: number;
     disabled?: boolean;
-    error?: boolean;
-    success?: boolean;
     allowOverlapping?: boolean;
     allowJumping?: boolean;
     arrowHeads?: boolean;
     arrowHeadSize?: number;
+    dynamicLineWidth?: boolean;
+    minConnectorThickness?: number;
     style?: React.CSSProperties;
     className?: string;
     noPop?: boolean;
@@ -39,14 +39,14 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     connectorThickness = 6,
     connectorRoundedCorners = false,
     disabled = false,
-    error = false,
-    success = false,
     allowOverlapping = false,
     noPop = false,
     invisible = false,
     allowJumping = false,
     arrowHeads = false,
     arrowHeadSize = 10,
+    dynamicLineWidth = false,
+    minConnectorThickness = 2,
     className = "",
     style = {},
     onChange,
@@ -60,7 +60,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
         <>
             <PatternLockStyles />
             <div
-                className={classnames(["react-pattern-lock__pattern-wrapper", { error, success, disabled }, className])}
+                className={classnames(["react-pattern-lock__pattern-wrapper", { disabled }, className])}
                 style={{ ...style, width: containerSize, height: containerSize }}
                 onMouseDown={onHold}
                 onTouchStart={onTouch}
@@ -89,6 +89,10 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                         connectorThickness={connectorThickness}
                         arrowHeads={arrowHeads}
                         arrowHeadSize={arrowHeadSize}
+                        dynamicLineWidth={dynamicLineWidth}
+                        minConnectorThickness={minConnectorThickness}
+                        cols={width}
+                        rows={height}
                     />
                 )}
             </div>

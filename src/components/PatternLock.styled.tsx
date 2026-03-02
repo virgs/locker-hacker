@@ -55,16 +55,6 @@ export const PatternLockStyles = createGlobalStyle`
         background: grey;
     }
 
-    .react-pattern-lock__pattern-wrapper.success .react-pattern-lock__point-inner,
-    .react-pattern-lock__pattern-wrapper.success .react-pattern-lock__connector {
-        background: #00ff00;
-    }
-
-    .react-pattern-lock__pattern-wrapper.error .react-pattern-lock__point-inner,
-    .react-pattern-lock__pattern-wrapper.error .react-pattern-lock__connector {
-        background: red;
-    }
-
     .react-pattern-lock__arrow-head {
         position: absolute;
         left: 100%;
@@ -81,12 +71,6 @@ export const PatternLockStyles = createGlobalStyle`
     }
     .react-pattern-lock__pattern-wrapper.disabled .react-pattern-lock__arrow-head {
         border-left-color: grey;
-    }
-    .react-pattern-lock__pattern-wrapper.success .react-pattern-lock__arrow-head {
-        border-left-color: #00ff00;
-    }
-    .react-pattern-lock__pattern-wrapper.error .react-pattern-lock__arrow-head {
-        border-left-color: red;
     }
 
     @keyframes pop {

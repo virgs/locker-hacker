@@ -169,4 +169,4 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [x] Make onChange and onFinish optionals. Also, when the PatternLock is disabled, the lines look weird. They don't connect to the dots and look unfinished. We should make the lines connect to the dots even when disabled. This will improve the visual consistency and user experience.
+1. [x] The `dynamicLineWidth` doesn't work when is set to false. The lines shouldn't get finner. but they do. We need to fix this. Also, this props make they get less opaque, which is good. But there sees to be a bug when many lines are rendered, after a few get more opaque again. We need to fix this as well.

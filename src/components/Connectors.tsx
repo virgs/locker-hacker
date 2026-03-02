@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { getAngle, getDistance, getConnectorPoint } from "../math/math.ts";
+import { getAngle, getDistance, getConnectorPoint, getDynamicConnectorThickness, getConnectorOpacity } from "../math/math.ts";
 import { Point } from "../math/point.ts";
 
 type Connector = {
@@ -18,6 +18,10 @@ interface ConnectorsProps {
     initialMousePosition    : Point | null;
     arrowHeads              : boolean;
     arrowHeadSize           : number;
+    dynamicLineWidth        : boolean;
+    minConnectorThickness   : number;
+    cols                    : number;
+    rows                    : number;
 }
 
 const Connectors: React.FunctionComponent<ConnectorsProps> = ({
@@ -29,7 +33,11 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
     connectorRoundedCorners,
     initialMousePosition,
     arrowHeads,
-    arrowHeadSize
+    arrowHeadSize,
+    dynamicLineWidth,
+    minConnectorThickness,
+    cols,
+    rows,
 }) => {
     const [mouse, setMouse] = React.useState<Point | null>(null);
 
@@ -55,23 +63,29 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
         };
     });
 
+    const hasLiveConnector = mouse !== null && path.length > 0;
+    const numLines = Math.max(1, path.length - 1 + (hasLiveConnector ? 1 : 0));
+    const maxPossibleLines = Math.max(1, cols * rows - 1);
+    const effectiveThickness = dynamicLineWidth
+        ? getDynamicConnectorThickness({ connectorThickness, minConnectorThickness, numLines, maxPossibleLines })
+        : connectorThickness;
+
     const connectors: Connector[] = [];
     for (let i = 0; i < path.length - 1; i += 1) {
         const current = points[path[i]];
         const next    = points[path[i + 1]];
         connectors.push({
-            from : getConnectorPoint(current, pointActiveSize, connectorThickness),
-            to   : getConnectorPoint(next, pointActiveSize, connectorThickness)
+            from : getConnectorPoint(current, pointActiveSize, effectiveThickness),
+            to   : getConnectorPoint(next, pointActiveSize, effectiveThickness)
         });
     }
-    const hasLiveConnector = mouse !== null && path.length > 0;
     if (hasLiveConnector) {
         connectors.push({
-            from : getConnectorPoint(points[path[path.length - 1]], pointActiveSize, connectorThickness),
+            from : getConnectorPoint(points[path[path.length - 1]], pointActiveSize, effectiveThickness),
             to   : mouse
         });
     }
-    const liveConnectorIndex = hasLiveConnector ? connectors.length - 1 : -1;
+    const arrowHeadIndex = arrowHeads && connectors.length > 0 ? connectors.length - 1 : -1;
 
     return (
         <div className="react-pattern-lock__connector-wrapper">
@@ -85,11 +99,12 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
                             width        : `${getDistance(from, to)}px`,
                             left         : `${from.x}px`,
                             top          : `${from.y}px`,
-                            height       : connectorThickness,
-                            borderRadius : connectorRoundedCorners ? Math.round(connectorThickness / 2) : 0
+                            height       : effectiveThickness,
+                            borderRadius : connectorRoundedCorners ? Math.round(effectiveThickness / 2) : 0,
+                            opacity      : dynamicLineWidth ? getConnectorOpacity(i, connectors.length) : 1
                         }}
                     >
-                        {arrowHeads && i === liveConnectorIndex && (
+                        {i === arrowHeadIndex && (
                             <div
                                 className="react-pattern-lock__arrow-head"
                                 style={{

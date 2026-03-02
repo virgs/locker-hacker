@@ -48,6 +48,42 @@
 
 ---
 
+### Per-Connector Opacity with `dynamicLineWidth`
+
+**Decision:** When `dynamicLineWidth=true`, each connector gets per-connector opacity `(i+1)/N` (oldest = `1/N`, newest = `1`). When `dynamicLineWidth=false`, all connectors have `opacity: 1` — no visual change at all.
+
+**Rationale:** Opacity variation makes older path segments fade, reinforcing the sense of direction. Without the `dynamicLineWidth` guard, semi-transparent older lines visually appeared thinner even though their CSS `height` was unchanged — the fix ensures both thickness *and* opacity are static when `dynamicLineWidth=false`.
+
+**Cyclic bug prevention:** The formula `(i+1)/N` is strictly monotonic in `[1/N, 1]` with no modular arithmetic, so it never wraps around regardless of path length.
+
+**`getConnectorOpacity`** extracted to `math.ts` and fully tested.
+
+---
+
+### Arrow Head Always on Last Connector
+
+**Decision:** The arrow head (`arrowHeadIndex`) now shows on the last connector in the array regardless of whether it is a live trailing connector or the final path segment. Previously it only showed on the live connector, making the arrow invisible when the component is disabled (no mouse interaction → no live connector).
+
+---
+
+### `dynamicLineWidth` and `minConnectorThickness` Props
+
+**Decision:** Added `dynamicLineWidth?: boolean` (default `false`) and `minConnectorThickness?: number` (default `2`) to `PatternLockProps`. When `dynamicLineWidth=true`, connector thickness scales linearly from `connectorThickness` (1 line) down to `minConnectorThickness` (max possible lines for the grid). When `false`, thickness is always `connectorThickness`.
+
+**Implementation:** Logic extracted into `getDynamicConnectorThickness` in `math.ts` (pure, tested). Formula: linear interpolation based on `numLines / maxPossibleLines`. No cyclic behavior — `Math.max(minConnectorThickness, ...)` ensures the floor is respected even if `numLines` exceeds the theoretical maximum.
+
+**`cols` and `rows` forwarded to Connectors** to compute `maxPossibleLines = cols * rows - 1`.
+
+---
+
+### Removed `error` and `success` Props
+
+**Decision:** Removed `error?: boolean` and `success?: boolean` from `PatternLockProps`. Removed corresponding CSS rules from `PatternLock.styled.tsx`.
+
+**Rationale:** Simplifies the API; callers can apply their own CSS classes via `className` prop if they need state-specific styling.
+
+---
+
 ### Optional `onChange` and `onFinish`
 
 **Decision:** `onChange` and `onFinish` are optional props (both in `PatternLockProps` and `UsePatternLockOptions`). All call sites in `usePatternLock.ts` use optional chaining (`onChange?.()`, `onFinish?.()`).
