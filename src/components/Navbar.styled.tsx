@@ -1,34 +1,67 @@
 import styled from "styled-components";
 
+const MOBILE = "@media (max-width: 600px)";
+
 export const NavbarContainer = styled.nav`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    height: 52px;
     flex-shrink: 0;
-    background: #0d0d0d;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-sizing: border-box;
+    padding: 0 16px;
 
-    @media (max-width: 480px) {
-        padding: 0 12px;
-        height: 44px;
+    ${MOBILE} {
+        padding: 0 8px;
     }
 `;
 
-export const NavbarTitle = styled.h1`
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #fff;
-    margin: 0;
-    letter-spacing: 0.4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+export const NavbarRow = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 52px;
+    gap: 8px;
+    flex-wrap: wrap;
 
-    @media (max-width: 480px) {
-        font-size: 0.95rem;
+    ${MOBILE} {
+        min-height: 44px;
+        gap: 6px;
+        padding: 4px 0;
+    }
+`;
+
+export const NavbarLeft = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    ${MOBILE} {
+        gap: 4px;
+    }
+`;
+
+export const NavbarCenter = styled.div`
+    display: flex;
+    align-items: center;
+`;
+
+export const NavbarRight = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+`;
+
+export const AppIconLink = styled.span`
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+`;
+
+export const AppIconImage = styled.img`
+    height: 28px;
+    width: auto;
+
+    ${MOBILE} {
+        height: 22px;
     }
 `;
 
@@ -37,9 +70,7 @@ export const GitHubLink = styled.a`
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    margin-left: 16px;
     transition: color 0.2s ease, transform 0.2s ease;
-    outline-offset: 4px;
 
     &:hover {
         color: #fff;
@@ -50,3 +81,25 @@ export const GitHubLink = styled.a`
         color: #2a9fd6;
     }
 `;
+
+export const HelpButton = styled.button`
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    transition: color 0.2s ease, transform 0.2s ease;
+
+    &:hover {
+        color: #fff;
+        transform: scale(1.1);
+    }
+
+    &:focus-visible {
+        color: #2a9fd6;
+        outline: none;
+    }
+`;
+

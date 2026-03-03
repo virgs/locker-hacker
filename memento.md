@@ -395,3 +395,123 @@ ResizeObserver fires → onResize() → setContainerWidth/Height
     → Connectors receives new points → lines re-render at correct positions
 ```
 
+---
+
+### Navbar Redesign with Game Controls
+
+**Decision:** Redesigned the navbar from a simple title+GitHub-link bar into a full game control center with dropdowns, play/reveal flow, help modal, and level/player configuration.
+
+**New components:**
+- `Navbar.tsx` — Shell component with layout and props from `App.tsx`. Contains: app icon (Lock), players dropdown, level dropdown, play/reveal button, help icon, GitHub icon.
+- `HelpModal.tsx` + `HelpModal.styled.tsx` — react-bootstrap Modal showing game rules and a "Play Now" button.
+- `CodeRevealOverlay.tsx` + `CodeRevealOverlay.styled.tsx` — Full-screen overlay that renders the secret code as a disabled `PatternLock` for `REVEAL_DELAY_MS` (3 seconds), then auto-dismisses and resets the game.
+
+**Game state lifted to `App.tsx`:**
+- `phase: GamePhase` ("idle" | "playing") — controls whether the PatternLock is interactive and whether dropdowns are disabled.
+- `level: Level` ("easy" | "medium" | "hard") — drives `config` via `LEVEL_CONFIGS[level]`.
+- `playerCount: PlayerCount` (1–4) — stored for future multiplayer; no gameplay effect yet.
+- `revealing: boolean` — drives the code reveal overlay visibility.
+
+**New file `src/game/GameConfig.ts`:** Exports `Level`, `GamePhase`, `PlayerCount`, `GridConfig` types, `LEVEL_CONFIGS` map, label maps, and defaults. Fully tested in `GameConfig.test.ts` (12 tests).
+
+**Play/Reveal flow:**
+1. User clicks "Play" → `startGame()` generates a new code, clears history, sets phase to "playing".
+2. User clicks "Reveal" → `revealCode()` shows `CodeRevealOverlay` for 3 seconds, then resets to "idle".
+3. Dropdowns are disabled during gameplay, re-enabled when idle.
+
+**Navbar constants updated:** `APP_TITLE` changed from "Pattern Lock History" to "Locker Hacker". Added `HELP_CONTENT` (array of rule summary strings) and `REVEAL_DELAY_MS`.
+
+**Responsive design:** `NavbarRow` uses `flex-wrap: wrap` so items flow to two rows on mobile. Dropdown font sizes shrink on XS. All items have feather icons.
+
+**Files changed/added:**
+- `src/game/GameConfig.ts` + `GameConfig.test.ts` — types, constants, tests
+- `src/components/Navbar.tsx` — redesigned with game control props
+- `src/components/Navbar.styled.tsx` — new styled components for layout
+- `src/components/Navbar.constants.ts` — new constants
+- `src/components/Navbar.test.ts` — updated tests
+- `src/components/HelpModal.tsx` + `HelpModal.styled.tsx` — help modal
+- `src/components/CodeRevealOverlay.tsx` + `CodeRevealOverlay.styled.tsx` — code reveal
+- `src/App.tsx` — game state management, wiring
+
+---
+
+### Fix: ResizeObserver Crash on Game Reset
+
+**Problem:** After the code reveal timer fired, `revealCode()` set `code` to `[]`, causing a React re-render cycle. The `ResizeObserver` callback in `usePatternLock.ts` fired during this transition and called `wrapperRef.current.getBoundingClientRect()` on a disconnected/null element, throwing `Cannot read properties of null`.
+
+**Fix (two changes):**
+1. `onResize()` in `usePatternLock.ts` now guards against a null or disconnected `wrapperRef.current` — returns `[0, 0]` early if `!el || !el.isConnected`.
+2. `revealCode()` in `App.tsx` no longer clears `code`, `path`, and `pathHistory` after the timer. It only sets `phase` back to `"idle"`. The cleanup happens in `startGame()` when the user clicks "Play" again, which avoids the problematic empty-code render.
+
+---
+
+### Removed "Play Now" from HelpModal
+
+**Decision:** The `HelpModal` footer with the "Play Now" button was removed. The modal now only shows the help content and a close button (via Bootstrap Modal's built-in `closeButton`). The `onPlay` prop was removed from `HelpModalProps`.
+
+**Rationale:** The Play button in the navbar already serves this purpose; duplicating it in the help modal was confusing.
+
+---
+
+### Cyborg Theme Preservation
+
+**Decision:** Removed custom styled-components that overrode the Cyborg Bootswatch theme's native styles. Specifically:
+- `IconButton` (custom border/color/hover) → replaced with native Bootstrap `<Button variant="outline-primary|outline-danger" size="sm">`.
+- `StyledDropdownToggle` → replaced with native `<Dropdown.Toggle variant="outline-secondary" size="sm">`.
+- `StyledDropdownItem` → replaced with native `<Dropdown.Item>`.
+- `HelpModal.styled.tsx` — removed `font-size` and `color` overrides on `li` elements.
+- `NavbarContainer` — removed hardcoded `background: #0d0d0d`; the theme provides the background.
+
+**Rationale:** The Cyborg theme already provides dark-mode-appropriate colors, hover effects, and sizing for all Bootstrap components. Custom overrides created visual inconsistencies and made the app fight the theme rather than embrace it.
+
+**Kept custom styles for:**
+- `GitHubLink` and `HelpButton` — these are not Bootstrap components; they're icon-only elements that need hover/transition effects matching the GitHub icon style.
+- `AppIconImage` — sizing the app icon image.
+- Layout containers (`NavbarRow`, `NavbarLeft`, `NavbarCenter`, `NavbarRight`) — pure flexbox layout, not visual overrides.
+
+---
+
+### App Icon from `public/icon.png`
+
+**Decision:** Replaced the feather `<Lock>` icon in the navbar with an `<img>` tag pointing to `/icon.png` (from `public/icon.png`). Sized at 28px height on desktop, 22px on mobile via `AppIconImage` styled-component.
+
+---
+
+### App Icon is a No-Op
+
+**Decision:** Changed `AppIconLink` from `styled.a` (with `href="/"`) to `styled.span`. The icon no longer acts as a navigation link — clicking it does nothing.
+
+**Rationale:** Navigating to `/` caused a full page refresh, restarting the game unexpectedly. Since this is a single-page app with no routing, there's no meaningful "home" to navigate to.
+
+---
+
+### Help Modal Rich Content
+
+**Decision:** Replaced the plain-text `HELP_CONTENT` string array (from `Navbar.constants.ts`) with inline JSX in `HelpModal.tsx` using `<strong>`, `<em>`, and colored bullet characters for Bulls/Cows/Miss. The `HELP_CONTENT` export was removed from constants.
+
+**Rationale:** Rich formatting (bold keywords, italic conditions, colored dot indicators matching the feedback colors) makes the rules scannable. JSX content can't live in a `.ts` constants file, so it moved to the component.
+
+---
+
+### Game Reinitialization After Reveal
+
+**Decision:** `revealCode()` now clears `code`, `path`, and `pathHistory` when the reveal timer expires (in addition to setting `phase` back to `"idle"`).
+
+**Rationale:** Previously, old feedback entries remained visible in the sidebar after the reveal overlay dismissed. Users expected a fresh slate. The `onResize` guard in `usePatternLock.ts` (`if (!el || !el.isConnected) return [0, 0]`) prevents the `getBoundingClientRect` crash that previously occurred when code was set to `[]`.
+
+---
+
+### `gameKey` — Forced PatternLock Remount on Game Reset
+
+**Problem:** After the code reveal overlay dismissed, the PatternLock disappeared entirely — no dots visible, just the navbar. The PatternLock component was the same React instance across game resets (never unmounted), but the `usePatternLock` hook's internal state (container dimensions, points array, ResizeObserver) could become stale or out of sync when the game state changed underneath it.
+
+**Root cause:** `usePatternLock` initialises `containerWidth`/`containerHeight` and the `ResizeObserver` in `useEffect([], [])` — mount-only effects. When the game reset (code→`[]`, phase→`"idle"`) the component re-rendered without remounting, so those effects never re-ran. If the ResizeObserver callback fired during the transition and hit the `!el.isConnected` guard, subsequent renders could leave the hook with stale zero-dimension state, causing points to compute at invisible positions.
+
+**Fix — `gameKey` state counter:**
+- `App.tsx` maintains a `gameKey: number` state, incremented in both `startGame()` and the `revealCode()` timer callback.
+- The main `<PatternLock key={gameKey} ... />` receives `gameKey` as its React `key`. When the key changes, React unmounts the old instance and mounts a fresh one, guaranteeing all `useEffect([], [])` hooks re-run (container measurement, ResizeObserver setup, points computation).
+
+**Why a key instead of fixing the hook:** The hook's mount-only effects are correct for the normal resize/interaction lifecycle. Trying to make them re-run on arbitrary state changes would add complexity and break the separation between "hook initialisation" and "prop-driven updates". A key change is the idiomatic React way to force a clean remount.
+
+**Files changed:**
+- `src/App.tsx` — added `gameKey` state, passed as `key` to `PatternLock`, incremented in `startGame` and `revealCode`.

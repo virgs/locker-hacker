@@ -11,6 +11,14 @@ A hidden code is a **sequence of distinct dots** drawn on a rectangular grid. Pl
 
 The game ends when Bulls == code length.
 
+## Features
+
+* **Level selection** — Easy (3×2, length 3), Medium (3×3, length 4), Hard (4×4, length 5)
+* **Play/Reveal flow** — Press Play to start; press Reveal to show the secret code
+* **Player count** — Select 1–4 players (future multiplayer support)
+* **Help modal** — In-app game rules with a "Play Now" button
+* **Responsive** — Works on desktop and mobile, navbar wraps to two rows on small screens
+
 ## Game Rules
 
 * No dot may appear twice in a code or guess.
@@ -26,11 +34,15 @@ src/
 │   ├── PatternLock.tsx        — main grid + drawing component
 │   ├── PatternLock.styled.tsx — global CSS-in-JS styles
 │   ├── PatternHistory.tsx     — renders the list of past guesses
+│   ├── Navbar.tsx             — game controls (dropdowns, play/reveal, help)
+│   ├── HelpModal.tsx          — how-to-play modal
+│   ├── CodeRevealOverlay.tsx  — secret code reveal overlay
 │   ├── Connectors.tsx
 │   ├── Point.tsx
 │   └── usePatternLock.ts
 ├── game/                # Game logic (pure TypeScript, framework-agnostic)
 │   ├── CodeGenerator.ts   — generates a valid hidden code
+│   ├── GameConfig.ts      — level/player types and constants
 │   └── GuessValidator.ts  — computes bulls/cows feedback
 └── math/                # Geometry utilities shared by game and component
     ├── math.ts

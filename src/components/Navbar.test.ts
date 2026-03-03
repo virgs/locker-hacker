@@ -1,4 +1,8 @@
-import { GITHUB_URL, APP_TITLE } from "./Navbar.constants.ts";
+import {
+    GITHUB_URL,
+    APP_TITLE,
+    REVEAL_DELAY_MS,
+} from "./Navbar.constants.ts";
 
 describe("Navbar constants", () => {
     describe("GITHUB_URL", () => {
@@ -18,7 +22,16 @@ describe("Navbar constants", () => {
         });
 
         it("matches the expected title", () => {
-            expect(APP_TITLE).toBe("Pattern Lock History");
+            expect(APP_TITLE).toBe("Locker Hacker");
+        });
+    });
+
+
+    describe("REVEAL_DELAY_MS", () => {
+        it("is a positive number", () => {
+            expect(typeof REVEAL_DELAY_MS).toBe("number");
+            expect(REVEAL_DELAY_MS).toBeGreaterThan(0);
         });
     });
 });
+

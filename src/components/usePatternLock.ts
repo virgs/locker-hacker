@@ -45,10 +45,12 @@ export const usePatternLock = ({
     const [initialMousePosition, setInitialMousePosition] = React.useState<PointType | null>(null);
 
     const onResize = (): [number, number] => {
-        const { top, left } = wrapperRef.current.getBoundingClientRect();
+        const el = wrapperRef.current;
+        if (!el || !el.isConnected) return [0, 0];
+        const { top, left } = el.getBoundingClientRect();
         setWrapperPosition({ x: left + window.scrollX, y: top + window.scrollY });
-        setContainerWidth(wrapperRef.current.offsetWidth);
-        setContainerHeight(wrapperRef.current.offsetHeight);
+        setContainerWidth(el.offsetWidth);
+        setContainerHeight(el.offsetHeight);
         return [top, left];
     };
 
