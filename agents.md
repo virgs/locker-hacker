@@ -179,4 +179,4 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [ ] I think that for intermediate screens, the PatternLock dots are too close to the edges of the screen. We should add some padding to the container to give it more breathing room. Also, between the PatternHistory dots and feed back dots, there should be more space to visually separate them. Let's add some margin between those sections to improve readability and aesthetics.
+1. [x] I think that for intermediate screens, the PatternLock dots are too close to the edges of the screen. We should add some padding to the container to give it more breathing room. Also, between the PatternHistory dots and feed back dots, there should be more space to visually separate them. Let's add some margin between those sections to improve readability and aesthetics.

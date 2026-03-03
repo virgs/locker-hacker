@@ -22,12 +22,12 @@ export const HistoryEntry = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 20px;
     padding: 12px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
     ${XS} {
-        gap: 6px;
+        gap: 10px;
         padding: 8px 0;
     }
 `;

@@ -31,10 +31,11 @@ export const MainArea = styled.main`
     justify-content: center;
     overflow: hidden;
     box-sizing: border-box;
-    padding-left: 220px; /* mirrors sidebar width so content sits at true viewport centre */
+    padding: 24px;
+    padding-left: calc(220px + 24px); /* mirrors sidebar width + breathing room */
 
     ${XL} {
-        padding-left: 440px;
+        padding-left: calc(440px + 24px);
     }
 
     ${MOBILE} {
@@ -91,10 +92,14 @@ export const Sidebar = styled.aside`
 `;
 
 /** Constrains the active PatternLock to 500 px on desktop and to the
- *  viewport width (minus padding) on mobile so it never overflows. */
+ *  viewport width (minus padding) on mobile so it never overflows.
+ *  On intermediate screens, max-width/max-height ensure the lock
+ *  shrinks gracefully rather than touching the edges. */
 export const PatternLockSizer = styled.div`
     width: 500px;
     height: 500px;
+    max-width: 100%;
+    max-height: 100%;
 
     ${MOBILE} {
         width: calc(100vw - 32px);

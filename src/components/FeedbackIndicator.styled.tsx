@@ -15,6 +15,7 @@ export const FeedbackDot = styled.div<{ $color: string }>`
 `;
 
 export const FeedbackColumn = styled.div`
+    padding-left: 10px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -22,6 +23,7 @@ export const FeedbackColumn = styled.div`
     justify-content: center;
 
     ${XS} {
-        gap: 3px;
+        padding-left: 20px;
+        gap: 5px;
     }
 `;

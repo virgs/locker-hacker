@@ -362,3 +362,17 @@ AppLayout (flex-col, 100%)
 - `src/components/FeedbackIndicator.styled.tsx` — smaller dots/gaps on XS
 - `src/components/useMediaQuery.ts` — `useSyncExternalStore` implementation
 
+---
+
+### Intermediate-Screen Breathing Room & History Entry Spacing
+
+**Decision:** Added uniform padding (`24px` all sides, with `padding-left: 220px + 24px`) to `MainArea` so the PatternLock has breathing room on intermediate screens (600–1400 px). `PatternLockSizer` gained `max-width: 100%; max-height: 100%` so it shrinks gracefully within the padded area instead of overflowing.
+
+**History entry gap** increased from `12px` → `20px` (desktop) and `6px` → `10px` (XS) to visually separate the pattern lock thumbnail from the feedback indicator dots.
+
+**Rationale:** On intermediate viewports (~700–900 px) the fixed 500 px lock + 220 px sidebar + 220 px counterbalance padding left almost no margin, making dots appear jammed against the container edges. The padding + `max-width`/`max-height` approach keeps the lock centred and ensures consistent whitespace without adding a new breakpoint.
+
+**Files changed:**
+- `src/App.styled.tsx` — `MainArea` padding, `PatternLockSizer` max constraints
+- `src/components/PatternHistory.styled.tsx` — increased `gap` on `HistoryEntry`
+
