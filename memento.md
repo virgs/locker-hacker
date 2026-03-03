@@ -819,6 +819,43 @@ A cleanup `useEffect` clears the timer on unmount. `flashingPoints` is included 
 - `src/game/playerColors.ts` + `playerColors.test.ts`
 - `src/components/TurnAnnouncement.tsx` + `TurnAnnouncement.styled.tsx` + `TurnAnnouncement.utils.ts` + `TurnAnnouncement.test.ts`
 
+---
+
+### Config Persistence (`src/game/ConfigService.ts`)
+
+**Decision:** Level and playerCount are persisted to localStorage under `"locker-hacker-config"` and restored on app start.
+
+**`parseConfig(raw)`** — pure helper that parses a JSON string and validates each field against the known enum arrays (`ALL_LEVELS`, `ALL_PLAYER_COUNTS`). Returns `Partial<GameConfig>` with `undefined` for any invalid/missing field. Fully unit-tested without localStorage mocking.
+
+**`loadConfig()`** — thin wrapper that reads from localStorage and delegates to `parseConfig`.
+
+**`saveConfig(config)`** — stringifies and writes to localStorage.
+
+**`GameContext.tsx` integration:**
+- Loads config once via `React.useState(() => loadConfig())` (lazy init on mount).
+- `initialLevel`/`initialPlayerCount` derived from saved config with defaults (`?? DEFAULT_*`).
+- `code` initializer uses `initialLevel` so the generated code matches the loaded level.
+- `React.useEffect([level, playerCount])` calls `saveConfig` whenever either value changes.
+
+**Files created:**
+- `src/game/ConfigService.ts` + `ConfigService.test.ts` (9 tests for `parseConfig`)
+
+**Files changed:**
+- `src/context/GameContext.tsx` — load on init, save on change
+
+---
+
+### Colored Player Count Icons in Navbar Dropdown
+
+**Decision:** Each player count dropdown item renders X colored `User` icons (one per player slot) instead of a single generic `Users` icon, using player colors from `playerColors.ts`.
+
+**Implementation:** `PlayerCountIcons` helper component defined above `Navbar` (not exported). Uses `Array.from({ length: count })` to render icons dynamically. Each icon gets `style={{ color: getPlayerColor(i + 1) }}` and `className="me-1"` for spacing.
+
+**Files changed:**
+- `src/components/Navbar.tsx` — added `User` import, `getPlayerColor` import, `PlayerCountIcons` component, updated dropdown items
+
+---
+
 **Files changed:**
 - `src/components/PatternLock.tsx` — `pathColor` prop
 - `src/components/Connectors.tsx` — `pathColor` prop + inline styles

@@ -35,10 +35,10 @@ export const LEVEL_LABELS: Record<Level, string> = {
 };
 
 export const PLAYER_LABELS: Record<PlayerCount, string> = {
-    [PlayerCount.One]  : "One player",
-    [PlayerCount.Two]  : "Two players",
-    [PlayerCount.Three]: "Three players",
-    [PlayerCount.Four] : "Four players",
+    [PlayerCount.One]  : "1 player",
+    [PlayerCount.Two]  : "2 players",
+    [PlayerCount.Three]: "3 players",
+    [PlayerCount.Four] : "4 players",
 };
 
 export const ALL_LEVELS: Level[] = [Level.Easy, Level.Medium, Level.Hard];

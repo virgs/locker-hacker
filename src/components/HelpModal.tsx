@@ -21,12 +21,12 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                 Submit guesses and receive feedback:
             </p>
             <HelpList>
-                <li><strong style={{ color: "#22c55e" }}>● Bulls</strong> — correct dot in the <em>correct position</em>.</li>
-                <li><strong style={{ color: "#eab308" }}>● Cows</strong> — correct dot but <em>wrong position</em>.</li>
-                <li><strong style={{ color: "#6b7280" }}>● Miss</strong> — dot <em>not in the code</em>.</li>
+                <li><strong style={{ color: "#22c55e" }}>● Green dots</strong> — correct dot in the <em>correct position</em>.</li>
+                <li><strong style={{ color: "#eab308" }}>● Yellow dots</strong> — correct dot but <em>wrong position</em>.</li>
+                <li><strong style={{ color: "#6b7280" }}>● Gray dots</strong> — dot <em>not in the code</em>.</li>
             </HelpList>
             <p className="mt-3 mb-0">
-                The game ends when <strong>all dots are bulls</strong>.
+                The game ends when <strong>all dots are in the correct position</strong>.
                 Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
             </p>
         </Modal.Body>

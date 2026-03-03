@@ -1,22 +1,31 @@
 import * as React from "react";
-import { GitHub, HelpCircle, Eye, EyeOff, Users, BarChart2, XOctagon } from "react-feather";
+import {GitHub, HelpCircle, Eye, EyeOff, Users, User, BarChart2, XOctagon} from "react-feather";
 import Dropdown from "react-bootstrap/Dropdown";
 import Button from "react-bootstrap/Button";
 import {
     NavbarContainer, NavbarRow, NavbarLeft, NavbarCenter, NavbarRight,
     AppIconLink, AppIconImage, HelpButton, GitHubLink, ButtonLabel,
 } from "./Navbar.styled.tsx";
-import { GITHUB_URL, APP_TITLE } from "./Navbar.constants.ts";
+import {GITHUB_URL, APP_TITLE} from "./Navbar.constants.ts";
 import {
     Level, PlayerCount, GamePhase,
     LEVEL_LABELS, LEVEL_CONFIGS, PLAYER_LABELS, ALL_LEVELS, ALL_PLAYER_COUNTS,
 } from "../game/GameConfig.ts";
-import { clearRecords } from "../game/StatsService.ts";
+import {clearRecords} from "../game/StatsService.ts";
 import HelpModal from "./HelpModal.tsx";
 import StatsModal from "./StatsModal.tsx";
-import { useGameContext } from "../context/GameContext.tsx";
+import {getPlayerColor} from "../game/playerColors.ts";
+import {useGameContext} from "../context/GameContext.tsx";
 
 const LONG_PRESS_MS = 10_000;
+
+const PlayerCountIcons: React.FunctionComponent<{ count: number }> = ({count}): React.ReactElement => (
+    <>
+        {Array.from({length: count}, (_, i) => (
+            <User key={i} size={14} className="me-1" style={{ color: count === 1 ? 'white' : getPlayerColor(i + 1) }} />
+        ))}
+    </>
+);
 
 const levelDetailLabel = (l: Level): string =>
     `${LEVEL_LABELS[l]} (${LEVEL_CONFIGS[l].length})`;
@@ -53,11 +62,12 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
         if (phase === GamePhase.Revealing) {
             return (
                 <>
-                    <Button variant="outline-secondary" size="sm" onClick={onToggleRevealModal} aria-label="Toggle reveal">
-                        <EyeOff size={16} /><ButtonLabel className="ms-1">Reveal</ButtonLabel>
+                    <Button variant="outline-secondary" size="sm" onClick={onToggleRevealModal}
+                            aria-label="Toggle reveal">
+                        <EyeOff size={16}/><ButtonLabel className="ms-1">Reveal</ButtonLabel>
                     </Button>
                     <Button variant="outline-danger" size="sm" onClick={onFinishGame} aria-label="Finish game">
-                        <XOctagon size={16} /><ButtonLabel className="ms-1">Finish</ButtonLabel>
+                        <XOctagon size={16}/><ButtonLabel className="ms-1">Finish</ButtonLabel>
                     </Button>
                 </>
             );
@@ -65,7 +75,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
         if (isRunning) {
             return (
                 <Button variant="danger" size="sm" onClick={onGiveUp} aria-label="Give up and reveal code">
-                    <Eye size={16} /><ButtonLabel className="ms-1">Give Up</ButtonLabel>
+                    <Eye size={16}/><ButtonLabel className="ms-1">Give Up</ButtonLabel>
                 </Button>
             );
         }
@@ -82,21 +92,33 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                             aria-label={APP_TITLE}
                             onMouseDown={handleIconDown}
                             onMouseUp={handleIconUp}
-                            onMouseLeave={() => { if (longPressRef.current) { clearTimeout(longPressRef.current); longPressRef.current = null; } }}
+                            onMouseLeave={() => {
+                                if (longPressRef.current) {
+                                    clearTimeout(longPressRef.current);
+                                    longPressRef.current = null;
+                                }
+                            }}
                             onTouchStart={handleIconDown}
                             onTouchEnd={handleIconUp}
                         >
-                            <AppIconImage src="/icon.png" alt={APP_TITLE} />
+                            <AppIconImage src="/icon.png" alt={APP_TITLE}/>
                         </AppIconLink>
 
                         <Dropdown>
                             <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
-                                <Users size={14} /><ButtonLabel className="ms-1">{PLAYER_LABELS[playerCount]}</ButtonLabel>
+                                <Users size={14}/><ButtonLabel
+                                className="ms-1">{PLAYER_LABELS[playerCount]}</ButtonLabel>
                             </Dropdown.Toggle>
-                            <Dropdown.Menu>
+                            <Dropdown.Menu style={{ minWidth: '220px' }}>
                                 {ALL_PLAYER_COUNTS.map((c: PlayerCount) => (
-                                    <Dropdown.Item key={c} active={c === playerCount} onClick={() => onPlayerCountChange(c)}>
-                                        <Users size={14} className="me-1" /> {PLAYER_LABELS[c]}
+                                    <Dropdown.Item key={c} active={c === playerCount}
+                                                   onClick={() => onPlayerCountChange(c)}>
+                                        <span className="me-2">
+                                        {PLAYER_LABELS[c]}
+                                        </span>
+                                        <span className="float-right" style={{float: 'right'}}>
+                                            <PlayerCountIcons count={c}/>
+                                        </span>
                                     </Dropdown.Item>
                                 ))}
                             </Dropdown.Menu>
@@ -104,12 +126,13 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
 
                         <Dropdown>
                             <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
-                                <BarChart2 size={14} /><ButtonLabel className="ms-1">{levelDetailLabel(level)}</ButtonLabel>
+                                <BarChart2 size={14}/><ButtonLabel
+                                className="ms-1">{levelDetailLabel(level)}</ButtonLabel>
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
                                 {ALL_LEVELS.map((l: Level) => (
                                     <Dropdown.Item key={l} active={l === level} onClick={() => onLevelChange(l)}>
-                                        <BarChart2 size={14} className="me-1" />
+                                        <BarChart2 size={14} className="me-1"/>
                                         {`${LEVEL_LABELS[l]}`}
                                         <span className="float-end fst-italic"> {`${LEVEL_CONFIGS[l].length}`}</span>
                                     </Dropdown.Item>
@@ -122,17 +145,18 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
 
                     <NavbarRight>
                         <HelpButton onClick={() => setHelpOpen(true)} aria-label="How to play">
-                            <HelpCircle size={20} />
+                            <HelpCircle size={20}/>
                         </HelpButton>
-                        <GitHubLink className="ms-2" href={GITHUB_URL} target="_blank" rel="noopener noreferrer" aria-label="View project on GitHub">
-                            <GitHub size={20} />
+                        <GitHubLink className="ms-2" href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
+                                    aria-label="View project on GitHub">
+                            <GitHub size={20}/>
                         </GitHubLink>
                     </NavbarRight>
                 </NavbarRow>
             </NavbarContainer>
 
-            <HelpModal show={helpOpen} onClose={() => setHelpOpen(false)} />
-            <StatsModal show={showStatsModal} onClose={onToggleStatsModal} />
+            <HelpModal show={helpOpen} onClose={() => setHelpOpen(false)}/>
+            <StatsModal show={showStatsModal} onClose={onToggleStatsModal}/>
         </>
     );
 };

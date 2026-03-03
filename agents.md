@@ -181,4 +181,7 @@ Build incrementally and safely.
 # TODO list
 
 
-1. [ ] The modal that announcees the player turn should
+1. [ ] I see these hardcoded colors spread in the codebase (    bull: "#22c55e",
+   cow:  "#eab308",
+   miss: "#6b7280",
+   ), we should move them to a central theme file to maintain consistency and make it easier to update colors in the future. Not only these, but every piece of code that is used multiple times and has a specific meaning should be moved to a central file. For example, if we have a specific color for bull or players, or dots..., we can define it in a theme file as `BULL_COLOR` and use that constant throughout the codebase instead of hardcoding the color value. This way, if we want to change the color scheme, we can do it in one place instead of searching through the entire codebase for hardcoded values.

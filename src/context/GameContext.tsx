@@ -2,6 +2,7 @@ import * as React from "react";
 import { CodeGenerator } from "../game/CodeGenerator.ts";
 import { GuessValidator } from "../game/GuessValidator.ts";
 import { saveRecord } from "../game/StatsService.ts";
+import { loadConfig, saveConfig } from "../game/ConfigService.ts";
 import {
     Level, PlayerCount, GamePhase, GridConfig,
     LEVEL_CONFIGS, DEFAULT_LEVEL, DEFAULT_PLAYER_COUNT,
@@ -48,10 +49,14 @@ export const useGameContext = (): GameContextValue => {
 };
 
 export const GameProvider = ({ children }: React.PropsWithChildren): React.ReactElement => {
-    const [level, setLevel]             = React.useState<Level>(DEFAULT_LEVEL);
-    const [playerCount, setPlayerCount] = React.useState<PlayerCount>(DEFAULT_PLAYER_COUNT);
+    const [savedConfig]     = React.useState(() => loadConfig());
+    const initialLevel       = savedConfig.level       ?? DEFAULT_LEVEL;
+    const initialPlayerCount = savedConfig.playerCount ?? DEFAULT_PLAYER_COUNT;
+
+    const [level, setLevel]             = React.useState<Level>(initialLevel);
+    const [playerCount, setPlayerCount] = React.useState<PlayerCount>(initialPlayerCount);
     const [phase, setPhase]             = React.useState<GamePhase>(GamePhase.Playing);
-    const [code, setCode]               = React.useState<number[]>(() => generateCode(LEVEL_CONFIGS[DEFAULT_LEVEL]));
+    const [code, setCode]               = React.useState<number[]>(() => generateCode(LEVEL_CONFIGS[initialLevel]));
     const [path, setPath]               = React.useState<number[]>([]);
     const [pathHistory, setPathHistory] = React.useState<number[][]>([]);
     const [gameKey, setGameKey]         = React.useState(0);
@@ -71,6 +76,10 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         const id = setInterval(() => setElapsedSeconds(prev => prev + 1), 1000);
         return () => clearInterval(id);
     }, [isRunning, phase]);
+
+    React.useEffect(() => {
+        saveConfig({ level, playerCount });
+    }, [level, playerCount]);
 
     const onLevelChange = React.useCallback((newLevel: Level): void => {
         setLevel(newLevel);
