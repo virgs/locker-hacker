@@ -3,7 +3,7 @@ import './App.scss'
 import PatternLock from "./components/PatternLock.tsx";
 import PatternHistory from "./components/PatternHistory.tsx";
 import Navbar from "./components/Navbar.tsx";
-import { AppLayout, ContentArea, MainArea, Sidebar } from "./App.styled.tsx";
+import { AppLayout, ContentArea, MainArea, PatternLockSizer, Sidebar } from "./App.styled.tsx";
 import { CodeGenerator } from "./game/CodeGenerator.ts";
 import { GuessValidator } from "./game/GuessValidator.ts";
 
@@ -35,17 +35,19 @@ export const App = (): ReactElement => {
             <Navbar />
             <ContentArea>
                 <MainArea>
-                    <PatternLock
-                        containerSize={500}
-                        pointSize={20}
-                        cols={config.cols}
-                        rows={config.rows}
-                        path={path}
-                        allowJumping={false}
-                        invisible={false}
-                        onChange={(pattern) => setPath(pattern)}
-                        onFinish={() => onFinish()}
-                    />
+                    <PatternLockSizer>
+                        <PatternLock
+                            containerSize="100%"
+                            pointSize={20}
+                            cols={config.cols}
+                            rows={config.rows}
+                            path={path}
+                            allowJumping={false}
+                            invisible={false}
+                            onChange={(pattern) => setPath(pattern)}
+                            onFinish={() => onFinish()}
+                        />
+                    </PatternLockSizer>
                 </MainArea>
                 <Sidebar>
                     <PatternHistory

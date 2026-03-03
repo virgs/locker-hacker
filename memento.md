@@ -317,6 +317,27 @@ AppLayout (flex-col, 100%)
 
 ---
 
+### Responsive Layout (mobile ≤ 600 px)
+
+**Problem:** On a 430 px viewport the Sidebar (220 px) consumed most of the width, leaving the MainArea only ~210 px while it still had `padding-left: 220px`. The 500 px PatternLock overflowed and was hidden behind the sidebar.
+
+**Fix — stacked column layout on mobile:**
+
+| Element | Desktop | Mobile (≤ 600 px) |
+|---|---|---|
+| `html/body` | `overflow: hidden; height: 100%` | `overflow-y: auto; height: auto` — page scrolls |
+| `#root` | `height: 100%` | `height: auto; min-height: 100dvh` |
+| `AppLayout` | `height: 100%; overflow: hidden` | `height: auto; overflow: visible` |
+| `ContentArea` | `flex-direction: row` | `flex-direction: column` |
+| `MainArea` | `flex: 1; padding-left: 220px` | `width: 100%; padding: 16px` |
+| `Sidebar` | `220px; height: 100%; overflow-y: scroll` | `width: 100%; height: auto; overflow-y: visible; border-top` |
+
+**`PatternLockSizer` (new styled-component):** wraps the PatternLock and provides explicit pixel dimensions (`500px × 500px` desktop, `calc(100vw - 32px) × calc(100vw - 32px)` mobile). The PatternLock receives `containerSize="100%"` so it fills the sizer precisely. This avoids passing a viewport-unit string to the component and keeps the sizing logic in CSS.
+
+**Breakpoint `600px`** chosen to cover all phones (iPhone 14 Pro = 430 px, typical Android ~360–412 px) while leaving tablets (768 px) on the desktop layout.
+
+---
+
 ## Trade-offs
 
 - `containerSize` default of `"100%"` means the CSS height is also `"100%"` when neither `width` nor `height` is provided. This differs from the old behavior where height was always set to a pixel value equal to `offsetWidth`. In practice all current usages pass an explicit pixel value so this has no visible impact.
