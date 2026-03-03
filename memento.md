@@ -682,3 +682,28 @@ A cleanup `useEffect` clears the timer on unmount. `flashingPoints` is included 
 - `src/components/Navbar.styled.tsx` — `ButtonLabel`, absolute `NavbarCenter`, `position: relative` on `NavbarRow`
 
 ---
+
+---
+
+### `isRunning` Definition: Based on Completed Guesses Only
+
+**Decision:** Changed `isRunning` from `pathHistory.length > 0 || path.length > 0` to `pathHistory.length > 0`.
+
+**Rationale:** The game is only "running" once the player has committed a complete guess, not while they are mid-draw. Consequences:
+- While drawing the first guess: `isRunning=false` → Give Up button hidden, dropdowns unlocked (level/players can still be changed).
+- After the first complete guess: `isRunning=true` → Give Up button appears, dropdowns locked.
+- `configDisabled = isRunning || phase === Revealing` still locks config during the Revealing phase.
+
+**Post-dismiss PatternLock:** After the reveal modal is dismissed (`showRevealModal=false`), `phase` remains `Revealing`. `App.tsx` uses `disabled={phase !== GamePhase.Playing}`, so the PatternLock stays disabled but visible. The history sidebar is always rendered and shows the full guess list. The lock stays disabled until `onFinishGame` resets phase to `Playing`.
+
+---
+
+---
+
+### `PatternLockStyles` Moved to App-Level Singleton
+
+**Root cause of bug:** `<PatternLockStyles />` (`createGlobalStyle`) was rendered inside every `PatternLock` instance. In styled-components v6, when **any** instance of a `createGlobalStyle` component unmounts, v6 removes the injected `<style>` tag from the document — even if other instances are still mounted (reference counting is not correctly implemented for this case). When `CodeRevealOverlay` closed and its `PatternLock` unmounted, all `.react-pattern-lock__*` CSS disappeared. Dots (which depend on `background: white`) became invisible on the dark background.
+
+**Fix:** Removed `<PatternLockStyles />` from `PatternLock.tsx` entirely. Added a single `<PatternLockStyles />` as the first child of `<AppLayout>` in `App.tsx`. There is now exactly one instance, always mounted for the lifetime of the app, regardless of how many `PatternLock` instances are created or destroyed.
+
+---

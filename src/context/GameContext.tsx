@@ -53,7 +53,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const [showRevealModal, setShowRevealModal] = React.useState(false);
 
     const gridConfig = LEVEL_CONFIGS[level];
-    const isRunning  = pathHistory.length > 0 || path.length > 0;
+    const isRunning  = pathHistory.length > 0;
 
     const onLevelChange = React.useCallback((newLevel: Level): void => {
         setLevel(newLevel);

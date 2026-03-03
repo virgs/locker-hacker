@@ -3,7 +3,6 @@ import classnames from "classnames";
 
 import Point from "./Point.tsx";
 import Connectors from "./Connectors.tsx";
-import { PatternLockStyles } from "./PatternLock.styled.tsx";
 import { usePatternLock } from "./usePatternLock.ts";
 
 interface PatternLockProps {
@@ -59,45 +58,42 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
         usePatternLock({ path, cols, rows, pointActiveSize, disabled, allowOverlapping, allowJumping, onChange, onFinish });
 
     return (
-        <>
-            <PatternLockStyles />
-            <div
-                className={classnames(["react-pattern-lock__pattern-wrapper", { disabled }, className])}
-                style={{ ...style, width: containerSize, height: containerSize }}
-                onMouseDown={onHold}
-                onTouchStart={onTouch}
-                ref={wrapperRef}
-            >
-                {Array.from({ length: cols * rows }).map((_, i) => (
-                    <Point
-                        key={i}
-                        index={i}
-                        cols={cols}
-                        rows={rows}
-                        pointSize={pointSize}
-                        pointActiveSize={pointActiveSize}
-                        pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
-                        selected={path.indexOf(i) > -1}
-                    />
-                ))}
-                {!invisible && points.length > 0 && (
-                    <Connectors
-                        initialMousePosition={initialMousePosition}
-                        wrapperPosition={wrapperPosition}
-                        path={path}
-                        points={points}
-                        pointActiveSize={pointActiveSize}
-                        connectorRoundedCorners={connectorRoundedCorners}
-                        connectorThickness={connectorThickness}
-                        arrowHeads={arrowHeads}
-                        arrowHeadSize={arrowHeadSize}
-                        dynamicLineStyle={dynamicLineStyle}
-                        minConnectorThickness={minConnectorThickness}
-                        minConnectorOpacity={minConnectorOpacity}
-                    />
-                )}
-            </div>
-        </>
+        <div
+            className={classnames(["react-pattern-lock__pattern-wrapper", { disabled }, className])}
+            style={{ ...style, width: containerSize, height: containerSize }}
+            onMouseDown={onHold}
+            onTouchStart={onTouch}
+            ref={wrapperRef}
+        >
+            {Array.from({ length: cols * rows }).map((_, i) => (
+                <Point
+                    key={i}
+                    index={i}
+                    cols={cols}
+                    rows={rows}
+                    pointSize={pointSize}
+                    pointActiveSize={pointActiveSize}
+                    pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
+                    selected={path.indexOf(i) > -1}
+                />
+            ))}
+            {!invisible && points.length > 0 && (
+                <Connectors
+                    initialMousePosition={initialMousePosition}
+                    wrapperPosition={wrapperPosition}
+                    path={path}
+                    points={points}
+                    pointActiveSize={pointActiveSize}
+                    connectorRoundedCorners={connectorRoundedCorners}
+                    connectorThickness={connectorThickness}
+                    arrowHeads={arrowHeads}
+                    arrowHeadSize={arrowHeadSize}
+                    dynamicLineStyle={dynamicLineStyle}
+                    minConnectorThickness={minConnectorThickness}
+                    minConnectorOpacity={minConnectorOpacity}
+                />
+            )}
+        </div>
     );
 };
 

@@ -5,6 +5,7 @@ import PatternHistory from "./components/PatternHistory.tsx";
 import Navbar from "./components/Navbar.tsx";
 import CodeRevealOverlay from "./components/CodeRevealOverlay.tsx";
 import { AppLayout, ContentArea, MainArea, PatternLockSizer, Sidebar } from "./App.styled.tsx";
+import { PatternLockStyles } from "./components/PatternLock.styled.tsx";
 import { GamePhase } from "./game/GameConfig.ts";
 import { useGameContext } from "./context/GameContext.tsx";
 
@@ -13,6 +14,7 @@ export const App = (): ReactElement => {
 
     return (
         <AppLayout>
+            <PatternLockStyles />
             <Navbar />
             <ContentArea>
                 <MainArea>
