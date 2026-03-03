@@ -1,8 +1,22 @@
-export type Level = "easy" | "medium" | "hard";
+export enum GamePhase {
+    Idle      = "idle",
+    Playing   = "playing",
+    Revealing = "revealing",
+    GameOver  = "game-over",
+}
 
-export type GamePhase = "idle" | "playing";
+export enum Level {
+    Easy   = "easy",
+    Medium = "medium",
+    Hard   = "hard",
+}
 
-export type PlayerCount = 1 | 2 | 3 | 4;
+export enum PlayerCount {
+    One   = 1,
+    Two   = 2,
+    Three = 3,
+    Four  = 4,
+}
 
 export interface GridConfig {
     cols   : number;
@@ -11,27 +25,39 @@ export interface GridConfig {
 }
 
 export const LEVEL_CONFIGS: Record<Level, GridConfig> = {
-    easy   : { cols: 3, rows: 2, length: 3 },
-    medium : { cols: 3, rows: 3, length: 4 },
-    hard   : { cols: 4, rows: 4, length: 5 },
+    [Level.Easy]  : { cols: 3, rows: 2, length: 3 },
+    [Level.Medium]: { cols: 3, rows: 3, length: 4 },
+    [Level.Hard]  : { cols: 4, rows: 4, length: 5 },
 };
 
 export const LEVEL_LABELS: Record<Level, string> = {
-    easy   : "Easy",
-    medium : "Medium",
-    hard   : "Hard",
+    [Level.Easy]  : "Easy",
+    [Level.Medium]: "Medium",
+    [Level.Hard]  : "Hard",
 };
 
 export const PLAYER_LABELS: Record<PlayerCount, string> = {
-    1: "One player",
-    2: "Two players",
-    3: "Three players",
-    4: "Four players",
+    [PlayerCount.One]  : "One player",
+    [PlayerCount.Two]  : "Two players",
+    [PlayerCount.Three]: "Three players",
+    [PlayerCount.Four] : "Four players",
 };
 
-export const ALL_LEVELS: Level[]             = ["easy", "medium", "hard"];
-export const ALL_PLAYER_COUNTS: PlayerCount[] = [1, 2, 3, 4];
+export const ALL_LEVELS: Level[] = [Level.Easy, Level.Medium, Level.Hard];
 
-export const DEFAULT_LEVEL: Level             = "medium";
-export const DEFAULT_PLAYER_COUNT: PlayerCount = 1;
+export const ALL_PLAYER_COUNTS: PlayerCount[] = [
+    PlayerCount.One,
+    PlayerCount.Two,
+    PlayerCount.Three,
+    PlayerCount.Four,
+];
 
+export const ALL_GAME_PHASES: GamePhase[] = [
+    GamePhase.Idle,
+    GamePhase.Playing,
+    GamePhase.Revealing,
+    GamePhase.GameOver,
+];
+
+export const DEFAULT_LEVEL: Level              = Level.Medium;
+export const DEFAULT_PLAYER_COUNT: PlayerCount = PlayerCount.One;

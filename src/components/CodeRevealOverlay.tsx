@@ -1,12 +1,15 @@
 import * as React from "react";
+import Button from "react-bootstrap/Button";
 import PatternLock from "./PatternLock.tsx";
-import { RevealBackdrop, RevealCard, RevealTitle } from "./CodeRevealOverlay.styled.tsx";
+import { RevealBackdrop, RevealCard, RevealTitle, RevealActions } from "./CodeRevealOverlay.styled.tsx";
 
 interface CodeRevealOverlayProps {
-    code : number[];
-    cols : number;
-    rows : number;
-    show : boolean;
+    code      : number[];
+    cols      : number;
+    rows      : number;
+    show      : boolean;
+    onDismiss : () => void;
+    onFinish  : () => void;
 }
 
 const CodeRevealOverlay: React.FunctionComponent<CodeRevealOverlayProps> = ({
@@ -14,6 +17,8 @@ const CodeRevealOverlay: React.FunctionComponent<CodeRevealOverlayProps> = ({
     cols,
     rows,
     show,
+    onDismiss,
+    onFinish,
 }): React.ReactElement | null => {
     if (!show) return null;
 
@@ -33,6 +38,14 @@ const CodeRevealOverlay: React.FunctionComponent<CodeRevealOverlayProps> = ({
                     arrowHeads={true}
                     allowJumping={false}
                 />
+                <RevealActions>
+                    <Button variant="outline-secondary" size="sm" onClick={onDismiss}>
+                        Dismiss
+                    </Button>
+                    <Button variant="outline-primary" size="sm" onClick={onFinish}>
+                        Finish
+                    </Button>
+                </RevealActions>
             </RevealCard>
         </RevealBackdrop>
     );

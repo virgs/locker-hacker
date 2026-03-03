@@ -36,3 +36,10 @@ export const RevealTitle = styled.h2`
     letter-spacing: 0.5px;
 `;
 
+export const RevealActions = styled.div`
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    width: 100%;
+`;
+

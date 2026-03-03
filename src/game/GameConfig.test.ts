@@ -4,10 +4,12 @@ import {
     PLAYER_LABELS,
     ALL_LEVELS,
     ALL_PLAYER_COUNTS,
+    ALL_GAME_PHASES,
     DEFAULT_LEVEL,
     DEFAULT_PLAYER_COUNT,
-    type Level,
-    type PlayerCount,
+    Level,
+    PlayerCount,
+    GamePhase,
 } from "./GameConfig.ts";
 
 describe("GameConfig", () => {
@@ -19,15 +21,15 @@ describe("GameConfig", () => {
         });
 
         it("easy has cols=3, rows=2, length=3", () => {
-            expect(LEVEL_CONFIGS.easy).toEqual({ cols: 3, rows: 2, length: 3 });
+            expect(LEVEL_CONFIGS[Level.Easy]).toEqual({ cols: 3, rows: 2, length: 3 });
         });
 
         it("medium has cols=3, rows=3, length=4", () => {
-            expect(LEVEL_CONFIGS.medium).toEqual({ cols: 3, rows: 3, length: 4 });
+            expect(LEVEL_CONFIGS[Level.Medium]).toEqual({ cols: 3, rows: 3, length: 4 });
         });
 
         it("hard has cols=4, rows=4, length=5", () => {
-            expect(LEVEL_CONFIGS.hard).toEqual({ cols: 4, rows: 4, length: 5 });
+            expect(LEVEL_CONFIGS[Level.Hard]).toEqual({ cols: 4, rows: 4, length: 5 });
         });
 
         it("code length never exceeds total dots", () => {
@@ -63,24 +65,43 @@ describe("GameConfig", () => {
 
     describe("ALL_LEVELS", () => {
         it("contains exactly easy, medium, hard", () => {
-            expect(ALL_LEVELS).toEqual(["easy", "medium", "hard"]);
+            expect(ALL_LEVELS).toEqual([Level.Easy, Level.Medium, Level.Hard]);
         });
     });
 
     describe("ALL_PLAYER_COUNTS", () => {
         it("contains 1 through 4", () => {
-            expect(ALL_PLAYER_COUNTS).toEqual([1, 2, 3, 4]);
+            expect(ALL_PLAYER_COUNTS).toEqual([
+                PlayerCount.One,
+                PlayerCount.Two,
+                PlayerCount.Three,
+                PlayerCount.Four,
+            ]);
+        });
+    });
+
+    describe("ALL_GAME_PHASES", () => {
+        it("contains all four phases", () => {
+            expect(ALL_GAME_PHASES).toEqual([
+                GamePhase.Idle,
+                GamePhase.Playing,
+                GamePhase.Revealing,
+                GamePhase.GameOver,
+            ]);
+        });
+
+        it("phases are distinct", () => {
+            expect(new Set(ALL_GAME_PHASES).size).toBe(ALL_GAME_PHASES.length);
         });
     });
 
     describe("defaults", () => {
         it("default level is medium", () => {
-            expect(DEFAULT_LEVEL).toBe<Level>("medium");
+            expect(DEFAULT_LEVEL).toBe(Level.Medium);
         });
 
         it("default player count is 1", () => {
-            expect(DEFAULT_PLAYER_COUNT).toBe<PlayerCount>(1);
+            expect(DEFAULT_PLAYER_COUNT).toBe(PlayerCount.One);
         });
     });
 });
-

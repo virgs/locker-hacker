@@ -15,9 +15,9 @@ import {
 } from "./Navbar.styled.tsx";
 import { GITHUB_URL, APP_TITLE } from "./Navbar.constants.ts";
 import {
-    type Level,
-    type PlayerCount,
-    type GamePhase,
+    Level,
+    PlayerCount,
+    GamePhase,
     LEVEL_LABELS,
     PLAYER_LABELS,
     ALL_LEVELS,
@@ -45,7 +45,32 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
     onReveal,
 }): React.ReactElement => {
     const [helpOpen, setHelpOpen] = React.useState(false);
-    const isPlaying = phase === "playing";
+    const configDisabled = phase !== GamePhase.Idle;
+
+    const centerButton = (): React.ReactElement => {
+        if (phase === GamePhase.Playing || phase === GamePhase.Revealing) {
+            return (
+                <Button variant="outline-danger" size="sm" onClick={onReveal} aria-label="Give up and reveal code">
+                    <Eye size={16} className="me-1" />
+                    Give Up
+                </Button>
+            );
+        }
+        if (phase === GamePhase.GameOver) {
+            return (
+                <Button variant="outline-primary" size="sm" onClick={onPlay} aria-label="Start new game">
+                    <Play size={16} className="me-1" />
+                    New Game
+                </Button>
+            );
+        }
+        return (
+            <Button variant="outline-primary" size="sm" onClick={onPlay} aria-label="Start game">
+                <Play size={16} className="me-1" />
+                Play
+            </Button>
+        );
+    };
 
     return (
         <>
@@ -57,7 +82,7 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
                         </AppIconLink>
 
                         <Dropdown>
-                            <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={isPlaying}>
+                            <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
                                 <Users size={14} className="me-1" />
                                 {PLAYER_LABELS[playerCount]}
                             </Dropdown.Toggle>
@@ -75,7 +100,7 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
                         </Dropdown>
 
                         <Dropdown>
-                            <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={isPlaying}>
+                            <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
                                 <BarChart2 size={14} className="me-1" />
                                 {LEVEL_LABELS[level]}
                             </Dropdown.Toggle>
@@ -94,17 +119,7 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
                     </NavbarLeft>
 
                     <NavbarCenter>
-                        {isPlaying ? (
-                            <Button variant="outline-danger" size="sm" onClick={onReveal} aria-label="Reveal code">
-                                <Eye size={16} className="me-1" />
-                                Reveal
-                            </Button>
-                        ) : (
-                            <Button variant="outline-primary" size="sm" onClick={onPlay} aria-label="Start game">
-                                <Play size={16} className="me-1" />
-                                Play
-                            </Button>
-                        )}
+                        {centerButton()}
                     </NavbarCenter>
 
                     <NavbarRight>

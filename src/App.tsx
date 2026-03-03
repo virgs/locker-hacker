@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, type ReactElement } from 'react'
+import { useState, useCallback, type ReactElement } from 'react'
 import './App.scss'
 import PatternLock from "./components/PatternLock.tsx";
 import PatternHistory from "./components/PatternHistory.tsx";
@@ -8,49 +8,49 @@ import { AppLayout, ContentArea, MainArea, PatternLockSizer, Sidebar } from "./A
 import { CodeGenerator } from "./game/CodeGenerator.ts";
 import { GuessValidator } from "./game/GuessValidator.ts";
 import {
-    type Level,
-    type PlayerCount,
-    type GamePhase,
+    Level,
+    PlayerCount,
+    GamePhase,
     LEVEL_CONFIGS,
     DEFAULT_LEVEL,
     DEFAULT_PLAYER_COUNT,
 } from "./game/GameConfig.ts";
-import { REVEAL_DELAY_MS } from "./components/Navbar.constants.ts";
 
 export const App = (): ReactElement => {
     const [level, setLevel]             = useState<Level>(DEFAULT_LEVEL);
     const [playerCount, setPlayerCount] = useState<PlayerCount>(DEFAULT_PLAYER_COUNT);
-    const [phase, setPhase]             = useState<GamePhase>("idle");
+    const [phase, setPhase]             = useState<GamePhase>(GamePhase.Idle);
     const [code, setCode]               = useState<number[]>([]);
     const [path, setPath]               = useState<number[]>([]);
     const [pathHistory, setPathHistory]  = useState<number[][]>([]);
-    const [revealing, setRevealing]      = useState(false);
     const [gameKey, setGameKey]          = useState(0);
-    const revealTimer                    = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const config = LEVEL_CONFIGS[level];
 
     const startGame = useCallback((): void => {
-        if (revealTimer.current) clearTimeout(revealTimer.current);
         const newCode = new CodeGenerator(config).generate();
         setCode(newCode);
         setPath([]);
         setPathHistory([]);
-        setPhase("playing");
-        setRevealing(false);
+        setPhase(GamePhase.Playing);
         setGameKey(prev => prev + 1);
     }, [config]);
 
     const revealCode = useCallback((): void => {
-        setRevealing(true);
-        revealTimer.current = setTimeout(() => {
-            setRevealing(false);
-            setPhase("idle");
-            setPath([]);
-            setPathHistory([]);
-            setCode([]);
-            setGameKey(prev => prev + 1);
-        }, REVEAL_DELAY_MS);
+        setPhase(GamePhase.Revealing);
+    }, []);
+
+    const dismissReveal = useCallback((): void => {
+        setPhase(GamePhase.GameOver);
+        setGameKey(prev => prev + 1);
+    }, []);
+
+    const finishGame = useCallback((): void => {
+        setCode([]);
+        setPath([]);
+        setPathHistory([]);
+        setPhase(GamePhase.Idle);
+        setGameKey(prev => prev + 1);
     }, []);
 
     const onFinish = useCallback((): void => {
@@ -64,7 +64,7 @@ export const App = (): ReactElement => {
         setPath([]);
     }, [path, config.length, code]);
 
-    const isPlaying = phase === "playing" && !revealing;
+    const isPlaying = phase === GamePhase.Playing;
 
     return (
         <AppLayout>
@@ -109,7 +109,9 @@ export const App = (): ReactElement => {
                 code={code}
                 cols={config.cols}
                 rows={config.rows}
-                show={revealing}
+                show={phase === GamePhase.Revealing}
+                onDismiss={dismissReveal}
+                onFinish={finishGame}
             />
         </AppLayout>
     );

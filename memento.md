@@ -501,6 +501,82 @@ ResizeObserver fires → onResize() → setContainerWidth/Height
 
 ---
 
+### Enum-Based State (GamePhase, Level, PlayerCount)
+
+**Decision:** Replaced raw string/number literal union types with TypeScript `enum` for all game-state discriminators.
+
+| Old type | New enum | Values |
+|---|---|---|
+| `type GamePhase = "idle" \| "playing" \| "revealing" \| "game-over"` | `enum GamePhase` | `Idle`, `Playing`, `Revealing`, `GameOver` |
+| `type Level = "easy" \| "medium" \| "hard"` | `enum Level` | `Easy`, `Medium`, `Hard` |
+| `type PlayerCount = 1 \| 2 \| 3 \| 4` | `enum PlayerCount` | `One=1`, `Two=2`, `Three=3`, `Four=4` |
+
+String enums (`GamePhase`, `Level`) preserve their string values at runtime so existing `Record<Level, ...>` lookups, `toEqual(["easy", ...])` comparisons, and styled-component switch logic all continue to work unchanged.
+
+**All call sites updated:** `App.tsx`, `Navbar.tsx`, and all tests now use `GamePhase.Playing`, `Level.Medium`, `PlayerCount.One`, etc. instead of raw literals.
+
+**`ALL_GAME_PHASES`, `ALL_LEVELS`, `ALL_PLAYER_COUNTS`** updated to reference enum members.
+
+---
+
+### "Give Up" Button (was "Reveal")
+
+**Decision:** Renamed the in-game action button from "Reveal" to "Give Up".
+
+**Rationale:** "Give Up" clearly communicates that pressing the button ends the current game and surrenders, which is the actual consequence. "Reveal" only described the effect (seeing the code) without conveying the finality.
+
+---
+
+### `dismissReveal` Increments `gameKey`
+
+**Problem:** After clicking Dismiss, the main PatternLock could end up in a stale `usePatternLock` state (zero container dimensions) because the `ResizeObserver` fires during the overlay-close transition and the mount-only dimension effects had not re-run. This caused the PatternLock to render with an invisible/empty grid.
+
+**Fix:** `dismissReveal()` now also increments `gameKey`, forcing the main PatternLock to remount with fresh hook state. This mirrors the existing pattern documented for `startGame()`.
+
+---
+
+### `finishGame` — Return to Idle From Overlay
+
+**Decision:** Added a separate `finishGame()` callback (called by the overlay "Finish" button) that resets all state and returns to `GamePhase.Idle`. This is distinct from `startGame()` which goes directly to `GamePhase.Playing`.
+
+| Action | Phase after | Code/History | gameKey |
+|---|---|---|---|
+| Dismiss | `GameOver` | preserved | +1 |
+| Finish (overlay) | `Idle` | cleared | +1 |
+| New Game (navbar) | `Playing` | cleared | +1 |
+
+**Rationale:** "Finish" ends the game session and lets the user reconfigure (choose level/players) before their next game. "New Game" from the navbar is a quick shortcut to jump straight into a fresh game.
+
+**Overlay button rename:** "New Game" → "Finish" (better conveys that the session is over).
+
+---
+
+### Dismiss vs New Game on Code Reveal Overlay
+
+**Decision:** Replaced the 3-second auto-dismiss timer with two explicit buttons — **Dismiss** and **New Game** — on `CodeRevealOverlay`.
+
+**Behaviour:**
+- **Dismiss** → `phase = "game-over"`: overlay closes, history and disabled PatternLock remain visible, dropdowns stay locked. Navbar center shows "New Game" button.
+- **New Game** (overlay or navbar) → `startGame()`: full reset (new code, clear history, `phase = "playing"`).
+
+**`GamePhase` expanded:** `"idle" | "playing" | "revealing" | "game-over"`. `"revealing"` replaces the old `revealing: boolean` flag; `"game-over"` is the new post-dismiss state.
+
+**`REVEAL_DELAY_MS` removed:** No longer used; deleted from `Navbar.constants.ts` and its test.
+
+**Navbar `configDisabled`:** Dropdowns are disabled whenever `phase !== "idle"` (was only during `"playing"`). Center button renders via `centerButton()` helper that returns Play / Reveal / New Game depending on the current phase.
+
+**Files changed:**
+- `src/game/GameConfig.ts` — `GamePhase` union + `ALL_GAME_PHASES` constant
+- `src/game/GameConfig.test.ts` — tests for `ALL_GAME_PHASES`
+- `src/components/Navbar.constants.ts` — removed `REVEAL_DELAY_MS`
+- `src/components/Navbar.test.ts` — removed `REVEAL_DELAY_MS` test
+- `src/components/Navbar.tsx` — `centerButton()` helper, `configDisabled` flag
+- `src/components/CodeRevealOverlay.tsx` — `onDismiss`/`onNewGame` props, two Bootstrap buttons
+- `src/components/CodeRevealOverlay.styled.tsx` — `RevealActions` flex container
+- `src/App.tsx` — removed `revealing` state + `revealTimer` ref; added `dismissReveal()`; `show={phase === "revealing"}`
+
+---
+
 ### `gameKey` — Forced PatternLock Remount on Game Reset
 
 **Problem:** After the code reveal overlay dismissed, the PatternLock disappeared entirely — no dots visible, just the navbar. The PatternLock component was the same React instance across game resets (never unmounted), but the `usePatternLock` hook's internal state (container dimensions, points array, ResizeObserver) could become stale or out of sync when the game state changed underneath it.

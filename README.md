@@ -14,7 +14,7 @@ The game ends when Bulls == code length.
 ## Features
 
 * **Level selection** — Easy (3×2, length 3), Medium (3×3, length 4), Hard (4×4, length 5)
-* **Play/Reveal flow** — Press Play to start; press Reveal to show the secret code
+* **Play/Give Up flow** — Press Play to start; press Give Up to surrender and reveal the secret code, then choose Dismiss (keeps history visible, lock disabled) or Finish (resets to idle so you can reconfigure and play again)
 * **Player count** — Select 1–4 players (future multiplayer support)
 * **Help modal** — In-app game rules with a "Play Now" button
 * **Responsive** — Works on desktop and mobile, navbar wraps to two rows on small screens
