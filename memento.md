@@ -773,3 +773,61 @@ A cleanup `useEffect` clears the timer on unmount. `flashingPoints` is included 
 - `src/components/PatternLock.css` — `complete` class: persistent transform instead of animation
 - `src/components/PatternLock.tsx` — `complete` limited to first `targetLength` dots
 
+---
+
+### Multiplayer Player Colors, Sidebar Title, and Turn Announcement
+
+**Decision:** Implemented full multiplayer visual identity: player-specific colors, sidebar title, turn announcement modal, footer player indicator, and colored victory text.
+
+**Player Colors (`src/game/playerColors.ts`):**
+- Maps player number (1–4) to Bootstrap CSS vars: `primary`, `success`, `warning`, `info`.
+- `getPlayerColor(player)` falls back to `white` for unknown players.
+- Colors apply only in multiplayer (`playerCount > PlayerCount.One`).
+
+**`pathColor` prop (PatternLock, Connectors, Point):**
+- New optional `pathColor?: string` prop on `PatternLock`, forwarded to `Connectors` and `Point`.
+- `PatternLock.tsx` passes `disabled ? undefined : pathColor` to both children, ensuring disabled history locks are never colored.
+- `Connectors.tsx` applies `background: pathColor` inline on connector divs and `borderLeftColor: pathColor` on arrowheads.
+- `Point.tsx` applies `background: pathColor` inline only on selected points (via `pathColor && selected`).
+- `App.tsx` computes `pathColor` from current player color when multiplayer, else `undefined`.
+
+**History entry player indicator (`PatternHistory`, `PatternHistory.styled.tsx`):**
+- `HistoryEntry` gains a `$playerColor?: string` transient prop → 3px colored left border.
+- `GameContext` now tracks `playerHistory: number[]` (parallel to `pathHistory`), recording which player made each guess.
+- `PatternHistory` reads `playerHistory` and `playerCount` from context; passes player color only in multiplayer. The PatternLock preview colors inside entries remain unchanged.
+
+**Sidebar title:**
+- `HistoryTitle` styled-component added to `PatternHistory.styled.tsx`.
+- `PatternHistory.tsx` renders the title with a `List` icon from `react-feather`.
+
+**Footer current player (`Footer.tsx`, `Footer.styled.tsx`):**
+- `PlayerLabel` styled-component: absolutely centered via `position: absolute; left: 50%; transform: translateX(-50%)`.
+- `FooterContainer` gains `position: relative` as containing block.
+- Shows `User` icon + "Player N" in player color only when multiplayer.
+
+**Victory text coloring (`CodeRevealOverlay.tsx`):**
+- `renderTitle()` helper: in multiplayer wins, wraps "Player N" in a `<span>` with inline player color; leaves " wins!" white. Single-player and give-up cases unchanged.
+
+**Turn Announcement modal (`TurnAnnouncement.tsx`, `.styled.tsx`, `.utils.ts`):**
+- Shows "Player N's Turn" when `showTurnModal` is true and `playerCount > PlayerCount.One`.
+- Auto-dismisses after 2 seconds via `setTimeout` in a `useEffect`. Dismiss button (X) and backdrop click also dismiss.
+- `showTurnModal` set to `true` in `GameContext`: after each non-winning guess (turn switches), on `onPlayerCountChange(> 1)`, on `onLevelChange` (if multiplayer), on `onFinishGame` (if multiplayer).
+- `onDismissTurnModal` sets it to `false`. Added to `GameContextValue`.
+- `TurnBackdrop` uses `z-index: 2000` (above reveal overlay at 1000).
+
+**Files created:**
+- `src/game/playerColors.ts` + `playerColors.test.ts`
+- `src/components/TurnAnnouncement.tsx` + `TurnAnnouncement.styled.tsx` + `TurnAnnouncement.utils.ts` + `TurnAnnouncement.test.ts`
+
+**Files changed:**
+- `src/components/PatternLock.tsx` — `pathColor` prop
+- `src/components/Connectors.tsx` — `pathColor` prop + inline styles
+- `src/components/Point.tsx` — `pathColor` prop + conditional inline background
+- `src/context/GameContext.tsx` — `playerHistory`, `showTurnModal`, `onDismissTurnModal`
+- `src/components/PatternHistory.tsx` — sidebar title + player color on entries
+- `src/components/PatternHistory.styled.tsx` — `HistoryTitle`, `HistoryEntry` with `$playerColor`
+- `src/components/Footer.tsx` — current player display
+- `src/components/Footer.styled.tsx` — `PlayerLabel` + `position: relative` on container
+- `src/components/CodeRevealOverlay.tsx` — colored winner text via `renderTitle()`
+- `src/App.tsx` — `pathColor` computed + `TurnAnnouncement` rendered
+

@@ -3,6 +3,7 @@ import { Award, Clock, MousePointer } from "react-feather";
 import PatternLock from "./PatternLock.tsx";
 import { RevealBackdrop, RevealCard, RevealTitle, RevealStats, RevealStat } from "./CodeRevealOverlay.styled.tsx";
 import { PlayerCount } from "../game/GameConfig.ts";
+import { getPlayerColor } from "../game/playerColors.ts";
 import { useGameContext } from "../context/GameContext.tsx";
 import { formatTime } from "./Footer.utils.ts";
 
@@ -11,17 +12,28 @@ const CodeRevealOverlay: React.FunctionComponent = (): React.ReactElement | null
 
     if (!showRevealModal) return null;
 
-    const isWin = winner !== null;
-    const title = isWin
-        ? (playerCount === PlayerCount.One ? "You win!" : `Player ${winner} wins!`)
-        : "Secret Code";
+    const isWin        = winner !== null;
+    const isMultiWin   = isWin && playerCount !== PlayerCount.One;
+    const singleTitle  = isWin ? "You win!" : "Secret Code";
+
+    const renderTitle = (): React.ReactNode => {
+        if (isMultiWin) {
+            return (
+                <>
+                    <span style={{ color: getPlayerColor(winner!) }}>Player {winner}</span>
+                    {' wins!'}
+                </>
+            );
+        }
+        return <>{singleTitle}</>;
+    };
 
     return (
         <RevealBackdrop onClick={onToggleRevealModal}>
             <RevealCard onClick={(e) => e.stopPropagation()}>
                 <RevealTitle>
                     {isWin && <Award size={22} className="me-2" />}
-                    {title}
+                    {renderTitle()}
                 </RevealTitle>
                 {isWin && (
                     <RevealStats>

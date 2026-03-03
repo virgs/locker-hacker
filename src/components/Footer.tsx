@@ -1,15 +1,24 @@
 import * as React from "react";
-import { Hash, BarChart2, Clock } from "react-feather";
-import { FooterContainer, FooterStat } from "./Footer.styled.tsx";
-import { LEVEL_LABELS } from "../game/GameConfig.ts";
+import { Hash, BarChart2, Clock, User } from "react-feather";
+import { FooterContainer, FooterStat, PlayerLabel } from "./Footer.styled.tsx";
+import { PlayerCount, LEVEL_LABELS } from "../game/GameConfig.ts";
+import { getPlayerColor } from "../game/playerColors.ts";
 import { useGameContext } from "../context/GameContext.tsx";
 import { formatTime } from "./Footer.utils.ts";
 
 const Footer: React.FunctionComponent = (): React.ReactElement => {
-    const { gridConfig, level, elapsedSeconds } = useGameContext();
+    const { gridConfig, level, elapsedSeconds, playerCount, currentPlayer } = useGameContext();
+    const isMultiplayer = playerCount !== PlayerCount.One;
+    const playerColor   = getPlayerColor(currentPlayer);
 
     return (
         <FooterContainer className="text-dark">
+            {isMultiplayer && (
+                <PlayerLabel $color={playerColor} aria-label={`Current player: Player ${currentPlayer}`}>
+                    <User size={12} />
+                    Player {currentPlayer}
+                </PlayerLabel>
+            )}
             <FooterStat aria-label="Code length">
                 <Hash size={13} />
                 {gridConfig.length}

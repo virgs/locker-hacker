@@ -181,4 +181,4 @@ Build incrementally and safely.
 # TODO list
 
 
-1. [ ] Add a title to the side bar. Horizontally centralized. Something like "guess history" or something similar keeping the project tone. Add an icon to it. Different players should have different colors in the pattern lock current path and in each of the dropdown items (the pattern locks in the history should still have the same colors) (use bootstrap colors: primary, success, warning, info). Again, only in multiplayer mode the color has to be changed. Also identify via text and color who the current player is in the horizontal center of the footer. Also identify with the player color the victory text in the victory modal. Also on multiplayer games (aka games with more than one player), there should be a 2 seconds long closeable modal announcing whose turn it is. After a player makes a move the turn should switch to the next player. The announcement should say something like "Player 2 turn" or something similar with the same meaning and the "Player X" should have the color of the player whose turn it is. Ask questions if something is not clear.
+1. [ ] The modal that announcees the player turn should

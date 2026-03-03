@@ -23,6 +23,7 @@ interface ConnectorsProps {
     dynamicLineStyle        : boolean;
     minConnectorThickness   : number;
     minConnectorOpacity     : number;
+    pathColor              ?: string;
 }
 
 const Connectors: React.FunctionComponent<ConnectorsProps> = ({
@@ -38,6 +39,7 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
     dynamicLineStyle,
     minConnectorThickness,
     minConnectorOpacity,
+    pathColor,
 }) => {
     const [mouse, setMouse] = React.useState<Point | null>(null);
 
@@ -101,6 +103,7 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
                             height       : thickness,
                             borderRadius : connectorRoundedCorners ? Math.round(thickness / 2) : 0,
                             opacity,
+                            ...(pathColor ? { background: pathColor } : {}),
                         }}
                     >
                         {i === arrowHeadIndex && (
@@ -110,6 +113,7 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
                                     borderTopWidth    : `${arrowHeadSize}px`,
                                     borderBottomWidth : `${arrowHeadSize}px`,
                                     borderLeftWidth   : `${Math.round(arrowHeadSize * 1.5)}px`,
+                                    ...(pathColor ? { borderLeftColor: pathColor } : {}),
                                 }}
                             />
                         )}

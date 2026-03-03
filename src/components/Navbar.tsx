@@ -78,6 +78,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                 <NavbarRow>
                     <NavbarLeft>
                         <AppIconLink
+                            className="me-2 ms-1"
                             aria-label={APP_TITLE}
                             onMouseDown={handleIconDown}
                             onMouseUp={handleIconUp}

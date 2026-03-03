@@ -28,6 +28,7 @@ interface PatternLockProps {
     noPop?: boolean;
     invisible?: boolean;
     targetLength?: number;
+    pathColor?: string;
     onChange?: (path: number[]) => void;
     onFinish?: () => void;
 }
@@ -53,6 +54,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     className = "",
     style = {},
     targetLength,
+    pathColor,
     onChange,
     onFinish,
     path,
@@ -79,6 +81,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                     complete={completionFlash && path.indexOf(i) > -1 && path.indexOf(i) < (targetLength ?? Infinity)}
                     pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
                     selected={path.indexOf(i) > -1}
+                    pathColor={disabled ? undefined : pathColor}
                 />
             ))}
             {!invisible && points.length > 0 && (
@@ -95,6 +98,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                     dynamicLineStyle={dynamicLineStyle}
                     minConnectorThickness={minConnectorThickness}
                     minConnectorOpacity={minConnectorOpacity}
+                    pathColor={disabled ? undefined : pathColor}
                 />
             )}
         </div>

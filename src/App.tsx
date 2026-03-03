@@ -5,12 +5,15 @@ import PatternHistory from "./components/PatternHistory.tsx";
 import Navbar from "./components/Navbar.tsx";
 import Footer from "./components/Footer.tsx";
 import CodeRevealOverlay from "./components/CodeRevealOverlay.tsx";
+import TurnAnnouncement from "./components/TurnAnnouncement.tsx";
 import { AppLayout, ContentArea, MainArea, PatternLockSizer, Sidebar } from "./App.styled.tsx";
-import { GamePhase } from "./game/GameConfig.ts";
+import { GamePhase, PlayerCount } from "./game/GameConfig.ts";
+import { getPlayerColor } from "./game/playerColors.ts";
 import { useGameContext } from "./context/GameContext.tsx";
 
 export const App = (): ReactElement => {
-    const { phase, path, gameKey, gridConfig, onPathChange, onGuessFinish } = useGameContext();
+    const { phase, path, gameKey, gridConfig, playerCount, currentPlayer, onPathChange, onGuessFinish } = useGameContext();
+    const pathColor = playerCount !== PlayerCount.One ? getPlayerColor(currentPlayer) : undefined;
 
     return (
         <AppLayout>
@@ -29,6 +32,7 @@ export const App = (): ReactElement => {
                             invisible={false}
                             disabled={phase !== GamePhase.Playing}
                             targetLength={gridConfig.length}
+                            pathColor={pathColor}
                             onChange={onPathChange}
                             onFinish={onGuessFinish}
                         />
@@ -40,6 +44,7 @@ export const App = (): ReactElement => {
             </ContentArea>
             <Footer />
             <CodeRevealOverlay />
+            <TurnAnnouncement />
         </AppLayout>
     );
 };

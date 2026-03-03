@@ -4,6 +4,7 @@ const MOBILE = "@media (max-width: 600px)";
 
 export const FooterContainer = styled.footer`
     flex-shrink: 0;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -18,6 +19,20 @@ export const FooterContainer = styled.footer`
         min-height: 32px;
         gap: 12px;
     }
+`;
+
+export const PlayerLabel = styled.span<{ $color: string }>`
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: ${({ $color }) => $color};
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    pointer-events: none;
 `;
 
 export const FooterStat = styled.span`
