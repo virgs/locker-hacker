@@ -81,12 +81,10 @@ describe("GameConfig", () => {
     });
 
     describe("ALL_GAME_PHASES", () => {
-        it("contains all four phases", () => {
+        it("contains playing and revealing", () => {
             expect(ALL_GAME_PHASES).toEqual([
-                GamePhase.Idle,
                 GamePhase.Playing,
                 GamePhase.Revealing,
-                GamePhase.GameOver,
             ]);
         });
 

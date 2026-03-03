@@ -1,5 +1,5 @@
 import * as React from "react";
-import { GitHub, HelpCircle, Play, Eye, Users, BarChart2 } from "react-feather";
+import { GitHub, HelpCircle, Eye, EyeOff, Users, BarChart2, XOctagon } from "react-feather";
 import Dropdown from "react-bootstrap/Dropdown";
 import Button from "react-bootstrap/Button";
 import {
@@ -12,6 +12,7 @@ import {
     AppIconImage,
     HelpButton,
     GitHubLink,
+    ButtonLabel,
 } from "./Navbar.styled.tsx";
 import { GITHUB_URL, APP_TITLE } from "./Navbar.constants.ts";
 import {
@@ -24,52 +25,41 @@ import {
     ALL_PLAYER_COUNTS,
 } from "../game/GameConfig.ts";
 import HelpModal from "./HelpModal.tsx";
+import { useGameContext } from "../context/GameContext.tsx";
 
-interface NavbarProps {
-    phase             : GamePhase;
-    level             : Level;
-    playerCount       : PlayerCount;
-    onLevelChange     : (level: Level) => void;
-    onPlayerCountChange: (count: PlayerCount) => void;
-    onPlay            : () => void;
-    onReveal          : () => void;
-}
-
-const Navbar: React.FunctionComponent<NavbarProps> = ({
-    phase,
-    level,
-    playerCount,
-    onLevelChange,
-    onPlayerCountChange,
-    onPlay,
-    onReveal,
-}): React.ReactElement => {
+const Navbar: React.FunctionComponent = (): React.ReactElement => {
     const [helpOpen, setHelpOpen] = React.useState(false);
-    const configDisabled = phase !== GamePhase.Idle;
+    const {
+        phase, level, playerCount, isRunning,
+        onLevelChange, onPlayerCountChange, onGiveUp, onToggleRevealModal, onFinishGame,
+    } = useGameContext();
 
-    const centerButton = (): React.ReactElement => {
-        if (phase === GamePhase.Playing || phase === GamePhase.Revealing) {
+    const configDisabled = isRunning || phase === GamePhase.Revealing;
+
+    const centerContent = (): React.ReactElement | null => {
+        if (phase === GamePhase.Revealing) {
             return (
-                <Button variant="outline-danger" size="sm" onClick={onReveal} aria-label="Give up and reveal code">
-                    <Eye size={16} className="me-1" />
-                    Give Up
+                <>
+                    <Button variant="outline-secondary" size="sm" onClick={onToggleRevealModal} aria-label="Toggle reveal">
+                        <EyeOff size={16} />
+                        <ButtonLabel className="ms-1">Reveal</ButtonLabel>
+                    </Button>
+                    <Button variant="outline-danger" size="sm" onClick={onFinishGame} aria-label="Finish game">
+                        <XOctagon size={16} />
+                        <ButtonLabel className="ms-1">Finish</ButtonLabel>
+                    </Button>
+                </>
+            );
+        }
+        if (isRunning) {
+            return (
+                <Button variant="outline-danger" size="sm" onClick={onGiveUp} aria-label="Give up and reveal code">
+                    <Eye size={16} />
+                    <ButtonLabel className="ms-1">Give Up</ButtonLabel>
                 </Button>
             );
         }
-        if (phase === GamePhase.GameOver) {
-            return (
-                <Button variant="outline-primary" size="sm" onClick={onPlay} aria-label="Start new game">
-                    <Play size={16} className="me-1" />
-                    New Game
-                </Button>
-            );
-        }
-        return (
-            <Button variant="outline-primary" size="sm" onClick={onPlay} aria-label="Start game">
-                <Play size={16} className="me-1" />
-                Play
-            </Button>
-        );
+        return null;
     };
 
     return (
@@ -83,11 +73,11 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
 
                         <Dropdown>
                             <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
-                                <Users size={14} className="me-1" />
-                                {PLAYER_LABELS[playerCount]}
+                                <Users size={14} />
+                                <ButtonLabel className="ms-1">{PLAYER_LABELS[playerCount]}</ButtonLabel>
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
-                                {ALL_PLAYER_COUNTS.map(c => (
+                                {ALL_PLAYER_COUNTS.map((c: PlayerCount) => (
                                     <Dropdown.Item
                                         key={c}
                                         active={c === playerCount}
@@ -101,11 +91,11 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
 
                         <Dropdown>
                             <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
-                                <BarChart2 size={14} className="me-1" />
-                                {LEVEL_LABELS[level]}
+                                <BarChart2 size={14} />
+                                <ButtonLabel className="ms-1">{LEVEL_LABELS[level]}</ButtonLabel>
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
-                                {ALL_LEVELS.map(l => (
+                                {ALL_LEVELS.map((l: Level) => (
                                     <Dropdown.Item
                                         key={l}
                                         active={l === level}
@@ -119,7 +109,7 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
                     </NavbarLeft>
 
                     <NavbarCenter>
-                        {centerButton()}
+                        {centerContent()}
                     </NavbarCenter>
 
                     <NavbarRight>
@@ -151,4 +141,3 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
 };
 
 export default Navbar;
-

@@ -21,6 +21,7 @@ export interface UsePatternLockResult {
     wrapperPosition: PointType;
     isMouseDown: boolean;
     initialMousePosition: PointType | null;
+    flashingPoints: Set<number>;
     onHold: (e: React.MouseEvent) => void;
     onTouch: (e: React.TouchEvent) => void;
 }
@@ -43,6 +44,8 @@ export const usePatternLock = ({
     const [wrapperPosition, setWrapperPosition] = React.useState<PointType>({ x: 0, y: 0 });
     const [isMouseDown, setIsMouseDown]         = React.useState<boolean>(false);
     const [initialMousePosition, setInitialMousePosition] = React.useState<PointType | null>(null);
+    const [flashingPoints, setFlashingPoints]   = React.useState<Set<number>>(new Set());
+    const flashTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const onResize = (): [number, number] => {
         const el = wrapperRef.current;
@@ -64,11 +67,15 @@ export const usePatternLock = ({
                     onChange?.([...path, index]);
                 } else {
                     const mid = getPointsInTheMiddle(path[path.length - 1], index, cols);
-                    if (allowOverlapping) {
-                        onChange?.([...path, ...mid, index]);
-                    } else {
-                        onChange?.([...path, ...mid.filter(p => path.indexOf(p) === -1), index]);
+                    const implicitDots = allowOverlapping
+                        ? mid
+                        : mid.filter(p => path.indexOf(p) === -1);
+                    if (implicitDots.length > 0) {
+                        if (flashTimerRef.current !== null) clearTimeout(flashTimerRef.current);
+                        setFlashingPoints(new Set(implicitDots));
+                        flashTimerRef.current = setTimeout(() => setFlashingPoints(new Set()), 350);
                     }
+                    onChange?.([...path, ...implicitDots, index]);
                 }
             }
         }
@@ -139,5 +146,11 @@ export const usePatternLock = ({
         };
     }, [disabled, path, onFinish]);
 
-    return { wrapperRef, points, wrapperPosition, isMouseDown, initialMousePosition, onHold, onTouch };
+    React.useEffect(() => {
+        return () => {
+            if (flashTimerRef.current !== null) clearTimeout(flashTimerRef.current);
+        };
+    }, []);
+
+    return { wrapperRef, points, wrapperPosition, isMouseDown, initialMousePosition, flashingPoints, onHold, onTouch };
 };

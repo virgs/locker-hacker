@@ -3,28 +3,22 @@ import PatternLock from "./PatternLock.tsx";
 import FeedbackIndicator from "./FeedbackIndicator.tsx";
 import { HistoryList, HistoryEntry, PatternLockWrapper, GuessNumber } from "./PatternHistory.styled.tsx";
 import { GuessValidator } from "../game/GuessValidator.ts";
+import { useGameContext } from "../context/GameContext.tsx";
 import useMediaQuery from "./useMediaQuery.ts";
 
 interface PatternHistoryProps {
-    pathHistory : number[][];
-    code        : number[];
-    cols        : number;
-    rows        : number;
-    entrySize  ?: number;
+    entrySize ?: number;
 }
 
 const PatternHistory: React.FunctionComponent<PatternHistoryProps> = ({
-    pathHistory,
-    code,
-    cols,
-    rows,
     entrySize = 120,
 }): React.ReactElement => {
+    const { pathHistory, code, gridConfig } = useGameContext();
     const isXS       = useMediaQuery("(max-width: 600px)");
-    const size       = isXS ? Math.round(entrySize * 0.65) : entrySize;
-    const validator  = new GuessValidator(code);
-    const dotSize    = Math.round(size / 10);
-    const listEndRef = React.useRef<HTMLDivElement>(null);
+    const size        = isXS ? Math.round(entrySize * 0.65) : entrySize;
+    const validator   = new GuessValidator(code);
+    const dotSize     = Math.round(size / 10);
+    const listEndRef  = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         listEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -38,13 +32,13 @@ const PatternHistory: React.FunctionComponent<PatternHistoryProps> = ({
                     <HistoryEntry key={`history-${index}`}>
                         <GuessNumber>#{index + 1}</GuessNumber>
                         <PatternLockWrapper>
-                        <PatternLock
-                            containerSize={size}
-                            pointSize={dotSize}
-                            arrowHeadSize={dotSize}
+                            <PatternLock
+                                containerSize={size}
+                                pointSize={dotSize}
+                                arrowHeadSize={dotSize}
                                 disabled={true}
-                                cols={cols}
-                                rows={rows}
+                                cols={gridConfig.cols}
+                                rows={gridConfig.rows}
                                 path={path}
                                 dynamicLineStyle={true}
                                 arrowHeads={true}

@@ -591,3 +591,94 @@ String enums (`GamePhase`, `Level`) preserve their string values at runtime so e
 
 **Files changed:**
 - `src/App.tsx` — added `gameKey` state, passed as `key` to `PatternLock`, incremented in `startGame` and `revealCode`.
+
+---
+
+### GameContext Refactor — Centralized Game State
+
+**Decision:** Moved all game state and logic from `App.tsx` into a new `src/context/GameContext.tsx` using React Context API. `App.tsx` is now a pure layout component.
+
+**`GamePhase` simplified:** Removed `Idle` and `GameOver` phases. Only two phases remain: `Playing` and `Revealing`. The previous phase states are replaced by derived values:
+- `isRunning`: `pathHistory.length > 0 || path.length > 0` — whether the user has made at least one move.
+- `configDisabled` (local to `Navbar`): `isRunning || phase === Revealing` — whether level/player dropdowns are locked.
+
+**Auto-start behaviour:** The game starts immediately when the user draws their first dot — no explicit Play button. Code is generated:
+- On initial app load (lazy `useState` initializer)
+- After "Finish Game" (full reset with new code)
+- When the level changes (new grid config → new code)
+
+**Navbar center button logic:**
+- `phase === Revealing`: shows **Reveal** (EyeOff icon, `outline-secondary`) + **Finish Game** (Feather icon, `outline-danger`) side by side
+- `phase === Playing && isRunning`: shows **Give Up** (Eye icon, `outline-danger`)
+- `phase === Playing && !isRunning`: nothing
+
+**`onDismissReveal`** (Reveal button / backdrop click on overlay): sets phase→Playing, increments `gameKey`. History is preserved; PatternLock remounts fresh.
+
+**`onFinishGame`** (Finish Game button): regenerates code, clears path/history, sets phase→Playing, increments `gameKey`.
+
+**`CodeRevealOverlay` simplified:** No action buttons. The overlay shows code only; clicking the backdrop calls `onDismissReveal`. Navbar owns all control buttons during Revealing phase.
+
+**`NavbarContainer`** gains `position: relative; z-index: 1100` so it renders above the overlay backdrop (`z-index: 1000`).
+
+**Files changed/added:**
+- `src/context/GameContext.tsx` — new: `GameContextValue`, `GameProvider`, `useGameContext`
+- `src/context/GameContext.test.ts` — new: basic tests for defaults and phases
+- `src/main.tsx` — wraps `<App>` with `<GameProvider>`
+- `src/App.tsx` — layout-only; reads from `useGameContext()`
+- `src/game/GameConfig.ts` — removed `Idle`/`GameOver` from `GamePhase`, updated `ALL_GAME_PHASES`
+- `src/game/GameConfig.test.ts` — updated `ALL_GAME_PHASES` test
+- `src/components/Navbar.tsx` — no props; consumes context; new center button logic
+- `src/components/Navbar.styled.tsx` — `NavbarContainer` z-index 1100; `NavbarCenter` gap 8px
+- `src/components/PatternHistory.tsx` — reads `pathHistory`/`code`/`gridConfig` from context
+- `src/components/CodeRevealOverlay.tsx` — reads from context; no action buttons; backdrop click
+- `src/components/CodeRevealOverlay.styled.tsx` — removed `RevealActions`
+
+---
+
+---
+
+### Implicit Dot Pop Animation
+
+**Problem:** When `allowJumping=false` and the user draws from dot A to dot C, intermediate dot B is silently inserted into the path by `checkCollision`. Only the final dot (C) received the `pop` animation (class `.active`), making the intermediate insertion invisible.
+
+**Fix:** Added `flashingPoints: Set<number>` state and `flashTimerRef` to `usePatternLock`. When `checkCollision` inserts implicit dots (`implicitDots`), they are added to `flashingPoints` for 350ms, then cleared. `PatternLock.tsx` propagates `flashingPoints` to the `pop` prop:
+```tsx
+pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
+```
+A cleanup `useEffect` clears the timer on unmount. `flashingPoints` is included in `UsePatternLockResult`.
+
+---
+
+### Reveal Modal Once Per Game + Persistent Reveal/Finish Buttons
+
+**Problem:** After clicking "Give Up" and dismissing the overlay, the user could click "Give Up" again to re-enter the Revealing phase and see the code again. The intent is that after giving up, the "Reveal"/"Finish" buttons stay in the navbar permanently.
+
+**Fix:** Separated modal visibility from phase:
+- `phase: Playing | Revealing` — `Revealing` means the user has given up (PatternLock disabled).
+- `showRevealModal: boolean` — controls overlay visibility independently.
+
+| Action | `phase` | `showRevealModal` |
+|---|---|---|
+| Give Up | → Revealing | → true |
+| "Reveal" button / backdrop click | unchanged | toggled |
+| "Finish Game" | → Playing | → false |
+
+`onDismissReveal` removed; replaced with `onToggleRevealModal` (toggled by Reveal button and overlay backdrop). `GameContextValue` updated accordingly.
+
+---
+
+### Icons-Only Navbar on Small Screens + Truly Centered Center Buttons
+
+**Icons-only on mobile (≤ 600 px):** Added `ButtonLabel` styled-component that hides (`display: none`) on mobile. All text labels in dropdown toggles and center action buttons are wrapped in `<ButtonLabel className="ms-1">`. Icons have no right margin (`me-1` removed from icon elements); margin comes from `ms-1` on the `ButtonLabel` so it disappears with the text on mobile.
+
+**Always-centered center buttons:** `NavbarCenter` changed from an in-flow flex item to `position: absolute; left: 50%; transform: translateX(-50%); z-index: 1`. `NavbarRow` gains `position: relative` as the containing block. This guarantees the center buttons are always at exactly 50% of the navbar width regardless of the widths of `NavbarLeft` and `NavbarRight`.
+
+**Files changed:**
+- `src/components/usePatternLock.ts` — `flashingPoints` state + `flashTimerRef` + cleanup
+- `src/components/PatternLock.tsx` — `flashingPoints.has(i)` in `pop` prop
+- `src/context/GameContext.tsx` — `showRevealModal` state, `onToggleRevealModal`, updated `onGiveUp`/`onFinishGame`
+- `src/components/CodeRevealOverlay.tsx` — uses `showRevealModal` / `onToggleRevealModal`
+- `src/components/Navbar.tsx` — `ButtonLabel` wrappers, `onToggleRevealModal`, icon-only on mobile
+- `src/components/Navbar.styled.tsx` — `ButtonLabel`, absolute `NavbarCenter`, `position: relative` on `NavbarRow`
+
+---

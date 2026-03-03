@@ -4,6 +4,8 @@ const MOBILE = "@media (max-width: 600px)";
 
 export const NavbarContainer = styled.nav`
     flex-shrink: 0;
+    position: relative;
+    z-index: 1100;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-sizing: border-box;
     padding: 0 16px;
@@ -14,6 +16,7 @@ export const NavbarContainer = styled.nav`
 `;
 
 export const NavbarRow = styled.div`
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -40,8 +43,13 @@ export const NavbarLeft = styled.div`
 `;
 
 export const NavbarCenter = styled.div`
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     align-items: center;
+    gap: 8px;
+    z-index: 1;
 `;
 
 export const NavbarRight = styled.div`
@@ -103,3 +111,8 @@ export const HelpButton = styled.button`
     }
 `;
 
+export const ButtonLabel = styled.span`
+    ${MOBILE} {
+        display: none;
+    }
+`;

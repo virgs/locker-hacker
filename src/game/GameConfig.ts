@@ -1,8 +1,6 @@
 export enum GamePhase {
-    Idle      = "idle",
     Playing   = "playing",
     Revealing = "revealing",
-    GameOver  = "game-over",
 }
 
 export enum Level {
@@ -53,10 +51,8 @@ export const ALL_PLAYER_COUNTS: PlayerCount[] = [
 ];
 
 export const ALL_GAME_PHASES: GamePhase[] = [
-    GamePhase.Idle,
     GamePhase.Playing,
     GamePhase.Revealing,
-    GamePhase.GameOver,
 ];
 
 export const DEFAULT_LEVEL: Level              = Level.Medium;
