@@ -179,4 +179,4 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [x] I think that for intermediate screens, the PatternLock dots are too close to the edges of the screen. We should add some padding to the container to give it more breathing room. Also, between the PatternHistory dots and feed back dots, there should be more space to visually separate them. Let's add some margin between those sections to improve readability and aesthetics.
+1. [x] When the user rotates the screen, the pattern lock redimensions the dots, which is amazing and exactly what I'm looking for. However, the lines connecting them don't adjust their positions accordingly, which causes them to be misaligned with the dots. The lines should dynamically update their positions based on the new dimensions of the dots after a screen rotation to maintain proper alignment. This will ensure a consistent and visually appealing user experience regardless of screen orientation.

@@ -47,6 +47,8 @@ export const usePatternLock = ({
     const onResize = (): [number, number] => {
         const { top, left } = wrapperRef.current.getBoundingClientRect();
         setWrapperPosition({ x: left + window.scrollX, y: top + window.scrollY });
+        setContainerWidth(wrapperRef.current.offsetWidth);
+        setContainerHeight(wrapperRef.current.offsetHeight);
         return [top, left];
     };
 
@@ -107,8 +109,10 @@ export const usePatternLock = ({
     }, []);
 
     React.useEffect(() => {
-        window.addEventListener("resize", onResize);
-        return () => window.removeEventListener("resize", onResize);
+        const ref = wrapperRef.current;
+        const observer = new ResizeObserver(() => onResize());
+        observer.observe(ref);
+        return () => observer.disconnect();
     }, []);
 
     React.useEffect(() => {

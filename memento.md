@@ -376,3 +376,22 @@ AppLayout (flex-col, 100%)
 - `src/App.styled.tsx` — `MainArea` padding, `PatternLockSizer` max constraints
 - `src/components/PatternHistory.styled.tsx` — increased `gap` on `HistoryEntry`
 
+---
+
+### Connector Lines Reposition on Screen Rotation / Resize
+
+**Problem:** When the screen was rotated or the container resized, the `Point` components repositioned correctly (they use CSS percentage-based layout), but the connector lines stayed at their old pixel positions. This caused visible misalignment between dots and lines.
+
+**Root cause:** `onResize` only updated `wrapperPosition` (the wrapper's viewport offset). `containerWidth` and `containerHeight` — used by `getPoints()` to compute the absolute pixel coordinates for connectors — were only set once on mount via a `useEffect([], [])`.
+
+**Fix (two changes in `usePatternLock.ts`):**
+1. `onResize` now also calls `setContainerWidth(wrapperRef.current.offsetWidth)` and `setContainerHeight(wrapperRef.current.offsetHeight)`. This triggers the existing effect that recomputes `points` via `getPoints()`, which in turn causes `Connectors` to re-render with correct positions.
+2. Replaced the `window.addEventListener("resize", ...)` with a `ResizeObserver` on the wrapper element. `ResizeObserver` is more reliable for detecting element-level size changes — it fires on container resizes that `window.resize` misses (e.g., CSS layout shifts, orientation changes on some mobile browsers).
+
+**Data flow after fix:**
+```
+ResizeObserver fires → onResize() → setContainerWidth/Height
+  → useEffect([containerWidth, containerHeight, ...]) → getPoints() → setPoints
+    → Connectors receives new points → lines re-render at correct positions
+```
+
