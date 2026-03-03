@@ -2,7 +2,7 @@ import { useRef, useEffect } from "react";
 import { Point } from "./point.ts";
 
 export const usePrevious = <T>(val: T): T | undefined => {
-    const ref = useRef<T>();
+    const ref = useRef<T | undefined>(undefined);
     useEffect(() => {
         ref.current = val
     }, [val]);

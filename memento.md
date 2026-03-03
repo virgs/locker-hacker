@@ -184,13 +184,136 @@ Both functions are pure, fully tested (21 tests), and use the same monotonically
 
 ---
 
+### `FeedbackIndicator` Component
+
+**Decision:** Added `src/components/FeedbackIndicator.tsx` to display a vertical column of `codeLength` coloured dots beside each history entry.
+
+**Colour convention:**
+- Green `#22c55e` — bull (correct dot, correct position)
+- Yellow `#eab308` — cow (correct dot, wrong position)
+- Grey `#6b7280` — miss (dot not in code)
+
+Dots are sorted: bulls first, cows next, misses last — matching standard Mastermind peg conventions. The colour mapping lives in `COLORS` constant so it can be updated without touching the render logic.
+
+**Files:**
+- `src/components/FeedbackIndicator.tsx`
+- `src/components/FeedbackIndicator.styled.tsx` (`FeedbackDot`, `FeedbackColumn` styled-components)
+
+---
+
+### History Entry Numbering and Dividers
+
+**Decision:** Each history entry shows a small `#N` badge (absolute-positioned, top-left of the PatternLock box) and a subtle horizontal divider between entries (`:not(:first-child)` border-top).
+
+**Numbering:** Since `pathHistory.unshift()` keeps newest first, guess index `i` maps to guess number `pathHistory.length - i`. So the most recent guess always shows the highest number.
+
+**Layout refinements:**
+- `PatternLockWrapper` (`position: relative; display: inline-block`) wraps each history PatternLock so `GuessNumber` can be absolute-positioned at `top: 2px; left: 2px` with `z-index: 3` (above the lock's dots at z-index 2).
+- `HistoryEntry` uses `justify-content: center` so the lock+feedback pair is horizontally centred.
+- `HistoryList` has `width: 100%` and `Sidebar` has `align-items: center` so the list fills the sidebar width and everything is centred.
+- `MainArea` gains `height: 100%; min-height: 0` to guarantee vertical centring of the PatternLock in all browsers.
+
+---
+
+### True Viewport Centering via `padding-left` on `MainArea`
+
+**Problem:** `MainArea` fills `viewport_width − 220px` (the sidebar). `justify-content: center` centres the PatternLock within that reduced area, so visually it appears left-shifted by `sidebar_width / 2 = 110px` relative to the true viewport centre.
+
+**Fix:** `padding-left: 220px; box-sizing: border-box` on `MainArea`. The content box shrinks by 220px from the left, so `justify-content: center` now places the PatternLock at `(viewport_width − 220px) / 2 + 220px / 2 = viewport_width / 2` — the exact screen centre.
+
+---
+
+### `GuessNumber` Position
+
+**Decision:** `GuessNumber` moved from inside `PatternLockWrapper` to a direct child of `HistoryEntry`, positioned at `left: 4px; top: 50%; transform: translateY(-50%)`. This anchors it to the left edge of the entry, vertically centred, well away from the first pattern dot.
+
+**Previous issue:** `left: 2px` inside `PatternLockWrapper` overlapped the first grid dot, causing visual confusion.
+
+---
+
+### Two-Column App Layout
+
+**Decision:** The app uses a full-viewport flex-row layout: `MainArea` (flex:1, centered) holds the active PatternLock; `Sidebar` (fixed 220px wide, `overflow-y: auto`) holds the PatternHistory.
+
+**Files:**
+- `src/App.styled.tsx` — `AppLayout`, `MainArea`, `Sidebar` styled-components
+- `src/App.scss` — overrides `body { display: block }` and sets `html/body/#root` to `height: 100%` (needed because `index.css` applies `display: flex; place-items: center` to `body`, which fights the two-column layout)
+
+**Scroll behaviour:**
+- `AppLayout` and `MainArea` both have `overflow: hidden` — the PatternLock never scrolls out of view.
+- `Sidebar` has `overflow-y: auto` and `height: 100%` — it scrolls independently when the history list grows.
+
+**`entrySize` prop on `PatternHistory`:** Controls `containerSize` of each history PatternLock (default 120). `pointSize` and `arrowHeadSize` are derived as `Math.round(entrySize / 10)` to keep the visuals proportional at any size.
+
+---
+
 ### `PatternHistory` Component
 
 **Decision:** Extracted the history-entries rendering from `App.tsx` into `src/components/PatternHistory.tsx`.
 
 **Rationale:** The `pathHistory.map(...)` block in `App.tsx` was inline configuration + rendering mixed together. `PatternHistory` owns the display of past guesses (disabled, `dynamicLineStyle`, arrow heads) and keeps `App.tsx` focused on game-state management only.
 
-**Props:** `{ pathHistory: number[][], cols: number, rows: number }`
+**Props:** `{ pathHistory: number[][], code: number[], cols: number, rows: number }`
+
+`GuessValidator` is instantiated once per render (not per entry) and reused across the `.map`. `code` is stable (from `useState` with no setter) so this is effectively a single allocation.
+
+**Layout styled-components:** `HistoryList` (flex column, gap 12px), `HistoryEntry` (flex row, gap 16px) live in `PatternHistory.styled.tsx`.
+
+---
+
+### `PatternHistory` Scroll and Numbering
+
+**Decision:** Oldest guesses appear at the top (index 0), newest at the bottom. A sentinel `<div ref={listEndRef} />` is appended after the mapped list. `useEffect` calls `listEndRef.current?.scrollIntoView({ behavior: 'smooth' })` whenever `pathHistory.length` changes, auto-scrolling the sidebar to show the latest guess.
+
+**Numbering:** `GuessNumber` displays `#{index + 1}` since `App.tsx` uses `push()` (oldest-first), making index 0 = guess #1.
+
+---
+
+### Navbar Component
+
+**Decision:** Added `src/components/Navbar.tsx` (rendered at the top of `AppLayout`) with a title "Pattern Lock History" and a GitHub icon (`react-feather`'s `<Github>`) linking to https://github.com/virgs/locker-hacker.
+
+**Constants file:** `src/components/Navbar.constants.ts` exports `GITHUB_URL` and `APP_TITLE`. These are imported by `Navbar.tsx` (used at runtime) and by `Navbar.test.ts` (unit-tested without loading React/JSX).
+
+**Styling (`Navbar.styled.tsx`):** `NavbarContainer` (flex row, 52 px height, dark background), `NavbarTitle` (h1 reset to `1.1rem` to avoid the browser h1 default of `3.2em`), `GitHubLink` (hover: full white + subtle scale, `focus-visible` ring in Cyborg blue). Both `NavbarContainer` and `NavbarTitle` include `@media (max-width: 480px)` rules for mobile.
+
+---
+
+### Cyborg Bootswatch Theme
+
+**Decision:** Imported `bootswatch/dist/cyborg/bootstrap.min.css` as the first CSS import in `main.tsx`. This provides the Cyborg dark colour scheme (body background `#060606`, primary blue `#2a9fd6`, Roboto font) to the whole application.
+
+**index.css simplified:** Removed the Vite starter's opinionated `color`, `background-color`, and font stack declarations (now supplied by Cyborg). Kept only `font-synthesis`, `text-rendering`, smoothing flags, `margin: 0`, and `min-width: 320px` so Cyborg's base styles are never overridden.
+
+**`App.scss` stays as-is:** The `html/body { display: block }` override is still needed to cancel any `display: flex` the Bootstrap reset might set.
+
+---
+
+### Layout: Navbar + ContentArea
+
+**Decision:** `AppLayout` changed from `flex-direction: row` to `flex-direction: column`. A new `ContentArea` styled component wraps the existing `MainArea` + `Sidebar` pair as a `flex-direction: row` container.
+
+```
+AppLayout (flex-col, 100%)
+├── Navbar          (flex-shrink: 0, 52 px)
+└── ContentArea     (flex: 1, min-height: 0, flex-row, overflow: hidden)
+    ├── MainArea    (flex: 1, centred, padding-left: 220px)
+    └── Sidebar     (220 px, overflow-y: scroll)
+```
+
+`min-height: 0` on `ContentArea` is required so the flex child does not overflow `AppLayout` past 100 vh.
+
+---
+
+### Always-Visible Sidebar Scrollbar
+
+**Decision:** Changed `Sidebar` from `overflow-y: auto` to `overflow-y: scroll` so the scrollbar track is always rendered (users see immediately that content is scrollable). Added custom `scrollbar-width: thin` (Firefox) and `&::-webkit-scrollbar` rules for a slim, subtly styled track.
+
+---
+
+### `FeedbackIndicator.utils.ts`
+
+**Decision:** Extracted `COLORS` and `dotColor` from `FeedbackIndicator.tsx` into `src/components/FeedbackIndicator.utils.ts`. This keeps the component file free of testable pure logic, and lets `FeedbackIndicator.test.ts` import those exports without pulling in React or styled-components.
 
 ---
 

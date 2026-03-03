@@ -100,6 +100,11 @@ Each unit should have one clear responsibility.
 ## 8. Testing Requirements
 
 * Keep tests updated with every change.
+* Each component must have a matching testing file (*.tsx, or *.ts files).
+
+  * `ComponentName.tsx`
+  * `ComponentName.test.tsx`
+ 
 * Cover:
 
     * New features
@@ -174,4 +179,4 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [x] Rename the `width` and `height` props to `cols` and `rows` respectively in the `PatternLock` component and its related material for better clarity and consistency with the configuration object. Update all references to these props in the codebase, including tests and documentation. Also, in the App.tsc for the history part, there seems to have a lot of repetition of the same code, we can extract it to a separate component to reduce redundancy and improve maintainability. This will help in keeping the codebase clean and easier to manage in the long run.
+1. [x] Make the vertical scroll in PatternHistory component always visible so that users know they can scroll through the history. Add a Navbar to the top of the page with a title "Pattern Lock History" and add to its far right corner a https://feathericons.com/ icon that leads to the repository of the project on GitHub when clicked. The icon should be a "github" icon from Feather Icons. Ensure that the Navbar is responsive and looks good on both desktop and mobile devices. Ensure the icon has a hover effect that changes its color to indicate it's clickable. Add the Cyborg bootswatch theme to the project and apply it to the entire application for a consistent and visually appealing design. Make sure to customize the theme as needed to fit the overall aesthetic of the project. Test the Navbar and the GitHub icon on various screen sizes to ensure they are responsive and function correctly. Also tests the components and classes that are not being tested yet. Ensure that the vertical scroll in the PatternHistory component is always visible and functions correctly on all devices.

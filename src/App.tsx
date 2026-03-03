@@ -2,6 +2,8 @@ import { useState, type ReactElement } from 'react'
 import './App.scss'
 import PatternLock from "./components/PatternLock.tsx";
 import PatternHistory from "./components/PatternHistory.tsx";
+import Navbar from "./components/Navbar.tsx";
+import { AppLayout, ContentArea, MainArea, Sidebar } from "./App.styled.tsx";
 import { CodeGenerator } from "./game/CodeGenerator.ts";
 import { GuessValidator } from "./game/GuessValidator.ts";
 
@@ -17,12 +19,11 @@ export const App = (): ReactElement => {
     const [pathHistory, setPathHistory] = useState<number[][]>([])
 
     const onFinish = () => {
-        console.log(path, code)
-        if (path.length === 4) {
+        if (path.length === config.length) {
             const feedback = new GuessValidator(code).validate(path)
             console.log(feedback)
-            pathHistory.unshift(path);
-            setPathHistory(pathHistory)
+            pathHistory.push(path);
+            setPathHistory([...pathHistory])
             setPath([])
         } else {
             setPath([])
@@ -30,20 +31,33 @@ export const App = (): ReactElement => {
     }
 
     return (
-        <>
-            <PatternLock
-                containerSize={200}
-                pointSize={20}
-                cols={config.cols}
-                rows={config.rows}
-                path={path}
-                allowJumping={false}
-                invisible={false}
-                onChange={(pattern) => setPath(pattern)}
-                onFinish={() => onFinish()}
-            />
-            <PatternHistory pathHistory={pathHistory} cols={config.cols} rows={config.rows} />
-        </>
+        <AppLayout>
+            <Navbar />
+            <ContentArea>
+                <MainArea>
+                    <PatternLock
+                        containerSize={500}
+                        pointSize={20}
+                        cols={config.cols}
+                        rows={config.rows}
+                        path={path}
+                        allowJumping={false}
+                        invisible={false}
+                        onChange={(pattern) => setPath(pattern)}
+                        onFinish={() => onFinish()}
+                    />
+                </MainArea>
+                <Sidebar>
+                    <PatternHistory
+                        pathHistory={pathHistory}
+                        code={code}
+                        cols={config.cols}
+                        rows={config.rows}
+                        entrySize={100}
+                    />
+                </Sidebar>
+            </ContentArea>
+        </AppLayout>
     )
 }
 

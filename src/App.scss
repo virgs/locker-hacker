@@ -1,6 +1,11 @@
+/* Override the flex-centering body reset from index.css so the app can own its layout */
+html, body {
+  height: 100%;
+  margin: 0;
+  display: block;
+  overflow: hidden;
+}
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  height: 100%;
 }

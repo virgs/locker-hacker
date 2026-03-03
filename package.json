@@ -13,10 +13,12 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
+    "bootswatch": "^5.3.8",
     "classnames": "^2.5.1",
     "react": "^19.2.4",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.4",
+    "react-feather": "^2.0.10",
     "styled-components": "^6.3.11"
   },
   "devDependencies": {
