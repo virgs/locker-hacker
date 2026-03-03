@@ -1,82 +1,72 @@
 import * as React from "react";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
-import { Award, Clock, TrendingUp, Info, CheckCircle, XCircle } from "react-feather";
-import { EmptyState, GameSummary } from "./StatsModal.styled.tsx";
-import { LEVEL_LABELS, ALL_LEVELS } from "../game/GameConfig.ts";
+import {Award, Clock, Info, BarChart2, Hash, GitCommit} from "react-feather";
+import {EmptyState} from "./StatsModal.styled.tsx";
+import {LEVEL_LABELS, ALL_LEVELS} from "../game/GameConfig.ts";
 import {
-    type GameRecord,
     loadRecords,
     computeLevelStats,
     computeTotalStats,
     winPercent,
     avgTimeSeconds,
+    avgMoves,
     formatStatsTime,
 } from "../game/StatsService.ts";
 
 interface StatsModalProps {
-    show            : boolean;
-    onClose         : () => void;
-    lastGameRecord ?: GameRecord | null;
+    show: boolean;
+    onClose: () => void;
 }
 
 const StatsModal: React.FunctionComponent<StatsModalProps> = ({
-    show,
-    onClose,
-    lastGameRecord = null,
-}): React.ReactElement => {
-    const records    = show ? loadRecords() : [];
+                                                                  show,
+                                                                  onClose,
+                                                              }): React.ReactElement => {
+    const records = show ? loadRecords() : [];
     const levelStats = computeLevelStats(records);
     const totalStats = computeTotalStats(records);
-    const hasData    = records.length > 0;
+    const hasData = records.length > 0;
 
     return (
         <Modal show={show} onHide={onClose} centered>
             <Modal.Header closeButton>
-                <Modal.Title><Award size={20} className="me-2" />Game Stats</Modal.Title>
+                <Modal.Title>Game Stats</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {lastGameRecord && (
-                    <GameSummary>
-                        {lastGameRecord.won
-                            ? <><CheckCircle size={18} color="#22c55e" /> <strong>You won!</strong></>
-                            : <><XCircle size={18} color="#ef4444" /> <strong>You lost</strong></>}
-                        <span className="ms-auto">
-                            <Clock size={14} className="me-1" />
-                            {formatStatsTime(lastGameRecord.durationSeconds)}
-                        </span>
-                    </GameSummary>
-                )}
                 {!hasData ? (
                     <EmptyState>
-                        <Info size={32} />
-                        <p>No stats available.<br />Play some games to see stats here!</p>
+                        <Info size={32}/>
+                        <p>No stats available.<br/>Play some games to see stats here!</p>
                     </EmptyState>
                 ) : (
-                    <Table striped hover size="sm" variant="dark">
+                    <Table striped hover size="sm">
                         <thead>
-                            <tr>
-                                <th>Level</th>
-                                <th><TrendingUp size={14} className="me-1" />Win %</th>
-                                <th><Clock size={14} className="me-1" />Avg Time</th>
-                                <th>Games</th>
-                            </tr>
+                        <tr>
+                            <th className="text-end"><BarChart2 size={14} className="me-1"/>Level</th>
+                            <th className="text-end"><Hash size={14} className="me-1"/>Games</th>
+                            <th className="text-end"><Award size={14} className="me-1"/>Win %</th>
+                            <th className="text-end"><Clock size={14} className="me-1"/>Time avg.</th>
+                            <th className="text-end"><GitCommit size={14} className="me-1"/>Moves</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {ALL_LEVELS.map(l => (
-                                <tr key={l}>
-                                    <td>{LEVEL_LABELS[l]}</td>
-                                    <td>{winPercent(levelStats[l])}%</td>
-                                    <td>{formatStatsTime(avgTimeSeconds(levelStats[l]))}</td>
-                                    <td>{levelStats[l].gamesPlayed}</td>
-                                </tr>
-                            ))}
-                            <tr className="fw-bold">
-                                <td>Total</td>
-                                <td>{winPercent(totalStats)}%</td>
-                                <td>{formatStatsTime(totalStats.totalSeconds)}</td>
-                                <td>{totalStats.gamesPlayed}</td>
+                        {ALL_LEVELS.map(l => (
+                            <tr key={l}>
+                                <td>{LEVEL_LABELS[l]}</td>
+                                <td className="text-end">{levelStats[l].gamesPlayed}</td>
+                                <td className="text-end">{winPercent(levelStats[l])}%</td>
+                                <td className="text-end">{formatStatsTime(avgTimeSeconds(levelStats[l]))}</td>
+                                <td className="text-end">{avgMoves(levelStats[l])}</td>
                             </tr>
+                        ))}
+                        <tr className="fw-bold">
+                            <td className="text-start">Total</td>
+                            <td className="text-end">{totalStats.gamesPlayed}</td>
+                            <td className="text-end">{winPercent(totalStats)}%</td>
+                            <td className="text-end">{formatStatsTime(totalStats.totalSeconds)}</td>
+                            <td className="text-end">-</td>
+                        </tr>
                         </tbody>
                     </Table>
                 )}

@@ -9,7 +9,7 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
     const { gridConfig, level, elapsedSeconds } = useGameContext();
 
     return (
-        <FooterContainer>
+        <FooterContainer className="text-dark">
             <FooterStat aria-label="Code length">
                 <Hash size={13} />
                 {gridConfig.length}

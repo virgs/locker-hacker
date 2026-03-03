@@ -80,18 +80,18 @@
 }
 
 @keyframes pop {
-    from { transform: scale(1); }
-    50%  { transform: scale(2); }
-    to   { transform: scale(1); }
+    from {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(2);
+    }
+    to {
+        transform: scale(1);
+    }
 }
 
 .react-pattern-lock__point-inner.complete {
-    animation: popComplete 700ms ease;
-}
-
-@keyframes popComplete {
-    from { transform: scale(1); background: white; }
-    40%  { transform: scale(2.5); background: #77b300; }
-    80%  { transform: scale(2.5); background: #77b300; }
-    to   { transform: scale(1); background: white; }
+    transform: scale(2.5);
+    transition: transform 200ms ease;
 }

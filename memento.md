@@ -523,8 +523,6 @@ ResizeObserver fires → onResize() → setContainerWidth/Height
 
 String enums (`GamePhase`, `Level`) preserve their string values at runtime so existing `Record<Level, ...>` lookups, `toEqual(["easy", ...])` comparisons, and styled-component switch logic all continue to work unchanged.
 
-**All call sites updated:** `App.tsx`, `Navbar.tsx`, and all tests now use `GamePhase.Playing`, `Level.Medium`, `PlayerCount.One`, etc. instead of raw literals.
-
 **`ALL_GAME_PHASES`, `ALL_LEVELS`, `ALL_PLAYER_COUNTS`** updated to reference enum members.
 
 ---
@@ -581,11 +579,11 @@ String enums (`GamePhase`, `Level`) preserve their string values at runtime so e
 - `src/components/Navbar.tsx` — `centerButton()` helper, `configDisabled` flag
 - `src/components/CodeRevealOverlay.tsx` — `onDismiss`/`onNewGame` props, two Bootstrap buttons
 - `src/components/CodeRevealOverlay.styled.tsx` — `RevealActions` flex container
-- `src/App.tsx` — removed `revealing` state + `revealTimer` ref; added `dismissReveal()`; `show={phase === "revealing"}`
+- `src/App.tsx` — game state management, wiring
 
 ---
 
-### `gameKey` — Forced PatternLock Remount on Game Reset
+### gameKey — Forced PatternLock Remount on Game Reset
 
 **Problem:** After the code reveal overlay dismissed, the PatternLock disappeared entirely — no dots visible, just the navbar. The PatternLock component was the same React instance across game resets (never unmounted), but the `usePatternLock` hook's internal state (container dimensions, points array, ResizeObserver) could become stale or out of sync when the game state changed underneath it.
 
@@ -742,3 +740,36 @@ A cleanup `useEffect` clears the timer on unmount. `flashingPoints` is included 
 - `src/context/GameContext.tsx` — win detection, stats recording, new state
 - `src/components/CodeRevealOverlay.tsx` — victory message
 - `src/components/Navbar.tsx` — stats modal, icon click/long-press
+
+---
+
+### Stats Modal & Completion Flash Refinements
+
+**Stats modal cleanup:**
+- Removed `lastGameRecord` prop and `GameSummary` component from `StatsModal`. The stats modal now shows only the aggregated stats table or the empty state. The "You won!"/"You lost" per-game summary was confusing when there was no data yet.
+- Removed `lastGameRecord` from `GameContextValue` and `GameProvider` state — no component needs it anymore.
+- Added `moves: number` to `GameRecord` and `totalMoves: number` to `LevelStats`.
+- Added `avgMoves(stats)` helper to `StatsService.ts`.
+- Stats table columns updated: `Level` (with `BarChart2` icon), `Games` (with `Hash` icon), `Win %` (with `TrendingUp` icon), `Avg (m:ss)` (with `Clock` icon), `Moves` (with `MousePointer` icon).
+
+**Victory overlay stats:**
+- When `winner !== null`, `CodeRevealOverlay` now shows elapsed time (`Clock` icon) and move count (`MousePointer` icon) below the victory title via `RevealStats`/`RevealStat` styled-components.
+
+**Completion flash fix — reactive instead of timer-based:**
+- `completionFlash` in `usePatternLock` is now a **derived value** (`isMouseDown && !!targetLength && path.length >= targetLength`) instead of timer-driven state. Dots scale up when the user reaches the target length and **stay scaled up** until the mouse is released.
+- `complete` CSS class changed from `animation: popComplete 500ms` to `transform: scale(2.5); transition: transform 200ms ease` — a persistent transform, not a one-shot animation.
+- Only the first N dots (where N = `targetLength`) get the `complete` class. Dots selected after position N still receive the normal `pop` animation.
+- Removed `completionTimerRef` and the `useEffect` that managed it.
+
+**Files changed:**
+- `src/game/StatsService.ts` — `moves` in `GameRecord`, `totalMoves` in `LevelStats`, `avgMoves()`
+- `src/game/StatsService.test.ts` — updated test factories + new `avgMoves` tests
+- `src/components/StatsModal.tsx` — removed `GameSummary`, added icons to all columns, added `Moves` column
+- `src/components/StatsModal.styled.tsx` — removed `GameSummary` styled-component
+- `src/context/GameContext.tsx` — removed `lastGameRecord`, added `moves` to record, removed `GameRecord` import
+- `src/components/CodeRevealOverlay.tsx` — added time + moves stats on victory
+- `src/components/CodeRevealOverlay.styled.tsx` — added `RevealStats`/`RevealStat`
+- `src/components/usePatternLock.ts` — reactive `completionFlash`, removed timer
+- `src/components/PatternLock.css` — `complete` class: persistent transform instead of animation
+- `src/components/PatternLock.tsx` — `complete` limited to first `targetLength` dots
+

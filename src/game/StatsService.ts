@@ -6,6 +6,7 @@ export interface GameRecord {
     level           : Level;
     won             : boolean;
     durationSeconds : number;
+    moves           : number;
     date            : string;
 }
 
@@ -13,6 +14,7 @@ export interface LevelStats {
     gamesPlayed    : number;
     wins           : number;
     totalSeconds   : number;
+    totalMoves     : number;
 }
 
 export const loadRecords = (): GameRecord[] => {
@@ -32,6 +34,7 @@ export const saveRecord = (record: GameRecord): void => {
 };
 
 export const clearRecords = (): void => {
+    console.log("Clearing records...");
     localStorage.removeItem(STORAGE_KEY);
 };
 
@@ -43,6 +46,7 @@ export const computeLevelStats = (records: GameRecord[]): Record<Level, LevelSta
             gamesPlayed  : filtered.length,
             wins         : filtered.filter(r => r.won).length,
             totalSeconds : filtered.reduce((sum, r) => sum + r.durationSeconds, 0),
+            totalMoves   : filtered.reduce((sum, r) => sum + (r.moves ?? 0), 0),
         };
     }
     return result;
@@ -52,6 +56,7 @@ export const computeTotalStats = (records: GameRecord[]): LevelStats => ({
     gamesPlayed  : records.length,
     wins         : records.filter(r => r.won).length,
     totalSeconds : records.reduce((sum, r) => sum + r.durationSeconds, 0),
+    totalMoves   : records.reduce((sum, r) => sum + (r.moves ?? 0), 0),
 });
 
 export const winPercent = (stats: LevelStats): number =>
@@ -59,6 +64,9 @@ export const winPercent = (stats: LevelStats): number =>
 
 export const avgTimeSeconds = (stats: LevelStats): number =>
     stats.gamesPlayed === 0 ? 0 : stats.totalSeconds / stats.gamesPlayed;
+
+export const avgMoves = (stats: LevelStats): number =>
+    stats.gamesPlayed === 0 ? 0 : Math.round(stats.totalMoves / stats.gamesPlayed * 10) / 10;
 
 export const formatStatsTime = (seconds: number): string => {
     const m = Math.floor(seconds / 60);

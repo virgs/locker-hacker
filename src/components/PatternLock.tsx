@@ -76,8 +76,8 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                     rows={rows}
                     pointSize={pointSize}
                     pointActiveSize={pointActiveSize}
-                    complete={completionFlash && path.indexOf(i) > -1}
-                    pop={!noPop && !completionFlash && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
+                    complete={completionFlash && path.indexOf(i) > -1 && path.indexOf(i) < (targetLength ?? Infinity)}
+                    pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
                     selected={path.indexOf(i) > -1}
                 />
             ))}

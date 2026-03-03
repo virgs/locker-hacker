@@ -1,7 +1,7 @@
 import * as React from "react";
 import { CodeGenerator } from "../game/CodeGenerator.ts";
 import { GuessValidator } from "../game/GuessValidator.ts";
-import { saveRecord, type GameRecord } from "../game/StatsService.ts";
+import { saveRecord } from "../game/StatsService.ts";
 import {
     Level, PlayerCount, GamePhase, GridConfig,
     LEVEL_CONFIGS, DEFAULT_LEVEL, DEFAULT_PLAYER_COUNT,
@@ -22,7 +22,6 @@ export interface GameContextValue {
     elapsedSeconds  : number;
     winner          : number | null;
     currentPlayer   : number;
-    lastGameRecord  : GameRecord | null;
     onLevelChange        : (level: Level) => void;
     onPlayerCountChange  : (count: PlayerCount) => void;
     onGiveUp             : () => void;
@@ -58,7 +57,6 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const [elapsedSeconds, setElapsedSeconds]   = React.useState<number>(0);
     const [winner, setWinner]                   = React.useState<number | null>(null);
     const [currentPlayer, setCurrentPlayer]     = React.useState(1);
-    const [lastGameRecord, setLastGameRecord]   = React.useState<GameRecord | null>(null);
 
     const gridConfig = LEVEL_CONFIGS[level];
     const isRunning  = pathHistory.length > 0;
@@ -96,14 +94,14 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
 
     const onFinishGame = React.useCallback((): void => {
         if (playerCount === PlayerCount.One) {
-            const rec: GameRecord = {
+            const rec = {
                 level,
                 won: winner !== null,
                 durationSeconds: elapsedSeconds,
+                moves: pathHistory.length,
                 date: new Date().toISOString(),
             };
             saveRecord(rec);
-            setLastGameRecord(rec);
             setShowStatsModal(true);
         }
         setCode(generateCode(gridConfig));
@@ -113,7 +111,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         setElapsedSeconds(0);
         setCurrentPlayer(1); setWinner(null);
         setGameKey(prev => prev + 1);
-    }, [gridConfig, playerCount, winner, elapsedSeconds, level]);
+    }, [gridConfig, playerCount, winner, elapsedSeconds, level, pathHistory]);
 
     const onPathChange = React.useCallback((newPath: number[]): void => {
         setPath(newPath);
@@ -138,7 +136,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         level, playerCount, gridConfig, code, gameKey,
         phase, path, pathHistory, isRunning,
         showRevealModal, showStatsModal, elapsedSeconds,
-        winner, currentPlayer, lastGameRecord,
+        winner, currentPlayer,
         onLevelChange, onPlayerCountChange,
         onGiveUp, onToggleRevealModal, onFinishGame,
         onPathChange, onGuessFinish, onToggleStatsModal,

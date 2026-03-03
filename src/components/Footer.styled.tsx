@@ -24,7 +24,6 @@ export const FooterStat = styled.span`
     display: flex;
     align-items: center;
     gap: 5px;
-    color: rgba(255, 255, 255, 0.55);
     font-size: 0.8rem;
     white-space: nowrap;
 `;

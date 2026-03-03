@@ -48,9 +48,7 @@ export const usePatternLock = ({
     const [isMouseDown, setIsMouseDown]         = React.useState<boolean>(false);
     const [initialMousePosition, setInitialMousePosition] = React.useState<PointType | null>(null);
     const [flashingPoints, setFlashingPoints]     = React.useState<Set<number>>(new Set());
-    const [completionFlash, setCompletionFlash]   = React.useState<boolean>(false);
     const flashTimerRef      = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-    const completionTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const onResize = (): [number, number] => {
         const el = wrapperRef.current;
@@ -151,17 +149,11 @@ export const usePatternLock = ({
         };
     }, [disabled, path, onFinish]);
 
-    React.useEffect(() => {
-        if (!targetLength || path.length !== targetLength) return;
-        if (completionTimerRef.current !== null) clearTimeout(completionTimerRef.current);
-        setCompletionFlash(true);
-        completionTimerRef.current = setTimeout(() => setCompletionFlash(false), 800);
-    }, [path.length, targetLength]);
+    const completionFlash = isMouseDown && !!targetLength && path.length >= targetLength;
 
     React.useEffect(() => {
         return () => {
             if (flashTimerRef.current !== null) clearTimeout(flashTimerRef.current);
-            if (completionTimerRef.current !== null) clearTimeout(completionTimerRef.current);
         };
     }, []);
 

@@ -26,7 +26,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
     const longPressRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const {
-        phase, level, playerCount, isRunning, lastGameRecord,
+        phase, level, playerCount, isRunning,
         showStatsModal, onToggleStatsModal,
         onLevelChange, onPlayerCountChange, onGiveUp, onToggleRevealModal, onFinishGame,
     } = useGameContext();
@@ -35,6 +35,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
 
     const handleIconDown = (): void => {
         longPressRef.current = setTimeout(() => {
+            console.log(`Long press detected, clearing records...`);
             clearRecords();
             longPressRef.current = null;
         }, LONG_PRESS_MS);
@@ -63,7 +64,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
         }
         if (isRunning) {
             return (
-                <Button variant="outline-danger" size="sm" onClick={onGiveUp} aria-label="Give up and reveal code">
+                <Button variant="danger" size="sm" onClick={onGiveUp} aria-label="Give up and reveal code">
                     <Eye size={16} /><ButtonLabel className="ms-1">Give Up</ButtonLabel>
                 </Button>
             );
@@ -107,7 +108,9 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                             <Dropdown.Menu>
                                 {ALL_LEVELS.map((l: Level) => (
                                     <Dropdown.Item key={l} active={l === level} onClick={() => onLevelChange(l)}>
-                                        <BarChart2 size={14} className="me-1" /> {levelDetailLabel(l)}
+                                        <BarChart2 size={14} className="me-1" />
+                                        {`${LEVEL_LABELS[l]}`}
+                                        <span className="float-end fst-italic"> {`${LEVEL_CONFIGS[l].length}`}</span>
                                     </Dropdown.Item>
                                 ))}
                             </Dropdown.Menu>
@@ -128,7 +131,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
             </NavbarContainer>
 
             <HelpModal show={helpOpen} onClose={() => setHelpOpen(false)} />
-            <StatsModal show={showStatsModal} onClose={onToggleStatsModal} lastGameRecord={lastGameRecord} />
+            <StatsModal show={showStatsModal} onClose={onToggleStatsModal} />
         </>
     );
 };

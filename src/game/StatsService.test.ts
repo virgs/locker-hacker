@@ -5,11 +5,12 @@ import {
     computeTotalStats,
     winPercent,
     avgTimeSeconds,
+    avgMoves,
     formatStatsTime,
 } from "./StatsService.ts";
 
-const record = (level: Level, won: boolean, dur: number): GameRecord => ({
-    level, won, durationSeconds: dur, date: "2025-01-01",
+const record = (level: Level, won: boolean, dur: number, moves = 5): GameRecord => ({
+    level, won, durationSeconds: dur, moves, date: "2025-01-01",
 });
 
 describe("StatsService", () => {
@@ -58,25 +59,35 @@ describe("StatsService", () => {
 
     describe("winPercent", () => {
         it("returns 0 for no games", () => {
-            expect(winPercent({ gamesPlayed: 0, wins: 0, totalSeconds: 0 })).toBe(0);
+            expect(winPercent({ gamesPlayed: 0, wins: 0, totalSeconds: 0, totalMoves: 0 })).toBe(0);
         });
 
         it("calculates correct percentage", () => {
-            expect(winPercent({ gamesPlayed: 4, wins: 3, totalSeconds: 0 })).toBe(75);
+            expect(winPercent({ gamesPlayed: 4, wins: 3, totalSeconds: 0, totalMoves: 0 })).toBe(75);
         });
 
         it("rounds to nearest integer", () => {
-            expect(winPercent({ gamesPlayed: 3, wins: 1, totalSeconds: 0 })).toBe(33);
+            expect(winPercent({ gamesPlayed: 3, wins: 1, totalSeconds: 0, totalMoves: 0 })).toBe(33);
         });
     });
 
     describe("avgTimeSeconds", () => {
         it("returns 0 for no games", () => {
-            expect(avgTimeSeconds({ gamesPlayed: 0, wins: 0, totalSeconds: 0 })).toBe(0);
+            expect(avgTimeSeconds({ gamesPlayed: 0, wins: 0, totalSeconds: 0, totalMoves: 0 })).toBe(0);
         });
 
         it("calculates average", () => {
-            expect(avgTimeSeconds({ gamesPlayed: 2, wins: 0, totalSeconds: 60 })).toBe(30);
+            expect(avgTimeSeconds({ gamesPlayed: 2, wins: 0, totalSeconds: 60, totalMoves: 0 })).toBe(30);
+        });
+    });
+
+    describe("avgMoves", () => {
+        it("returns 0 for no games", () => {
+            expect(avgMoves({ gamesPlayed: 0, wins: 0, totalSeconds: 0, totalMoves: 0 })).toBe(0);
+        });
+
+        it("calculates average rounded to one decimal", () => {
+            expect(avgMoves({ gamesPlayed: 3, wins: 0, totalSeconds: 0, totalMoves: 10 })).toBe(3.3);
         });
     });
 
