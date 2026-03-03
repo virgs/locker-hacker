@@ -1,14 +1,10 @@
 import * as React from "react";
 import { CodeGenerator } from "../game/CodeGenerator.ts";
 import { GuessValidator } from "../game/GuessValidator.ts";
+import { saveRecord, type GameRecord } from "../game/StatsService.ts";
 import {
-    Level,
-    PlayerCount,
-    GamePhase,
-    GridConfig,
-    LEVEL_CONFIGS,
-    DEFAULT_LEVEL,
-    DEFAULT_PLAYER_COUNT,
+    Level, PlayerCount, GamePhase, GridConfig,
+    LEVEL_CONFIGS, DEFAULT_LEVEL, DEFAULT_PLAYER_COUNT,
 } from "../game/GameConfig.ts";
 
 export interface GameContextValue {
@@ -22,7 +18,11 @@ export interface GameContextValue {
     pathHistory     : number[][];
     isRunning       : boolean;
     showRevealModal : boolean;
+    showStatsModal  : boolean;
     elapsedSeconds  : number;
+    winner          : number | null;
+    currentPlayer   : number;
+    lastGameRecord  : GameRecord | null;
     onLevelChange        : (level: Level) => void;
     onPlayerCountChange  : (count: PlayerCount) => void;
     onGiveUp             : () => void;
@@ -30,6 +30,7 @@ export interface GameContextValue {
     onFinishGame         : () => void;
     onPathChange         : (path: number[]) => void;
     onGuessFinish        : () => void;
+    onToggleStatsModal   : () => void;
 }
 
 const GameContext = React.createContext<GameContextValue | undefined>(undefined);
@@ -37,6 +38,7 @@ const GameContext = React.createContext<GameContextValue | undefined>(undefined)
 const generateCode = (config: GridConfig): number[] =>
     new CodeGenerator(config).generate();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useGameContext = (): GameContextValue => {
     const ctx = React.useContext(GameContext);
     if (!ctx) throw new Error("useGameContext must be used within GameProvider");
@@ -52,7 +54,11 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const [pathHistory, setPathHistory] = React.useState<number[][]>([]);
     const [gameKey, setGameKey]         = React.useState(0);
     const [showRevealModal, setShowRevealModal] = React.useState(false);
+    const [showStatsModal, setShowStatsModal]   = React.useState(false);
     const [elapsedSeconds, setElapsedSeconds]   = React.useState<number>(0);
+    const [winner, setWinner]                   = React.useState<number | null>(null);
+    const [currentPlayer, setCurrentPlayer]     = React.useState(1);
+    const [lastGameRecord, setLastGameRecord]   = React.useState<GameRecord | null>(null);
 
     const gridConfig = LEVEL_CONFIGS[level];
     const isRunning  = pathHistory.length > 0;
@@ -66,9 +72,8 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const onLevelChange = React.useCallback((newLevel: Level): void => {
         setLevel(newLevel);
         setCode(generateCode(LEVEL_CONFIGS[newLevel]));
-        setPath([]);
-        setPathHistory([]);
-        setElapsedSeconds(0);
+        setPath([]); setPathHistory([]); setElapsedSeconds(0);
+        setCurrentPlayer(1); setWinner(null);
         setGameKey(prev => prev + 1);
     }, []);
 
@@ -85,41 +90,60 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         setShowRevealModal(prev => !prev);
     }, []);
 
+    const onToggleStatsModal = React.useCallback((): void => {
+        setShowStatsModal(prev => !prev);
+    }, []);
+
     const onFinishGame = React.useCallback((): void => {
+        if (playerCount === PlayerCount.One) {
+            const rec: GameRecord = {
+                level,
+                won: winner !== null,
+                durationSeconds: elapsedSeconds,
+                date: new Date().toISOString(),
+            };
+            saveRecord(rec);
+            setLastGameRecord(rec);
+            setShowStatsModal(true);
+        }
         setCode(generateCode(gridConfig));
-        setPath([]);
-        setPathHistory([]);
+        setPath([]); setPathHistory([]);
         setPhase(GamePhase.Playing);
         setShowRevealModal(false);
         setElapsedSeconds(0);
+        setCurrentPlayer(1); setWinner(null);
         setGameKey(prev => prev + 1);
-    }, [gridConfig]);
+    }, [gridConfig, playerCount, winner, elapsedSeconds, level]);
 
     const onPathChange = React.useCallback((newPath: number[]): void => {
         setPath(newPath);
     }, []);
 
     const onGuessFinish = React.useCallback((): void => {
-        if (path.length !== gridConfig.length) {
-            setPath([]);
-            return;
-        }
-        new GuessValidator(code).validate(path);
+        if (path.length !== gridConfig.length) { setPath([]); return; }
+        const validator = new GuessValidator(code);
+        validator.validate(path);
         setPathHistory(prev => [...prev, path]);
         setPath([]);
-    }, [path, gridConfig.length, code]);
+        if (validator.isSolved(path)) {
+            setWinner(currentPlayer);
+            setPhase(GamePhase.Revealing);
+            setShowRevealModal(true);
+        } else {
+            setCurrentPlayer(prev => (prev % playerCount) + 1);
+        }
+    }, [path, gridConfig.length, code, currentPlayer, playerCount]);
 
     const value: GameContextValue = {
         level, playerCount, gridConfig, code, gameKey,
-        phase, path, pathHistory, isRunning, showRevealModal, elapsedSeconds,
+        phase, path, pathHistory, isRunning,
+        showRevealModal, showStatsModal, elapsedSeconds,
+        winner, currentPlayer, lastGameRecord,
         onLevelChange, onPlayerCountChange,
         onGiveUp, onToggleRevealModal, onFinishGame,
-        onPathChange, onGuessFinish,
+        onPathChange, onGuessFinish, onToggleStatsModal,
     };
 
-    return (
-        <GameContext.Provider value={value}>
-            {children}
-        </GameContext.Provider>
-    );
+    return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 };
+

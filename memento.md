@@ -419,12 +419,22 @@ ResizeObserver fires → onResize() → setContainerWidth/Height
 2. User clicks "Reveal" → `revealCode()` shows `CodeRevealOverlay` for 3 seconds, then resets to "idle".
 3. Dropdowns are disabled during gameplay, re-enabled when idle.
 
-**Navbar constants updated:** `APP_TITLE` changed from "Pattern Lock History" to "Locker Hacker". Added `HELP_CONTENT` (array of rule summary strings) and `REVEAL_DELAY_MS`.
+**Navbar center button logic:**
+- `phase === Revealing`: shows **Reveal** (EyeOff icon, `outline-secondary`) + **Finish Game** (Feather icon, `outline-danger`) side by side
+- `phase === Playing && isRunning`: shows **Give Up** (Eye icon, `outline-danger`)
+- `phase === Playing && !isRunning`: nothing
 
-**Responsive design:** `NavbarRow` uses `flex-wrap: wrap` so items flow to two rows on mobile. Dropdown font sizes shrink on XS. All items have feather icons.
+**`onDismissReveal`** (Reveal button / backdrop click on overlay): sets phase→Playing, increments `gameKey`. History is preserved; PatternLock remounts fresh.
+
+**`onFinishGame`** (Finish Game button): regenerates code, clears path/history, sets phase→Playing, increments `gameKey`.
+
+**`CodeRevealOverlay` simplified:** No action buttons. The overlay shows code only; clicking the backdrop calls `onDismissReveal`. Navbar owns all control buttons during Revealing phase.
+
+**`NavbarContainer`** gains `position: relative; z-index: 1100` so it renders above the overlay backdrop (`z-index: 1000`).
 
 **Files changed/added:**
-- `src/game/GameConfig.ts` + `GameConfig.test.ts` — types, constants, tests
+- `src/game/GameConfig.ts` — `GamePhase` union + `ALL_GAME_PHASES` constant
+- `src/game/GameConfig.test.ts` — tests for `ALL_GAME_PHASES`
 - `src/components/Navbar.tsx` — redesigned with game control props
 - `src/components/Navbar.styled.tsx` — new styled components for layout
 - `src/components/Navbar.constants.ts` — new constants
@@ -568,8 +578,6 @@ String enums (`GamePhase`, `Level`) preserve their string values at runtime so e
 **Files changed:**
 - `src/game/GameConfig.ts` — `GamePhase` union + `ALL_GAME_PHASES` constant
 - `src/game/GameConfig.test.ts` — tests for `ALL_GAME_PHASES`
-- `src/components/Navbar.constants.ts` — removed `REVEAL_DELAY_MS`
-- `src/components/Navbar.test.ts` — removed `REVEAL_DELAY_MS` test
 - `src/components/Navbar.tsx` — `centerButton()` helper, `configDisabled` flag
 - `src/components/CodeRevealOverlay.tsx` — `onDismiss`/`onNewGame` props, two Bootstrap buttons
 - `src/components/CodeRevealOverlay.styled.tsx` — `RevealActions` flex container
@@ -685,80 +693,52 @@ A cleanup `useEffect` clears the timer on unmount. `flashingPoints` is included 
 
 ---
 
-### `isRunning` Definition: Based on Completed Guesses Only
+### Win Detection, Victory Modal & Stats System
 
-**Decision:** Changed `isRunning` from `pathHistory.length > 0 || path.length > 0` to `pathHistory.length > 0`.
+**Decision:** Added automatic win detection, a victory overlay, persistent game stats with localStorage, and a stats modal accessible from the app icon.
 
-**Rationale:** The game is only "running" once the player has committed a complete guess, not while they are mid-draw. Consequences:
-- While drawing the first guess: `isRunning=false` → Give Up button hidden, dropdowns unlocked (level/players can still be changed).
-- After the first complete guess: `isRunning=true` → Give Up button appears, dropdowns locked.
-- `configDisabled = isRunning || phase === Revealing` still locks config during the Revealing phase.
+**Win detection (`GameContext.tsx`):**
+- `onGuessFinish` now calls `GuessValidator.isSolved(path)` after validating. If solved, sets `winner` to `currentPlayer`, transitions to `GamePhase.Revealing`, and shows the reveal modal.
+- `currentPlayer: number` (1-based) tracks whose turn it is; advances `(prev % playerCount) + 1` after each non-winning guess.
+- Both `winner` and `currentPlayer` reset to `null`/`1` in `onFinishGame` and `onLevelChange`.
 
-**Post-dismiss PatternLock:** After the reveal modal is dismissed (`showRevealModal=false`), `phase` remains `Revealing`. `App.tsx` uses `disabled={phase !== GamePhase.Playing}`, so the PatternLock stays disabled but visible. The history sidebar is always rendered and shows the full guess list. The lock stays disabled until `onFinishGame` resets phase to `Playing`.
+**Victory message (`CodeRevealOverlay.tsx`):**
+- When `winner !== null`, title shows "You win!" (single-player) or "Player X wins!" (multiplayer) with an `Award` feather icon.
+- When `winner === null` (give-up), title remains "Secret Code".
 
----
+**Stats persistence (`src/game/StatsService.ts`):**
+- `GameRecord` type: `{ level, won, durationSeconds, date }`.
+- `LevelStats` type: `{ gamesPlayed, wins, totalSeconds }`.
+- `loadRecords()` / `saveRecord()` / `clearRecords()` — localStorage CRUD under key `"locker-hacker-stats"`.
+- `computeLevelStats()` / `computeTotalStats()` — aggregation functions.
+- `winPercent()` / `avgTimeSeconds()` / `formatStatsTime()` — display helpers (time formatted as `m:ss.d` with deciseconds).
+- Fully tested in `StatsService.test.ts` (12 tests).
 
----
+**Stats recording (`GameContext.tsx`):**
+- `onFinishGame` saves a `GameRecord` to localStorage when `playerCount === PlayerCount.One` (single-player only).
+- Sets `lastGameRecord` state so the stats modal can show the just-finished game's result.
+- Sets `showStatsModal = true` to auto-open the stats modal.
 
-### `PatternLockStyles` Moved to App-Level Singleton
+**Stats modal (`StatsModal.tsx` + `StatsModal.styled.tsx`):**
+- Bootstrap `Modal` with a table: Level / Win % / Avg Time / Games columns.
+- Rows: Easy, Medium, Hard, **Total** (bold).
+- If `lastGameRecord` is set, shows a game summary at top (won/lost icon + time).
+- Empty state: "No stats available. Play some games to see stats here!" with `Info` icon.
+- Icons: `Award` (title), `TrendingUp` (win %), `Clock` (time), `CheckCircle`/`XCircle` (won/lost), `Info` (empty).
 
-**Root cause of bug:** `<PatternLockStyles />` (`createGlobalStyle`) was rendered inside every `PatternLock` instance. In styled-components v6, when **any** instance of a `createGlobalStyle` component unmounts, v6 removes the injected `<style>` tag from the document — even if other instances are still mounted (reference counting is not correctly implemented for this case). When `CodeRevealOverlay` closed and its `PatternLock` unmounted, all `.react-pattern-lock__*` CSS disappeared. Dots (which depend on `background: white`) became invisible on the dark background.
+**App icon interaction (`Navbar.tsx`):**
+- Click → opens stats modal via `onToggleStatsModal()`.
+- Long press (10 seconds) → calls `clearRecords()` to wipe localStorage stats. Uses `onMouseDown`/`onTouchStart` to start a timer, `onMouseUp`/`onTouchEnd`/`onMouseLeave` to cancel. If 10s elapses without release, stats are cleared.
 
-**Fix:** Removed `<PatternLockStyles />` from `PatternLock.tsx` entirely. Added a single `<PatternLockStyles />` as the first child of `<AppLayout>` in `App.tsx`. There is now exactly one instance, always mounted for the lifetime of the app, regardless of how many `PatternLock` instances are created or destroyed.
+**Context additions:**
+- `winner: number | null`, `currentPlayer: number`, `lastGameRecord: GameRecord | null`
+- `showStatsModal: boolean`, `onToggleStatsModal: () => void`
 
----
-
----
-
-### PatternLock Styles Converted to Static CSS File
-
-**Problem persisted:** Even after moving `<PatternLockStyles />` to `App.tsx` as a singleton, styled-components v6 `createGlobalStyle` can remove injected styles during React StrictMode's double-mount cycle or in other edge cases where the component re-mounts, causing PatternLock dots and connectors to disappear (they rely on `background: white` from the global CSS).
-
-**Fix:** Deleted `PatternLock.styled.tsx`. Created `src/components/PatternLock.css` with the same rules. Imported it directly in `PatternLock.tsx` (`import "./PatternLock.css"`). Vite processes CSS imports at module load time and injects them as persistent `<style>` tags — they are never removed by React lifecycle events. This is completely immune to styled-components lifecycle issues.
-
-**Trade-off:** Loss of the styled-components `createGlobalStyle` wrapper; gain of rock-solid style persistence. The rules themselves are unchanged.
-
----
-
----
-
-### TODO #1: Level Length Hints, Completion Animation, Footer
-
-**Decision:** Three improvements to help players understand game state.
-
-#### Level length in dropdown
-
-Added `levelDetailLabel(l: Level): string` helper in `Navbar.tsx` that returns e.g. `"Easy (3)"`. Used in both the dropdown toggle and each dropdown item. `LEVEL_CONFIGS` is imported from `GameConfig.ts` to get the `length` for each level — stays in sync with config changes.
-
-#### Completion animation (Nth dot)
-
-When the user draws exactly N dots (where N = `gridConfig.length`), all selected dots pulse green (`#77b300` — Bootstrap Cyborg `--bs-success` color) via a `popComplete` CSS keyframe animation (700ms, scale 1→2.5→1 with green fill). Implementation:
-- `usePatternLock.ts`: `completionFlash: boolean` state + `completionTimerRef`. A `useEffect` watching `path.length` triggers `completionFlash=true` for 800ms when `path.length === targetLength`.
-- `PatternLock.tsx`: new `targetLength?: number` prop; passes `complete={completionFlash && path.indexOf(i) > -1}` to each `Point`. When `completionFlash` is true, `pop` is suppressed so animations don't conflict.
-- `Point.tsx`: new `complete: boolean` prop; adds `.complete` CSS class (priority over `.active`).
-- `PatternLock.css`: `@keyframes popComplete` + `.react-pattern-lock__point-inner.complete` rule.
-
-#### Footer
-
-A persistent footer visible on all screens (flex-shrink: 0 in AppLayout column). Right-aligned stats:
-- Hash icon + code length (N)
-- BarChart2 icon + level name
-- Clock icon + elapsed time (M:SS format)
-
-Elapsed time is tracked in `GameContext` via a `setInterval` that counts up while `isRunning && phase === Playing`. Timer resets on `onLevelChange` and `onFinishGame`.
-
-**Files added:**
-- `src/components/Footer.tsx`
-- `src/components/Footer.styled.tsx`
-- `src/components/Footer.utils.ts` — `formatTime(totalSeconds): string` → `"M:SS"`
-- `src/components/Footer.test.ts`
+**Files created:**
+- `src/game/StatsService.ts` + `StatsService.test.ts`
+- `src/components/StatsModal.tsx` + `StatsModal.styled.tsx`
 
 **Files changed:**
-- `src/components/usePatternLock.ts` — `targetLength`, `completionFlash`, `completionTimerRef`
-- `src/components/PatternLock.tsx` — `targetLength` prop, `complete` + `pop` wired
-- `src/components/PatternLock.css` — `popComplete` animation + `.complete` rule
-- `src/components/Point.tsx` — `complete` prop
-- `src/components/Navbar.tsx` — `levelDetailLabel` helper, `LEVEL_CONFIGS` import
-- `src/context/GameContext.tsx` — `elapsedSeconds`, timer effect, resets in `onLevelChange`/`onFinishGame`
-- `src/App.tsx` — `<Footer />`, `targetLength={gridConfig.length}` on PatternLock
-
+- `src/context/GameContext.tsx` — win detection, stats recording, new state
+- `src/components/CodeRevealOverlay.tsx` — victory message
+- `src/components/Navbar.tsx` — stats modal, icon click/long-press
