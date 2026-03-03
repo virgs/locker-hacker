@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 const MOBILE = "@media (max-width: 600px)";
+const XL     = "@media (min-width: 1400px)";
 
 export const AppLayout = styled.div`
     display: flex;
@@ -31,6 +32,10 @@ export const MainArea = styled.main`
     overflow: hidden;
     box-sizing: border-box;
     padding-left: 220px; /* mirrors sidebar width so content sits at true viewport centre */
+
+    ${XL} {
+        padding-left: 440px;
+    }
 
     ${MOBILE} {
         flex: none;
@@ -65,6 +70,10 @@ export const Sidebar = styled.aside`
     &::-webkit-scrollbar-thumb {
         background: rgba(255, 255, 255, 0.2);
         border-radius: 3px;
+    }
+
+    ${XL} {
+        width: 440px;
     }
 
     ${MOBILE} {

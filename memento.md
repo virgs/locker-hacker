@@ -342,3 +342,23 @@ AppLayout (flex-col, 100%)
 ## Trade-offs
 
 - `containerSize` default of `"100%"` means the CSS height is also `"100%"` when neither `width` nor `height` is provided. This differs from the old behavior where height was always set to a pixel value equal to `offsetWidth`. In practice all current usages pass an explicit pixel value so this has no visible impact.
+
+---
+
+### Responsive Two-Column Pattern History Grid
+
+**Decision:** `PatternHistory` now uses CSS Grid with responsive column counts. On XL screens (≥ 1400 px) and XS screens (≤ 600 px), the history renders in a **two-column grid**. On intermediate breakpoints, it remains **single-column**.
+
+**XL behaviour:** `Sidebar` widens from 220 px → 440 px; `MainArea.padding-left` mirrors the change to keep the PatternLock visually centred. `HistoryList` switches to `grid-template-columns: 1fr 1fr`, allowing more patterns visible without scrolling.
+
+**XS behaviour:** `HistoryList` also gets `grid-template-columns: 1fr 1fr`. Pattern cards shrink to 65 % of the normal `entrySize` (via `useMediaQuery("(max-width: 600px)")` in `PatternHistory.tsx`). `FeedbackDot` sizes reduce from 14 px → 10 px, gaps tighten, and `GuessNumber` font shrinks to keep everything readable on small screens.
+
+**`useMediaQuery` hook:** Rewritten to use React 18's `useSyncExternalStore` for correctness and to avoid the ESLint `react-hooks/set-state-in-effect` violation that the previous `useState`+`useEffect` approach triggered.
+
+**Files changed:**
+- `src/components/PatternHistory.styled.tsx` — CSS Grid layout with XS/XL media queries
+- `src/components/PatternHistory.tsx` — responsive `entrySize` via `useMediaQuery`
+- `src/App.styled.tsx` — XL breakpoint for `Sidebar` (440 px) and `MainArea` padding
+- `src/components/FeedbackIndicator.styled.tsx` — smaller dots/gaps on XS
+- `src/components/useMediaQuery.ts` — `useSyncExternalStore` implementation
+

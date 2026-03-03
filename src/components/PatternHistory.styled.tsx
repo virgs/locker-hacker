@@ -1,9 +1,20 @@
 import styled from "styled-components";
 
+const XS = "@media (max-width: 600px)";
+const XL = "@media (min-width: 1400px)";
+
 export const HistoryList = styled.div`
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
     width: 100%;
+
+    ${XL} {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    ${XS} {
+        grid-template-columns: 1fr 1fr;
+    }
 `;
 
 export const HistoryEntry = styled.div`
@@ -13,9 +24,11 @@ export const HistoryEntry = styled.div`
     justify-content: center;
     gap: 12px;
     padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
-    &:not(:first-child) {
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    ${XS} {
+        gap: 6px;
+        padding: 8px 0;
     }
 `;
 
@@ -34,4 +47,9 @@ export const GuessNumber = styled.span`
     color: rgba(255, 255, 255, 0.45);
     line-height: 1;
     pointer-events: none;
+
+    ${XS} {
+        font-size: 8px;
+        left: 2px;
+    }
 `;
