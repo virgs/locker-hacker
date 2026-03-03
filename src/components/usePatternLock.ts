@@ -11,6 +11,7 @@ interface UsePatternLockOptions {
     disabled: boolean;
     allowOverlapping: boolean;
     allowJumping: boolean;
+    targetLength?: number;
     onChange?: (path: number[]) => void;
     onFinish?: () => void;
 }
@@ -22,6 +23,7 @@ export interface UsePatternLockResult {
     isMouseDown: boolean;
     initialMousePosition: PointType | null;
     flashingPoints: Set<number>;
+    completionFlash: boolean;
     onHold: (e: React.MouseEvent) => void;
     onTouch: (e: React.TouchEvent) => void;
 }
@@ -34,6 +36,7 @@ export const usePatternLock = ({
     disabled,
     allowOverlapping,
     allowJumping,
+    targetLength,
     onChange,
     onFinish,
 }: UsePatternLockOptions): UsePatternLockResult => {
@@ -44,8 +47,10 @@ export const usePatternLock = ({
     const [wrapperPosition, setWrapperPosition] = React.useState<PointType>({ x: 0, y: 0 });
     const [isMouseDown, setIsMouseDown]         = React.useState<boolean>(false);
     const [initialMousePosition, setInitialMousePosition] = React.useState<PointType | null>(null);
-    const [flashingPoints, setFlashingPoints]   = React.useState<Set<number>>(new Set());
-    const flashTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [flashingPoints, setFlashingPoints]     = React.useState<Set<number>>(new Set());
+    const [completionFlash, setCompletionFlash]   = React.useState<boolean>(false);
+    const flashTimerRef      = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+    const completionTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const onResize = (): [number, number] => {
         const el = wrapperRef.current;
@@ -147,10 +152,18 @@ export const usePatternLock = ({
     }, [disabled, path, onFinish]);
 
     React.useEffect(() => {
+        if (!targetLength || path.length !== targetLength) return;
+        if (completionTimerRef.current !== null) clearTimeout(completionTimerRef.current);
+        setCompletionFlash(true);
+        completionTimerRef.current = setTimeout(() => setCompletionFlash(false), 800);
+    }, [path.length, targetLength]);
+
+    React.useEffect(() => {
         return () => {
             if (flashTimerRef.current !== null) clearTimeout(flashTimerRef.current);
+            if (completionTimerRef.current !== null) clearTimeout(completionTimerRef.current);
         };
     }, []);
 
-    return { wrapperRef, points, wrapperPosition, isMouseDown, initialMousePosition, flashingPoints, onHold, onTouch };
+    return { wrapperRef, points, wrapperPosition, isMouseDown, initialMousePosition, flashingPoints, completionFlash, onHold, onTouch };
 };

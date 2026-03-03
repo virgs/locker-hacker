@@ -7,6 +7,7 @@ interface PointProps {
     cols            : number;
     rows            : number;
     pop             : boolean;
+    complete        : boolean;
     selected        : boolean;
 }
 
@@ -17,7 +18,8 @@ const Point: React.FunctionComponent<PointProps> = ({
     cols,
     rows,
     selected,
-    pop
+    pop,
+    complete,
 }): React.ReactElement => {
     const colPercent = 100 / cols;
     const rowPercent = 100 / rows;
@@ -40,7 +42,7 @@ const Point: React.FunctionComponent<PointProps> = ({
                 }}
             >
                 <div
-                    className={ `react-pattern-lock__point-inner${pop ? " active" : ""}` }
+                    className={ `react-pattern-lock__point-inner${complete ? " complete" : pop ? " active" : ""}` }
                     style={{
                         minWidth   : pointSize,
                         minHeight  : pointSize

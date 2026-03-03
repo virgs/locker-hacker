@@ -3,9 +3,9 @@ import './App.scss'
 import PatternLock from "./components/PatternLock.tsx";
 import PatternHistory from "./components/PatternHistory.tsx";
 import Navbar from "./components/Navbar.tsx";
+import Footer from "./components/Footer.tsx";
 import CodeRevealOverlay from "./components/CodeRevealOverlay.tsx";
 import { AppLayout, ContentArea, MainArea, PatternLockSizer, Sidebar } from "./App.styled.tsx";
-import { PatternLockStyles } from "./components/PatternLock.styled.tsx";
 import { GamePhase } from "./game/GameConfig.ts";
 import { useGameContext } from "./context/GameContext.tsx";
 
@@ -14,7 +14,6 @@ export const App = (): ReactElement => {
 
     return (
         <AppLayout>
-            <PatternLockStyles />
             <Navbar />
             <ContentArea>
                 <MainArea>
@@ -29,6 +28,7 @@ export const App = (): ReactElement => {
                             allowJumping={false}
                             invisible={false}
                             disabled={phase !== GamePhase.Playing}
+                            targetLength={gridConfig.length}
                             onChange={onPathChange}
                             onFinish={onGuessFinish}
                         />
@@ -38,6 +38,7 @@ export const App = (): ReactElement => {
                     <PatternHistory />
                 </Sidebar>
             </ContentArea>
+            <Footer />
             <CodeRevealOverlay />
         </AppLayout>
     );

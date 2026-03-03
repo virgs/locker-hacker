@@ -22,6 +22,7 @@ export interface GameContextValue {
     pathHistory     : number[][];
     isRunning       : boolean;
     showRevealModal : boolean;
+    elapsedSeconds  : number;
     onLevelChange        : (level: Level) => void;
     onPlayerCountChange  : (count: PlayerCount) => void;
     onGiveUp             : () => void;
@@ -51,15 +52,23 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const [pathHistory, setPathHistory] = React.useState<number[][]>([]);
     const [gameKey, setGameKey]         = React.useState(0);
     const [showRevealModal, setShowRevealModal] = React.useState(false);
+    const [elapsedSeconds, setElapsedSeconds]   = React.useState<number>(0);
 
     const gridConfig = LEVEL_CONFIGS[level];
     const isRunning  = pathHistory.length > 0;
+
+    React.useEffect(() => {
+        if (!isRunning || phase === GamePhase.Revealing) return;
+        const id = setInterval(() => setElapsedSeconds(prev => prev + 1), 1000);
+        return () => clearInterval(id);
+    }, [isRunning, phase]);
 
     const onLevelChange = React.useCallback((newLevel: Level): void => {
         setLevel(newLevel);
         setCode(generateCode(LEVEL_CONFIGS[newLevel]));
         setPath([]);
         setPathHistory([]);
+        setElapsedSeconds(0);
         setGameKey(prev => prev + 1);
     }, []);
 
@@ -82,6 +91,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         setPathHistory([]);
         setPhase(GamePhase.Playing);
         setShowRevealModal(false);
+        setElapsedSeconds(0);
         setGameKey(prev => prev + 1);
     }, [gridConfig]);
 
@@ -101,7 +111,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
 
     const value: GameContextValue = {
         level, playerCount, gridConfig, code, gameKey,
-        phase, path, pathHistory, isRunning, showRevealModal,
+        phase, path, pathHistory, isRunning, showRevealModal, elapsedSeconds,
         onLevelChange, onPlayerCountChange,
         onGiveUp, onToggleRevealModal, onFinishGame,
         onPathChange, onGuessFinish,

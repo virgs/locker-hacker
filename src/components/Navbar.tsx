@@ -20,10 +20,14 @@ import {
     PlayerCount,
     GamePhase,
     LEVEL_LABELS,
+    LEVEL_CONFIGS,
     PLAYER_LABELS,
     ALL_LEVELS,
     ALL_PLAYER_COUNTS,
 } from "../game/GameConfig.ts";
+
+const levelDetailLabel = (l: Level): string =>
+    `${LEVEL_LABELS[l]} (${LEVEL_CONFIGS[l].length})`;
 import HelpModal from "./HelpModal.tsx";
 import { useGameContext } from "../context/GameContext.tsx";
 
@@ -92,7 +96,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                         <Dropdown>
                             <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
                                 <BarChart2 size={14} />
-                                <ButtonLabel className="ms-1">{LEVEL_LABELS[level]}</ButtonLabel>
+                                <ButtonLabel className="ms-1">{levelDetailLabel(level)}</ButtonLabel>
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
                                 {ALL_LEVELS.map((l: Level) => (
@@ -101,7 +105,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                                         active={l === level}
                                         onClick={() => onLevelChange(l)}
                                     >
-                                        <BarChart2 size={14} className="me-1" /> {LEVEL_LABELS[l]}
+                                        <BarChart2 size={14} className="me-1" /> {levelDetailLabel(l)}
                                     </Dropdown.Item>
                                 ))}
                             </Dropdown.Menu>

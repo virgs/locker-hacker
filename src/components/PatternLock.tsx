@@ -1,5 +1,6 @@
 import * as React from "react";
 import classnames from "classnames";
+import "./PatternLock.css";
 
 import Point from "./Point.tsx";
 import Connectors from "./Connectors.tsx";
@@ -26,6 +27,7 @@ interface PatternLockProps {
     className?: string;
     noPop?: boolean;
     invisible?: boolean;
+    targetLength?: number;
     onChange?: (path: number[]) => void;
     onFinish?: () => void;
 }
@@ -50,12 +52,13 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     minConnectorOpacity = 0.5,
     className = "",
     style = {},
+    targetLength,
     onChange,
     onFinish,
     path,
 }): React.ReactElement => {
-    const { wrapperRef, points, wrapperPosition, isMouseDown, initialMousePosition, flashingPoints, onHold, onTouch } =
-        usePatternLock({ path, cols, rows, pointActiveSize, disabled, allowOverlapping, allowJumping, onChange, onFinish });
+    const { wrapperRef, points, wrapperPosition, isMouseDown, initialMousePosition, flashingPoints, completionFlash, onHold, onTouch } =
+        usePatternLock({ path, cols, rows, pointActiveSize, disabled, allowOverlapping, allowJumping, targetLength, onChange, onFinish });
 
     return (
         <div
@@ -73,7 +76,8 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                     rows={rows}
                     pointSize={pointSize}
                     pointActiveSize={pointActiveSize}
-                    pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
+                    complete={completionFlash && path.indexOf(i) > -1}
+                    pop={!noPop && !completionFlash && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
                     selected={path.indexOf(i) > -1}
                 />
             ))}

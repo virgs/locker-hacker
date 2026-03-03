@@ -707,3 +707,58 @@ A cleanup `useEffect` clears the timer on unmount. `flashingPoints` is included 
 **Fix:** Removed `<PatternLockStyles />` from `PatternLock.tsx` entirely. Added a single `<PatternLockStyles />` as the first child of `<AppLayout>` in `App.tsx`. There is now exactly one instance, always mounted for the lifetime of the app, regardless of how many `PatternLock` instances are created or destroyed.
 
 ---
+
+---
+
+### PatternLock Styles Converted to Static CSS File
+
+**Problem persisted:** Even after moving `<PatternLockStyles />` to `App.tsx` as a singleton, styled-components v6 `createGlobalStyle` can remove injected styles during React StrictMode's double-mount cycle or in other edge cases where the component re-mounts, causing PatternLock dots and connectors to disappear (they rely on `background: white` from the global CSS).
+
+**Fix:** Deleted `PatternLock.styled.tsx`. Created `src/components/PatternLock.css` with the same rules. Imported it directly in `PatternLock.tsx` (`import "./PatternLock.css"`). Vite processes CSS imports at module load time and injects them as persistent `<style>` tags — they are never removed by React lifecycle events. This is completely immune to styled-components lifecycle issues.
+
+**Trade-off:** Loss of the styled-components `createGlobalStyle` wrapper; gain of rock-solid style persistence. The rules themselves are unchanged.
+
+---
+
+---
+
+### TODO #1: Level Length Hints, Completion Animation, Footer
+
+**Decision:** Three improvements to help players understand game state.
+
+#### Level length in dropdown
+
+Added `levelDetailLabel(l: Level): string` helper in `Navbar.tsx` that returns e.g. `"Easy (3)"`. Used in both the dropdown toggle and each dropdown item. `LEVEL_CONFIGS` is imported from `GameConfig.ts` to get the `length` for each level — stays in sync with config changes.
+
+#### Completion animation (Nth dot)
+
+When the user draws exactly N dots (where N = `gridConfig.length`), all selected dots pulse green (`#77b300` — Bootstrap Cyborg `--bs-success` color) via a `popComplete` CSS keyframe animation (700ms, scale 1→2.5→1 with green fill). Implementation:
+- `usePatternLock.ts`: `completionFlash: boolean` state + `completionTimerRef`. A `useEffect` watching `path.length` triggers `completionFlash=true` for 800ms when `path.length === targetLength`.
+- `PatternLock.tsx`: new `targetLength?: number` prop; passes `complete={completionFlash && path.indexOf(i) > -1}` to each `Point`. When `completionFlash` is true, `pop` is suppressed so animations don't conflict.
+- `Point.tsx`: new `complete: boolean` prop; adds `.complete` CSS class (priority over `.active`).
+- `PatternLock.css`: `@keyframes popComplete` + `.react-pattern-lock__point-inner.complete` rule.
+
+#### Footer
+
+A persistent footer visible on all screens (flex-shrink: 0 in AppLayout column). Right-aligned stats:
+- Hash icon + code length (N)
+- BarChart2 icon + level name
+- Clock icon + elapsed time (M:SS format)
+
+Elapsed time is tracked in `GameContext` via a `setInterval` that counts up while `isRunning && phase === Playing`. Timer resets on `onLevelChange` and `onFinishGame`.
+
+**Files added:**
+- `src/components/Footer.tsx`
+- `src/components/Footer.styled.tsx`
+- `src/components/Footer.utils.ts` — `formatTime(totalSeconds): string` → `"M:SS"`
+- `src/components/Footer.test.ts`
+
+**Files changed:**
+- `src/components/usePatternLock.ts` — `targetLength`, `completionFlash`, `completionTimerRef`
+- `src/components/PatternLock.tsx` — `targetLength` prop, `complete` + `pop` wired
+- `src/components/PatternLock.css` — `popComplete` animation + `.complete` rule
+- `src/components/Point.tsx` — `complete` prop
+- `src/components/Navbar.tsx` — `levelDetailLabel` helper, `LEVEL_CONFIGS` import
+- `src/context/GameContext.tsx` — `elapsedSeconds`, timer effect, resets in `onLevelChange`/`onFinishGame`
+- `src/App.tsx` — `<Footer />`, `targetLength={gridConfig.length}` on PatternLock
+
