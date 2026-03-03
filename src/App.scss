@@ -1,4 +1,4 @@
-/* ── Desktop: no-scroll, fully contained layout ─────────────────────────── */
+/* Fully-contained layout on all screen sizes — no page scroll ever */
 html, body {
   height: 100%;
   margin: 0;
@@ -8,19 +8,4 @@ html, body {
 
 #root {
   height: 100%;
-}
-
-/* ── Mobile: allow page scroll, let content grow naturally ───────────────── */
-@media (max-width: 600px) {
-  html, body {
-    height: auto;
-    min-height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-
-  #root {
-    height: auto;
-    min-height: 100dvh;
-  }
 }

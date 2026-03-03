@@ -321,16 +321,17 @@ AppLayout (flex-col, 100%)
 
 **Problem:** On a 430 px viewport the Sidebar (220 px) consumed most of the width, leaving the MainArea only ~210 px while it still had `padding-left: 220px`. The 500 px PatternLock overflowed and was hidden behind the sidebar.
 
-**Fix — stacked column layout on mobile:**
+**Fix — stacked column layout on mobile, viewport always locked (no page scroll):**
 
 | Element | Desktop | Mobile (≤ 600 px) |
 |---|---|---|
-| `html/body` | `overflow: hidden; height: 100%` | `overflow-y: auto; height: auto` — page scrolls |
-| `#root` | `height: 100%` | `height: auto; min-height: 100dvh` |
-| `AppLayout` | `height: 100%; overflow: hidden` | `height: auto; overflow: visible` |
-| `ContentArea` | `flex-direction: row` | `flex-direction: column` |
-| `MainArea` | `flex: 1; padding-left: 220px` | `width: 100%; padding: 16px` |
-| `Sidebar` | `220px; height: 100%; overflow-y: scroll` | `width: 100%; height: auto; overflow-y: visible; border-top` |
+| `html/body` | `overflow: hidden; height: 100%` | same — no page scroll on any screen size |
+| `AppLayout` | `height: 100%; overflow: hidden` | same — no override needed |
+| `ContentArea` | `flex-direction: row` | `flex-direction: column` (stacks vertically) |
+| `MainArea` | `flex: 1; padding-left: 220px` | `flex: none; width: 100%; padding: 16px` |
+| `Sidebar` | `220px; height: 100%; overflow-y: scroll` | `width: 100%; flex: 1; min-height: 0; overflow-y: scroll; border-top` |
+
+**Why `flex: 1; min-height: 0` on mobile Sidebar:** without `min-height: 0`, a flex child's minimum height defaults to its content size, so the browser never imposes a height cap and `overflow-y: scroll` has nothing to clip against — the sidebar expands to full content height instead of scrolling. `flex: 1` makes the sidebar fill whatever space remains below the PatternLock; `min-height: 0` overrides the flex default and lets the scroll container actually constrain its content.
 
 **`PatternLockSizer` (new styled-component):** wraps the PatternLock and provides explicit pixel dimensions (`500px × 500px` desktop, `calc(100vw - 32px) × calc(100vw - 32px)` mobile). The PatternLock receives `containerSize="100%"` so it fills the sizer precisely. This avoids passing a viewport-unit string to the component and keeps the sizing logic in CSS.
 

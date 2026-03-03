@@ -7,12 +7,6 @@ export const AppLayout = styled.div`
     flex-direction: column;
     height: 100%;
     overflow: hidden;
-
-    ${MOBILE} {
-        height: auto;
-        min-height: 100dvh;
-        overflow: visible;
-    }
 `;
 
 export const ContentArea = styled.div`
@@ -24,8 +18,6 @@ export const ContentArea = styled.div`
 
     ${MOBILE} {
         flex-direction: column;
-        flex: none;
-        overflow: visible;
     }
 `;
 
@@ -45,7 +37,6 @@ export const MainArea = styled.main`
         width: 100%;
         height: auto;
         padding: 16px;
-        overflow: visible;
     }
 `;
 
@@ -78,8 +69,12 @@ export const Sidebar = styled.aside`
 
     ${MOBILE} {
         width: 100%;
+        /* flex: 1 + min-height: 0 lets this child grow into remaining space
+           AND enables overflow-y: scroll to actually scroll (without min-height: 0
+           the browser does not impose a height limit so nothing scrolls). */
+        flex: 1;
+        min-height: 0;
         height: auto;
-        overflow-y: visible;
         border-left: none;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
         padding: 8px 16px;

@@ -179,4 +179,4 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [x] When using narrower screens such as (430x932) the PatternLock component should be responsive and adapt to the screen size without breaking the layout or functionality. This may involve using CSS media queries to adjust the size and positioning of the component based on the screen width. Additionally, ensure that all interactive elements remain accessible and usable on smaller screens. Right now, it doesn't render properly and it's being overlaid by the Sidebar component. This issue needs to be fixed to ensure a seamless user experience across different devices and screen sizes. Fix it.
+1. [x] Keep the large screen behavior. But in smaller screens only the side bar should be scrollable. Use the bootsttrap container if you have to. 
