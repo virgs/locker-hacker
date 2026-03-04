@@ -34,6 +34,12 @@ export const LEVEL_LABELS: Record<Level, string> = {
     [Level.Hard]  : "Hard",
 };
 
+export const LEVEL_LABELS_SHORT: Record<Level, string> = {
+    [Level.Easy]  : "E",
+    [Level.Medium]: "M",
+    [Level.Hard]  : "H",
+};
+
 export const PLAYER_LABELS: Record<PlayerCount, string> = {
     [PlayerCount.One]  : "1 player",
     [PlayerCount.Two]  : "2 players",

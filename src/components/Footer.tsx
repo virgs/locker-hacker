@@ -1,12 +1,14 @@
 import * as React from "react";
 import { Hash, BarChart2, Clock, User, Unlock } from "react-feather";
 import { FooterContainer, FooterStat, AiProgressStat, PlayerLabel } from "./Footer.styled.tsx";
-import { PlayerCount, LEVEL_LABELS } from "../game/GameConfig.ts";
+import { PlayerCount, LEVEL_LABELS, LEVEL_LABELS_SHORT } from "../game/GameConfig.ts";
 import { getPlayerColor } from "../game/playerColors.ts";
 import { useGameContext } from "../context/GameContext.tsx";
 import { formatTime, getAiIndicatorColor } from "./Footer.utils.ts";
 import useInferenceEngine, { GuessQuality } from "./useInferenceEngine.ts";
 import Tip from "./Tip.tsx";
+import useMediaQuery from "./useMediaQuery.ts";
+import { BREAKPOINT_QUERIES } from "../theme/breakpoints.ts";
 
 const QUALITY_FLASH_MS = 2500;
 
@@ -16,6 +18,8 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
     const playerColor   = getPlayerColor(currentPlayer);
     const aiProgress    = useInferenceEngine(gridConfig, code, pathHistory);
     const [flashQuality, setFlashQuality] = React.useState<GuessQuality>(GuessQuality.Neutral);
+    const isMobile      = useMediaQuery(BREAKPOINT_QUERIES.mobile);
+    const levelLabel    = isMobile ? LEVEL_LABELS_SHORT[level] : LEVEL_LABELS[level];
 
     React.useEffect(() => {
         if (aiProgress.lastGuessQuality === GuessQuality.Neutral || pathHistory.length === 0) return;
@@ -31,16 +35,16 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
             <Tip text="AI confidence" placement="top">
                 <AiProgressStat
                     $color={indicatorColor}
-                    aria-label={`AI progress: ${Math.round(aiProgress.percent)}%`}
+                    aria-label={`AI progress: ${aiProgress.percent.toFixed(1)}%`}
                 >
                     <Unlock size={20} />
-                    {Math.floor(aiProgress.percent)}%
+                    {aiProgress.percent.toFixed(1)}%
                 </AiProgressStat>
             </Tip>
             {isMultiplayer && (
                 <PlayerLabel $color={playerColor} aria-label={`Current player: Player ${currentPlayer}`}>
                     <User size={20} />
-                    Player {currentPlayer}
+                    {isMobile ? currentPlayer : `Player ${currentPlayer}`}
                 </PlayerLabel>
             )}
             <Tip text="Code length" placement="top">
@@ -52,7 +56,7 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
             <Tip text="Difficulty level" placement="top">
                 <FooterStat aria-label={`Level: ${LEVEL_LABELS[level]}`}>
                     <BarChart2 size={20} />
-                    {LEVEL_LABELS[level]}
+                    {levelLabel}
                 </FooterStat>
             </Tip>
             <Tip text="Elapsed time" placement="top">

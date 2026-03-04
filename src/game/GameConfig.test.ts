@@ -1,6 +1,7 @@
 import {
     LEVEL_CONFIGS,
     LEVEL_LABELS,
+    LEVEL_LABELS_SHORT,
     PLAYER_LABELS,
     ALL_LEVELS,
     ALL_PLAYER_COUNTS,
@@ -46,6 +47,26 @@ describe("GameConfig", () => {
                 expect(typeof LEVEL_LABELS[level]).toBe("string");
                 expect(LEVEL_LABELS[level].length).toBeGreaterThan(0);
             }
+        });
+    });
+
+    describe("LEVEL_LABELS_SHORT", () => {
+        it("has a short label for each level", () => {
+            for (const level of ALL_LEVELS) {
+                expect(typeof LEVEL_LABELS_SHORT[level]).toBe("string");
+                expect(LEVEL_LABELS_SHORT[level].length).toBe(1);
+            }
+        });
+
+        it("short labels are distinct", () => {
+            const labels = ALL_LEVELS.map(l => LEVEL_LABELS_SHORT[l]);
+            expect(new Set(labels).size).toBe(labels.length);
+        });
+
+        it("maps easy=E, medium=M, hard=H", () => {
+            expect(LEVEL_LABELS_SHORT[Level.Easy]).toBe("E");
+            expect(LEVEL_LABELS_SHORT[Level.Medium]).toBe("M");
+            expect(LEVEL_LABELS_SHORT[Level.Hard]).toBe("H");
         });
     });
 

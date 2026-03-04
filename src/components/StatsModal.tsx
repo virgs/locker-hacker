@@ -3,7 +3,7 @@ import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 import {Award, Clock, Info, BarChart2, Hash, GitCommit} from "react-feather";
 import {EmptyState} from "./StatsModal.styled.tsx";
-import {LEVEL_LABELS, ALL_LEVELS} from "../game/GameConfig.ts";
+import {LEVEL_LABELS, LEVEL_LABELS_SHORT, ALL_LEVELS} from "../game/GameConfig.ts";
 import {
     loadRecords,
     computeLevelStats,
@@ -12,6 +12,8 @@ import {
     avgMoves,
     formatStatsTime,
 } from "../game/StatsService.ts";
+import useMediaQuery from "./useMediaQuery.ts";
+import {BREAKPOINT_QUERIES} from "../theme/breakpoints.ts";
 
 interface StatsModalProps {
     show: boolean;
@@ -26,6 +28,8 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
     const levelStats = computeLevelStats(records);
     const totalStats = computeTotalStats(records);
     const hasData = records.length > 0;
+    const isMobile = useMediaQuery(BREAKPOINT_QUERIES.mobile);
+    const labels = isMobile ? LEVEL_LABELS_SHORT : LEVEL_LABELS;
 
     return (
         <Modal show={show} onHide={onClose} centered>
@@ -42,17 +46,17 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
                     <Table hover>
                         <thead>
                         <tr>
-                            <th className="text-end"><BarChart2 size={14} className="me-1"/>Level</th>
-                            <th className="text-end"><Hash size={14} className="me-1"/>Games</th>
-                            <th className="text-end"><Award size={14} className="me-1"/>Wins</th>
-                            <th className="text-end"><Clock size={14} className="me-1"/>Time avg</th>
-                            <th className="text-end"><GitCommit size={14} className="me-1"/>Moves avg</th>
+                            <th className="text-end"><BarChart2 size={14} className="me-1"/>{!isMobile && "Level"}</th>
+                            <th className="text-end"><Hash size={14} className="me-1"/>{!isMobile && "Games"}</th>
+                            <th className="text-end"><Award size={14} className="me-1"/>{!isMobile && "Wins"}</th>
+                            <th className="text-end"><Clock size={14} className="me-1"/>{!isMobile && "Time avg"}</th>
+                            <th className="text-end"><GitCommit size={14} className="me-1"/>{!isMobile && "Moves avg"}</th>
                         </tr>
                         </thead>
                         <tbody>
                         {ALL_LEVELS.map(l => (
                             <tr key={l}>
-                                <td className="fw-bolder">{LEVEL_LABELS[l]}</td>
+                                <td className="fw-bolder">{labels[l]}</td>
                                 <td className="text-end">{levelStats[l].gamesPlayed}</td>
                                 <td className="text-end">{levelStats[l].wins}</td>
                                 <td className="text-end">{formatStatsTime(avgTimeSeconds(levelStats[l]))}</td>

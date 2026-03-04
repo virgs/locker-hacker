@@ -895,3 +895,22 @@ Sidebar (flex-col)
 
 **Files:**
 - `src/components/useInferenceEngine.ts` — added `console.log` when `isSolved && summary.candidates.length === 1`
+
+---
+
+### Small Screen (Mobile) Responsive Adjustments
+
+**Decision:** On mobile screens (≤600px, matching Bootstrap xs breakpoint via `BREAKPOINT_QUERIES.mobile`), apply three condensed-layout changes:
+
+1. **Stats table:** Hide header text labels, keeping only the icons (e.g., the clock icon remains, but "Time avg" text is hidden).
+2. **Footer level label:** Show abbreviated single-letter labels (E/M/H) instead of full words (Easy/Medium/Hard).
+3. **Footer player label:** Show only the player icon + number (e.g., `👤 2`) instead of "Player 2".
+
+**Rationale:** On xs screens the footer and stats modal were cramped. Abbreviating text while preserving icons keeps the UI readable without horizontal overflow. The `LEVEL_LABELS_SHORT` map centralizes short labels in `GameConfig.ts` alongside `LEVEL_LABELS` for consistency.
+
+**Files:**
+- `src/game/GameConfig.ts` — added `LEVEL_LABELS_SHORT` map
+- `src/game/GameConfig.test.ts` — added tests for `LEVEL_LABELS_SHORT`
+- `src/components/Footer.tsx` — uses `useMediaQuery` to switch between full/short labels and full/short player text
+- `src/components/StatsModal.tsx` — uses `useMediaQuery` to conditionally hide header text and use short level labels
+

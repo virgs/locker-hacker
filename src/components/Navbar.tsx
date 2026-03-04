@@ -1,5 +1,5 @@
 import * as React from "react";
-import {GitHub, HelpCircle, Eye, EyeOff, Users, User, BarChart2, XOctagon, Play} from "react-feather";
+import {GitHub, HelpCircle, Eye, EyeOff, Users, User, BarChart2, Play} from "react-feather";
 import Dropdown from "react-bootstrap/Dropdown";
 import Button from "react-bootstrap/Button";
 import {
@@ -71,7 +71,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                     </Tip>
                     <Tip text="Start a new game">
                         <Button variant="primary" size="sm" onClick={onFinishGame} aria-label="Finish game">
-                            <Play size={20}/><ButtonLabel className="ms-1">New Game</ButtonLabel>
+                            <Play size={20}/><ButtonLabel className="ms-1">Play again</ButtonLabel>
                         </Button>
                     </Tip>
                 </>
