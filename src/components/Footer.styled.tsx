@@ -43,13 +43,13 @@ export const AiProgressStat = styled.span<{ $color?: string }>`
     position: relative;
 `;
 
-export const ConfidenceDelta = styled.span<{ $color: string }>`
+export const ConfidenceDelta = styled.span<{ $color?: string }>`
     position: absolute;
     top: -4px;
     left: 10px;
     font-size: 0.65rem;
     font-weight: 700;
-    color: ${({ $color }) => $color};
+    color: ${({ $color }) => $color ?? 'inherit'};
     pointer-events: none;
     animation: ${moveUpAndFadeOut} 2s ease-out forwards;
     white-space: nowrap;
