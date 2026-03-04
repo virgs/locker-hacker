@@ -46,7 +46,7 @@ describe("filterCandidates", () => {
         };
         const result = filterCandidates(candidates, observation);
         // [3,4,5] also has no overlap with [6,7,8], so kept too
-        expect(result.length).toBeGreaterThanOrEqual(candidates.length - 0);
+        expect(result.length).toBeGreaterThanOrEqual(candidates.length);
     });
 
     it("returns exact match when feedback is all bulls", () => {

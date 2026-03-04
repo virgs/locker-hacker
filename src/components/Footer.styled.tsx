@@ -20,6 +20,15 @@ export const FooterContainer = styled.footer`
     }
 `;
 
+export const AiProgressStat = styled.span`
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    margin-right: auto;
+`;
+
 export const PlayerLabel = styled.span<{ $color: string }>`
     position: absolute;
     left: 50%;

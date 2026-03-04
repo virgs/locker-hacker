@@ -729,3 +729,26 @@ feedbackEntry(index, bulls, cows) — returns the correct entry for a position
 - Each file is under 90 lines (well within the 200-line limit)
 
 **Tests:** `CandidateGenerator.test.ts` (7 tests), `CandidateFilter.test.ts` (5 tests), `SummaryBuilder.test.ts` (13 tests), `InferenceEngine.test.ts` (5 tests), `grid.test.ts` (5 tests)
+
+---
+
+### AI Progress Percentage in Footer
+
+**Decision:** Added a real-time AI progress percentage to the far left of the footer, showing how close the AI inference engine is to narrowing down the secret code.
+
+**Display:** An `Unlock` icon (from react-feather) followed by `X%` on the far left side of the footer. The percentage represents `reducedPercent` from the AI's progress — how much of the initial candidate space has been eliminated (0% = no guesses yet, ~100% = only 1 candidate remains).
+
+**Implementation:**
+- `src/components/useInferenceEngine.ts` — custom React hook that wraps `InferenceEngine`. Uses `useMemo` (not `useState`+`useEffect`) to avoid the `react-hooks/set-state-in-effect` ESLint error. The engine is memoized on `gridConfig` and recomputed when `pathHistory` changes. Returns `{ percent, candidates }`.
+- `src/components/Footer.tsx` — calls `useInferenceEngine(gridConfig, code, pathHistory)` and renders the progress stat with the `Unlock` icon.
+- `src/components/Footer.styled.tsx` — added `AiProgressStat` styled component with `margin-right: auto` to push it to the far left while other stats stay right-aligned.
+
+**Reset behaviour:** When `pathHistory` is empty (new game / level change / finish game), the hook returns `{ percent: 0, candidates: 0 }` immediately without running any inference, matching the TODO requirement that "every time a new game starts, the percentage should reset to 0%".
+
+**Why `useMemo` over `useState`+`useEffect`:** The project's ESLint config enforces `react-hooks/set-state-in-effect` which forbids calling `setState` synchronously inside effects. `useMemo` computes the progress synchronously during render — no cascading re-renders, no effect cleanup issues. The `InferenceEngine` constructor (candidate generation) is expensive for large grids, so it's memoized separately on `gridConfig`.
+
+**Files:**
+- `src/components/useInferenceEngine.ts` — new hook
+- `src/components/useInferenceEngine.test.ts` — 6 tests (progress computation logic)
+- `src/components/Footer.tsx` — added AI progress display
+- `src/components/Footer.styled.tsx` — added `AiProgressStat`
