@@ -180,13 +180,9 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [x] When in small screens (xs bootstrap breakpoint)"
-   - Hide texts in stats table and keep only the icons.
-   - Abbreviate footer texts: Medium should be M (and the same for all levels).
-   - Remove the "player" and leave only the icon + their identifier (like icon + 1, icon + 2, etc).
-2. [ ] Players turn announcements also should reuse react bootstrap modal instead of creating a custom one
-3. [ ] Every time a guess is made, add an animated feedback to the player telling how much the ai confidence increased. This should be a simple text that appears for ~0.5ms on the unlock icon showing the confidence change (e.g., "+5%" or "-3%") with a brief animation (like fading in and out, moving up a few pixels and getting bigger). Something like.
-   ```@keyframes moveUpAndFadeOut {
+1. [x] Players turn announcements also should reuse react bootstrap modal instead of creating a custom one
+2. [ ] Every time a guess is made, add an animated feedback to the player telling how much the ai confidence increased. This should be a simple text that appears for ~0.5ms on the unlock icon showing the confidence change (e.g., "+5%" or "-3%") with a brief animation (like fading in and out, moving up a few pixels and getting bigger). Something like.
+   ```@keyframes moveUpAndFadeOut (or any better naming) {
     0% {
         opacity: 1;
     }
@@ -196,5 +192,5 @@ Build incrementally and safely.
         transform: translateY(-30px) translateX(10px) scale(2.5);
     }
 }```
-4. [ ] Add a confetti like animation (can be anything simple) when a player wins the game.
+1. [ ] Add a confetti like animation or something similar (can be anything simple) when a player wins the game.
 

@@ -914,3 +914,21 @@ Sidebar (flex-col)
 - `src/components/Footer.tsx` — uses `useMediaQuery` to switch between full/short labels and full/short player text
 - `src/components/StatsModal.tsx` — uses `useMediaQuery` to conditionally hide header text and use short level labels
 
+---
+
+### TurnAnnouncement Refactor to React Bootstrap Modal
+
+**Decision:** Replaced the custom overlay implementation (`TurnBackdrop`, `TurnCard`, `DismissButton`) with `react-bootstrap/Modal`, consistent with how `StatsModal`, `HelpModal`, and `CodeRevealOverlay` work.
+
+**Rationale:** The custom overlay duplicated modal behaviour (backdrop, dismiss, centering, animation) that React Bootstrap already provides. Reusing the same `<Modal>` component ensures consistent styling, accessibility (focus trap, Escape key), and animation across the app. Also uses `formatTurnMessage` from `TurnAnnouncement.utils.ts` for the title text.
+
+**Behaviour preserved:**
+- Auto-dismiss after 2 seconds via `setTimeout`
+- Click backdrop or close button to dismiss
+- Player-colored name in the title
+- Only renders in multiplayer mode
+
+**Files:**
+- `src/components/TurnAnnouncement.tsx` — rewrote to use `react-bootstrap/Modal`
+- `src/components/TurnAnnouncement.styled.tsx` — removed `TurnBackdrop`, `TurnCard`, `TurnMessage`, `DismissButton`; kept `TurnPlayerName`
+
