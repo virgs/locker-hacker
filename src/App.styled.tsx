@@ -48,10 +48,41 @@ export const Sidebar = styled.aside`
     width: 220px;
     height: 100%;
     flex-shrink: 0;
-    overflow-y: scroll;
-    padding: 16px 8px;
+    display: flex;
+    flex-direction: column;
     box-sizing: border-box;
     border-left: 1px solid rgba(255, 255, 255, 0.1);
+
+    ${BREAKPOINTS.xl} {
+        width: 440px;
+    }
+
+    ${BREAKPOINTS.mobile} {
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+        height: auto;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+`;
+
+export const SidebarHeader = styled.div`
+    flex-shrink: 0;
+    padding: 12px 8px 0;
+    box-sizing: border-box;
+
+    ${BREAKPOINTS.mobile} {
+        padding: 8px 16px 0;
+    }
+`;
+
+export const SidebarContent = styled.div`
+    flex: 1;
+    min-height: 0;
+    overflow-y: scroll;
+    padding: 8px 8px 16px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -71,21 +102,8 @@ export const Sidebar = styled.aside`
         border-radius: 3px;
     }
 
-    ${BREAKPOINTS.xl} {
-        width: 440px;
-    }
-
     ${BREAKPOINTS.mobile} {
-        width: 100%;
-        /* flex: 1 + min-height: 0 lets this child grow into remaining space
-           AND enables overflow-y: scroll to actually scroll (without min-height: 0
-           the browser does not impose a height limit so nothing scrolls). */
-        flex: 1;
-        min-height: 0;
-        height: auto;
-        border-left: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 8px 16px;
+        padding: 4px 16px 8px;
     }
 `;
 

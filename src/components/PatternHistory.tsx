@@ -2,13 +2,20 @@ import * as React from "react";
 import { List } from "react-feather";
 import PatternLock from "./PatternLock.tsx";
 import FeedbackIndicator from "./FeedbackIndicator.tsx";
-import { HistoryTitle, HistoryList, HistoryEntry, PatternLockWrapper, GuessNumber } from "./PatternHistory.styled.tsx";
+import { HistoryTitleContainer, HistoryList, HistoryEntry, PatternLockWrapper, GuessNumber } from "./PatternHistory.styled.tsx";
 import { GuessValidator } from "../game/GuessValidator.ts";
 import { PlayerCount } from "../game/GameConfig.ts";
 import { getPlayerColor } from "../game/playerColors.ts";
 import { useGameContext } from "../context/GameContext.tsx";
 import { BREAKPOINT_QUERIES } from "../theme/breakpoints.ts";
 import useMediaQuery from "./useMediaQuery.ts";
+
+export const HistoryTitle: React.FunctionComponent = (): React.ReactElement => (
+    <HistoryTitleContainer>
+        <List size={12} />
+        Guess History
+    </HistoryTitleContainer>
+);
 
 interface PatternHistoryProps {
     entrySize ?: number;
@@ -30,12 +37,7 @@ const PatternHistory: React.FunctionComponent<PatternHistoryProps> = ({
     }, [pathHistory.length]);
 
     return (
-        <>
-            <HistoryTitle>
-                <List size={12} />
-                Guess History
-            </HistoryTitle>
-            <HistoryList>
+        <HistoryList>
             {pathHistory.map((path, index) => {
                 const { bulls, cows } = validator.validate(path);
                 const playerColor = isMultiplayer ? getPlayerColor(playerHistory[index]) : undefined;
@@ -62,7 +64,6 @@ const PatternHistory: React.FunctionComponent<PatternHistoryProps> = ({
             })}
             <div ref={listEndRef} />
         </HistoryList>
-        </>
     );
 };
 

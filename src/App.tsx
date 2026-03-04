@@ -6,10 +6,11 @@ import Navbar from "./components/Navbar.tsx";
 import Footer from "./components/Footer.tsx";
 import CodeRevealOverlay from "./components/CodeRevealOverlay.tsx";
 import TurnAnnouncement from "./components/TurnAnnouncement.tsx";
-import { AppLayout, ContentArea, MainArea, PatternLockSizer, Sidebar } from "./App.styled.tsx";
+import { AppLayout, ContentArea, MainArea, PatternLockSizer, Sidebar, SidebarHeader, SidebarContent } from "./App.styled.tsx";
 import { GamePhase, PlayerCount } from "./game/GameConfig.ts";
 import { getPlayerColor } from "./game/playerColors.ts";
 import { useGameContext } from "./context/GameContext.tsx";
+import { HistoryTitle } from "./components/PatternHistory.tsx";
 
 export const App = (): ReactElement => {
     const { phase, path, gameKey, gridConfig, playerCount, currentPlayer, onPathChange, onGuessFinish } = useGameContext();
@@ -39,7 +40,12 @@ export const App = (): ReactElement => {
                     </PatternLockSizer>
                 </MainArea>
                 <Sidebar>
-                    <PatternHistory />
+                    <SidebarHeader>
+                        <HistoryTitle />
+                    </SidebarHeader>
+                    <SidebarContent>
+                        <PatternHistory />
+                    </SidebarContent>
                 </Sidebar>
             </ContentArea>
             <Footer />

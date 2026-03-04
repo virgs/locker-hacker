@@ -39,15 +39,16 @@ const computeAiProgress = (
     const isSolved = currentCandidates <= 1;
     const percent = isSolved ? 100 : summary.progress.reducedPercent;
 
-    let lastGuessQuality = GuessQuality.Neutral;
+    let prevCandidates: number;
     if (pathHistory.length >= 2) {
         const prevObservations = observations.slice(0, -1);
         const prevSummary = engine.applyAll(prevObservations);
-        lastGuessQuality = classifyGuessQuality(
-            prevSummary.progress.candidateCount,
-            currentCandidates,
-        );
+        prevCandidates = prevSummary.progress.candidateCount;
+    } else {
+        prevCandidates = summary.progress.initialCandidateCount;
     }
+
+    const lastGuessQuality = classifyGuessQuality(prevCandidates, currentCandidates);
 
     return { percent, candidates: currentCandidates, isSolved, lastGuessQuality };
 };
@@ -111,10 +112,12 @@ describe("AI progress computation", () => {
         expect(result.lastGuessQuality).toBe(GuessQuality.Bad);
     });
 
-    it("lastGuessQuality is Neutral on the first guess", () => {
+    it("classifies first guess quality based on initial candidate reduction", () => {
         const code = [0, 3];
         const result = computeAiProgress(config, code, [[0, 1]]);
-        expect(result.lastGuessQuality).toBe(GuessQuality.Neutral);
+        // First guess always eliminates a significant portion of candidates
+        expect(result.lastGuessQuality).not.toBe(GuessQuality.Neutral);
+        expect(result.lastGuessQuality).not.toBe(GuessQuality.Bad);
     });
 });
 
@@ -178,8 +181,8 @@ describe("getAiIndicatorColor", () => {
         expect(getAiIndicatorColor(true, GuessQuality.Neutral)).toBe(AI_COLOR_SUCCESS);
     });
 
-    it("returns success color even when flashQuality is Bad (solved takes priority)", () => {
-        expect(getAiIndicatorColor(true, GuessQuality.Bad)).toBe(AI_COLOR_SUCCESS);
+    it("returns danger color when flashQuality is Bad even if solved (flash takes priority)", () => {
+        expect(getAiIndicatorColor(true, GuessQuality.Bad)).toBe(AI_COLOR_DANGER);
     });
 
     it("returns danger color for Bad quality", () => {

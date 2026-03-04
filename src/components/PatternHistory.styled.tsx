@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { BREAKPOINTS } from "../theme/breakpoints.ts";
 
-export const HistoryTitle = styled.h6`
+export const HistoryTitleContainer = styled.h6`
     display: flex;
     align-items: center;
     justify-content: center;
@@ -11,7 +11,7 @@ export const HistoryTitle = styled.h6`
     color: rgba(255, 255, 255, 0.4);
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    margin: 0 0 10px;
+    margin: 0;
     width: 100%;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);

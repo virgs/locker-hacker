@@ -181,4 +181,4 @@ Build incrementally and safely.
 # TODO list
 
 
-1. [x] The same way the unlock ai indicator changes color to red briefly when a bad guess is made, change it to yellow when a guess is is bad, but slightly better than a red one and green when a guess is good (increases substantially). All these "guess evaluator" should be based relatively. Which means that the increase from 0 to 50% is the same as from 98% to 99% (it increase by 50% in both cases). This way the feedback is more meaningful and not just based on absolute values.
+1. [ ] Add tooltips to every button and interactive element in the UI to improve accessibility and user understanding.

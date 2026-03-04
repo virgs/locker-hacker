@@ -8,7 +8,6 @@ import {
     loadRecords,
     computeLevelStats,
     computeTotalStats,
-    winPercent,
     avgTimeSeconds,
     avgMoves,
     formatStatsTime,
@@ -31,7 +30,7 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
     return (
         <Modal show={show} onHide={onClose} centered>
             <Modal.Header closeButton>
-                <Modal.Title>Game Stats</Modal.Title>
+                <Modal.Title>Games Stats</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {!hasData ? (
@@ -40,30 +39,30 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
                         <p>No stats available.<br/>Play some games to see stats here!</p>
                     </EmptyState>
                 ) : (
-                    <Table striped hover size="sm">
+                    <Table hover>
                         <thead>
                         <tr>
                             <th className="text-end"><BarChart2 size={14} className="me-1"/>Level</th>
                             <th className="text-end"><Hash size={14} className="me-1"/>Games</th>
-                            <th className="text-end"><Award size={14} className="me-1"/>Win %</th>
-                            <th className="text-end"><Clock size={14} className="me-1"/>Time avg.</th>
-                            <th className="text-end"><GitCommit size={14} className="me-1"/>Moves</th>
+                            <th className="text-end"><Award size={14} className="me-1"/>Wins</th>
+                            <th className="text-end"><Clock size={14} className="me-1"/>Time avg</th>
+                            <th className="text-end"><GitCommit size={14} className="me-1"/>Moves avg</th>
                         </tr>
                         </thead>
                         <tbody>
                         {ALL_LEVELS.map(l => (
                             <tr key={l}>
-                                <td>{LEVEL_LABELS[l]}</td>
+                                <td className="fw-bolder">{LEVEL_LABELS[l]}</td>
                                 <td className="text-end">{levelStats[l].gamesPlayed}</td>
-                                <td className="text-end">{winPercent(levelStats[l])}%</td>
+                                <td className="text-end">{levelStats[l].wins}</td>
                                 <td className="text-end">{formatStatsTime(avgTimeSeconds(levelStats[l]))}</td>
                                 <td className="text-end">{avgMoves(levelStats[l])}</td>
                             </tr>
                         ))}
                         <tr className="fw-bold">
-                            <td className="text-start">Total</td>
+                            <td className="text-start fw-bolder">Total</td>
                             <td className="text-end">{totalStats.gamesPlayed}</td>
-                            <td className="text-end">{winPercent(totalStats)}%</td>
+                            <td className="text-end">{totalStats.wins}</td>
                             <td className="text-end">{formatStatsTime(totalStats.totalSeconds)}</td>
                             <td className="text-end">-</td>
                         </tr>

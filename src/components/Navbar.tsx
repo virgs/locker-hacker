@@ -101,7 +101,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                             onTouchStart={handleIconDown}
                             onTouchEnd={handleIconUp}
                         >
-                            <AppIconImage src="/icon.png" alt={APP_TITLE}/>
+                            <AppIconImage src={`${import.meta.env.BASE_URL}icon.png`} alt={APP_TITLE}/>
                         </AppIconLink>
 
                         <Dropdown>

@@ -761,20 +761,49 @@ feedbackEntry(index, bulls, cows) — returns the correct entry for a position
 - **Green** (`var(--bs-success)`) — guess was good: eliminated ≥ 50% of the remaining candidate space
 - **Yellow** (`var(--bs-warning)`) — guess was mediocre: eliminated some candidates, but < 50% of the remaining space
 - **Red** (`var(--bs-danger)`) — guess was bad: no candidates eliminated (or candidates increased)
-- **Green** also shown permanently when `isSolved = true` (AI reaches 100%)
+- **Green** also shown permanently when `isSolved = true` (AI reaches 100%), but active flashes temporarily override it
 - All color flashes last 2.5 seconds, with `transition: color 0.4s ease`
 
 **Relative evaluation formula:** `relativeReduction = (prevCandidates - currentCandidates) / prevCandidates`. This ensures the feedback is proportional — going from 0% → 50% is rated the same as from 98% → 99%, since both represent a 50% reduction of the remaining candidate space. Thresholds: `≤ 0` = Bad, `< 0.5` = Mediocre, `≥ 0.5` = Good.
 
-**Replaced:** The binary `lastGuessUseless: boolean` field and `flashRed: boolean` state with `lastGuessQuality: GuessQuality` enum and `flashQuality: GuessQuality` state. The `classifyGuessQuality` function is pure, exported, and fully tested (12 tests).
+**First-guess classification:** Previously, the first guess was always `Neutral` (no flash) because classification only ran when `pathHistory.length >= 2`. Now the first guess uses `initialCandidateCount` from the inference engine as the baseline. A first guess typically eliminates a large portion of candidates, so it correctly flashes green.
 
-**Color priority:** `isSolved` (green) always takes precedence. The `getAiIndicatorColor` function in `Footer.utils.ts` maps `GuessQuality` to Bootstrap CSS variables.
+**Flash priority over isSolved:** Active flash quality takes precedence over the permanent `isSolved` green. This ensures that once the AI reaches 100%, any subsequent non-winning guess correctly flashes red (since no guess can further reduce an already-minimal candidate count), rather than staying permanently green.
+
+**Color priority in `getAiIndicatorColor`:** `flashQuality !== Neutral` → use flash color; else if `isSolved` → success green; else → undefined (default).
 
 **Files changed:**
-- `src/components/useInferenceEngine.ts` — added `GuessQuality` enum, `classifyGuessQuality` function, replaced `lastGuessUseless` with `lastGuessQuality`
-- `src/components/Footer.tsx` — replaced `flashRed` boolean with `flashQuality: GuessQuality` state
-- `src/components/Footer.utils.ts` — added `AI_COLOR_WARNING`, updated `getAiIndicatorColor` to accept `GuessQuality` and return three colors
-- `src/components/useInferenceEngine.test.ts` — 12 tests for `classifyGuessQuality`, 6 tests for `getAiIndicatorColor` (updated), 8 tests for AI progress computation
+- `src/components/useInferenceEngine.ts` — `GuessQuality` enum, `classifyGuessQuality` function, first guess uses `initialCandidateCount`
+- `src/components/Footer.tsx` — `flashQuality: GuessQuality` state with 2.5s timer
+- `src/components/Footer.utils.ts` — `getAiIndicatorColor` with flash-first priority
+- `src/components/useInferenceEngine.test.ts` — updated tests for first-guess classification and flash priority
+
+---
+
+### Sidebar Title Outside Scroll Area
+
+**Decision:** Extracted the "Guess History" title from `PatternHistory` into a standalone `HistoryTitle` component, rendered in a fixed `SidebarHeader` above the scrollable `SidebarContent`.
+
+**Problem:** The title scrolled away with the guess history, making it invisible after a few guesses.
+
+**Fix — split Sidebar into header + scrollable content:**
+```
+Sidebar (flex-col)
+├── SidebarHeader (flex-shrink: 0, padding)
+│   └── HistoryTitle (icon + "Guess History")
+└── SidebarContent (flex: 1, min-height: 0, overflow-y: scroll)
+    └── PatternHistory (HistoryList only, no title)
+```
+
+**`HistoryTitle`** — extracted from inline JSX in `PatternHistory.tsx` into a named export component. Uses `HistoryTitleContainer` styled `h6` from `PatternHistory.styled.tsx`. Removed bottom margin (now handled by `SidebarHeader` padding).
+
+**`SidebarHeader` / `SidebarContent`** — new styled components in `App.styled.tsx`. Scrollbar styling moved from `Sidebar` to `SidebarContent`.
+
+**Files changed:**
+- `src/App.styled.tsx` — `Sidebar` split into `Sidebar` + `SidebarHeader` + `SidebarContent`
+- `src/App.tsx` — imports `HistoryTitle`, wraps in `SidebarHeader`/`SidebarContent`
+- `src/components/PatternHistory.tsx` — exports `HistoryTitle` component, removes title from render
+- `src/components/PatternHistory.styled.tsx` — renamed `HistoryTitle` → `HistoryTitleContainer`
 
 ---
 

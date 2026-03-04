@@ -66,15 +66,16 @@ const useInferenceEngine = (
         const isSolved = currentCandidates <= 1;
         const percent = isSolved ? 100 : summary.progress.reducedPercent;
 
-        let lastGuessQuality = GuessQuality.Neutral;
+        let prevCandidates: number;
         if (pathHistory.length >= 2) {
             const prevObservations = observations.slice(0, -1);
             const prevSummary = engine.applyAll(prevObservations);
-            lastGuessQuality = classifyGuessQuality(
-                prevSummary.progress.candidateCount,
-                currentCandidates,
-            );
+            prevCandidates = prevSummary.progress.candidateCount;
+        } else {
+            prevCandidates = summary.progress.initialCandidateCount;
         }
+
+        const lastGuessQuality = classifyGuessQuality(prevCandidates, currentCandidates);
 
         return { percent, candidates: currentCandidates, isSolved, lastGuessQuality };
     }, [engine, code, pathHistory]);
