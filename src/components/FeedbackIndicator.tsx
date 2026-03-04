@@ -1,6 +1,6 @@
 import * as React from "react";
-import { FeedbackDot, FeedbackColumn } from "./FeedbackIndicator.styled.tsx";
-import { dotColor } from "./FeedbackIndicator.utils.ts";
+import { FeedbackShape, FeedbackColumn } from "./FeedbackIndicator.styled.tsx";
+import { feedbackEntry } from "./FeedbackIndicator.utils.ts";
 
 interface FeedbackIndicatorProps {
     bulls      : number;
@@ -14,9 +14,14 @@ const FeedbackIndicator: React.FunctionComponent<FeedbackIndicatorProps> = ({
     codeLength,
 }): React.ReactElement => (
     <FeedbackColumn>
-        {Array.from({ length: codeLength }).map((_, i) => (
-            <FeedbackDot key={i} $color={dotColor(i, bulls, cows)} />
-        ))}
+        {Array.from({ length: codeLength }).map((_, i) => {
+            const entry = feedbackEntry(i, bulls, cows);
+            return (
+                <FeedbackShape key={i} $color={entry.color}>
+                    {entry.symbol}
+                </FeedbackShape>
+            );
+        })}
     </FeedbackColumn>
 );
 

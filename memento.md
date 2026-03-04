@@ -577,7 +577,7 @@ String enums (`GamePhase`, `Level`) preserve their string values at runtime so e
 - `src/game/GameConfig.ts` — `GamePhase` union + `ALL_GAME_PHASES` constant
 - `src/game/GameConfig.test.ts` — tests for `ALL_GAME_PHASES`
 - `src/components/Navbar.tsx` — `centerButton()` helper, `configDisabled` flag
-- `src/components/CodeRevealOverlay.tsx` — `onDismiss`/`onNewGame` props, two Bootstrap buttons
+- `src/components/CodeRevealOverlay.tsx` — two Bootstrap buttons
 - `src/components/CodeRevealOverlay.styled.tsx` — `RevealActions` flex container
 - `src/App.tsx` — game state management, wiring
 
@@ -587,7 +587,7 @@ String enums (`GamePhase`, `Level`) preserve their string values at runtime so e
 
 **Problem:** After the code reveal overlay dismissed, the PatternLock disappeared entirely — no dots visible, just the navbar. The PatternLock component was the same React instance across game resets (never unmounted), but the `usePatternLock` hook's internal state (container dimensions, points array, ResizeObserver) could become stale or out of sync when the game state changed underneath it.
 
-**Root cause:** `usePatternLock` initialises `containerWidth`/`containerHeight` and the `ResizeObserver` in `useEffect([], [])` — mount-only effects. When the game reset (code→`[]`, phase→`"idle"`) the component re-rendered without remounting, so those effects never re-ran. If the ResizeObserver callback fired during the transition and hit the `!el.isConnected` guard, subsequent renders could leave the hook with stale zero-dimension state, causing points to compute at invisible positions.
+**Root cause:** `usePatternLock` initialises `containerWidth`/`containerHeight` and the `ResizeObserver` in a `useEffect([], [])` — mount-only effects. When the game reset (code→`[]`, phase→`"idle"`) the component re-rendered without remounting, so those effects never re-ran. If the ResizeObserver callback fired during the transition and hit the `!el.isConnected` guard, subsequent renders could leave the hook with stale zero-dimension state, causing points to compute at invisible positions.
 
 **Fix — `gameKey` state counter:**
 - `App.tsx` maintains a `gameKey: number` state, incremented in both `startGame()` and the `revealCode()` timer callback.
@@ -627,244 +627,41 @@ String enums (`GamePhase`, `Level`) preserve their string values at runtime so e
 **`NavbarContainer`** gains `position: relative; z-index: 1100` so it renders above the overlay backdrop (`z-index: 1000`).
 
 **Files changed/added:**
-- `src/context/GameContext.tsx` — new: `GameContextValue`, `GameProvider`, `useGameContext`
-- `src/context/GameContext.test.ts` — new: basic tests for defaults and phases
-- `src/main.tsx` — wraps `<App>` with `<GameProvider>`
-- `src/App.tsx` — layout-only; reads from `useGameContext()`
-- `src/game/GameConfig.ts` — removed `Idle`/`GameOver` from `GamePhase`, updated `ALL_GAME_PHASES`
-- `src/game/GameConfig.test.ts` — updated `ALL_GAME_PHASES` test
-- `src/components/Navbar.tsx` — no props; consumes context; new center button logic
-- `src/components/Navbar.styled.tsx` — `NavbarContainer` z-index 1100; `NavbarCenter` gap 8px
-- `src/components/PatternHistory.tsx` — reads `pathHistory`/`code`/`gridConfig` from context
-- `src/components/CodeRevealOverlay.tsx` — reads from context; no action buttons; backdrop click
-- `src/components/CodeRevealOverlay.styled.tsx` — removed `RevealActions`
+- `src/game/GameConfig.ts` — `GamePhase` union + `ALL_GAME_PHASES` constant
+- `src/game/GameConfig.test.ts` — tests for `ALL_GAME_PHASES`
+- `src/components/Navbar.tsx` — redesigned with game control props
+- `src/components/Navbar.styled.tsx` — new styled components for layout
+- `src/components/Navbar.constants.ts` — new constants
+- `src/components/Navbar.test.ts` — updated tests
+- `src/components/HelpModal.tsx` + `HelpModal.styled.tsx` — help modal
+- `src/components/CodeRevealOverlay.tsx` + `CodeRevealOverlay.styled.tsx` — code reveal
+- `src/App.tsx` — game state management, wiring
 
 ---
 
----
+### Centralized Feedback Theme & Accessible Shapes
 
-### Implicit Dot Pop Animation
+**Decision:** Extracted hardcoded bull/cow/miss colors from `FeedbackIndicator.utils.ts` and `HelpModal.tsx` into a central theme file `src/theme/feedbackTheme.ts`. Replaced colored circles with color-coded **shape symbols** for colorblind accessibility.
 
-**Problem:** When `allowJumping=false` and the user draws from dot A to dot C, intermediate dot B is silently inserted into the path by `checkCollision`. Only the final dot (C) received the `pop` animation (class `.active`), making the intermediate insertion invisible.
+**Shape convention:**
+- `+` (plus) — bull (correct dot, correct position) — green `#22c55e`
+- `−` (minus/U+2212) — cow (correct dot, wrong position) — yellow `#eab308`
+- `○` (circle/U+25CB) — miss (dot not in code) — grey `#6b7280`
 
-**Fix:** Added `flashingPoints: Set<number>` state and `flashTimerRef` to `usePatternLock`. When `checkCollision` inserts implicit dots (`implicitDots`), they are added to `flashingPoints` for 350ms, then cleared. `PatternLock.tsx` propagates `flashingPoints` to the `pop` prop:
-```tsx
-pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
+**Rationale:** Using distinct shapes in addition to colors ensures colorblind users can differentiate feedback types. The central theme file (`FEEDBACK_THEME`) provides a single source of truth for colors, symbols, and labels — eliminating scattered hardcoded hex values and making future theme changes trivial.
+
+**Theme structure:**
+```typescript
+interface FeedbackEntry { color: string; symbol: string; label: string; }
+FEEDBACK_THEME = { bull, cow, miss } — each a FeedbackEntry
+feedbackEntry(index, bulls, cows) — returns the correct entry for a position
 ```
-A cleanup `useEffect` clears the timer on unmount. `flashingPoints` is included in `UsePatternLockResult`.
-
----
-
-### Reveal Modal Once Per Game + Persistent Reveal/Finish Buttons
-
-**Problem:** After clicking "Give Up" and dismissing the overlay, the user could click "Give Up" again to re-enter the Revealing phase and see the code again. The intent is that after giving up, the "Reveal"/"Finish" buttons stay in the navbar permanently.
-
-**Fix:** Separated modal visibility from phase:
-- `phase: Playing | Revealing` — `Revealing` means the user has given up (PatternLock disabled).
-- `showRevealModal: boolean` — controls overlay visibility independently.
-
-| Action | `phase` | `showRevealModal` |
-|---|---|---|
-| Give Up | → Revealing | → true |
-| "Reveal" button / backdrop click | unchanged | toggled |
-| "Finish Game" | → Playing | → false |
-
-`onDismissReveal` removed; replaced with `onToggleRevealModal` (toggled by Reveal button and overlay backdrop). `GameContextValue` updated accordingly.
-
----
-
-### Icons-Only Navbar on Small Screens + Truly Centered Center Buttons
-
-**Icons-only on mobile (≤ 600 px):** Added `ButtonLabel` styled-component that hides (`display: none`) on mobile. All text labels in dropdown toggles and center action buttons are wrapped in `<ButtonLabel className="ms-1">`. Icons have no right margin (`me-1` removed from icon elements); margin comes from `ms-1` on the `ButtonLabel` so it disappears with the text on mobile.
-
-**Always-centered center buttons:** `NavbarCenter` changed from an in-flow flex item to `position: absolute; left: 50%; transform: translateX(-50%); z-index: 1`. `NavbarRow` gains `position: relative` as the containing block. This guarantees the center buttons are always at exactly 50% of the navbar width regardless of the widths of `NavbarLeft` and `NavbarRight`.
 
 **Files changed:**
-- `src/components/usePatternLock.ts` — `flashingPoints` state + `flashTimerRef` + cleanup
-- `src/components/PatternLock.tsx` — `flashingPoints.has(i)` in `pop` prop
-- `src/context/GameContext.tsx` — `showRevealModal` state, `onToggleRevealModal`, updated `onGiveUp`/`onFinishGame`
-- `src/components/CodeRevealOverlay.tsx` — uses `showRevealModal` / `onToggleRevealModal`
-- `src/components/Navbar.tsx` — `ButtonLabel` wrappers, `onToggleRevealModal`, icon-only on mobile
-- `src/components/Navbar.styled.tsx` — `ButtonLabel`, absolute `NavbarCenter`, `position: relative` on `NavbarRow`
-
----
-
----
-
-### Win Detection, Victory Modal & Stats System
-
-**Decision:** Added automatic win detection, a victory overlay, persistent game stats with localStorage, and a stats modal accessible from the app icon.
-
-**Win detection (`GameContext.tsx`):**
-- `onGuessFinish` now calls `GuessValidator.isSolved(path)` after validating. If solved, sets `winner` to `currentPlayer`, transitions to `GamePhase.Revealing`, and shows the reveal modal.
-- `currentPlayer: number` (1-based) tracks whose turn it is; advances `(prev % playerCount) + 1` after each non-winning guess.
-- Both `winner` and `currentPlayer` reset to `null`/`1` in `onFinishGame` and `onLevelChange`.
-
-**Victory message (`CodeRevealOverlay.tsx`):**
-- When `winner !== null`, title shows "You win!" (single-player) or "Player X wins!" (multiplayer) with an `Award` feather icon.
-- When `winner === null` (give-up), title remains "Secret Code".
-
-**Stats persistence (`src/game/StatsService.ts`):**
-- `GameRecord` type: `{ level, won, durationSeconds, date }`.
-- `LevelStats` type: `{ gamesPlayed, wins, totalSeconds }`.
-- `loadRecords()` / `saveRecord()` / `clearRecords()` — localStorage CRUD under key `"locker-hacker-stats"`.
-- `computeLevelStats()` / `computeTotalStats()` — aggregation functions.
-- `winPercent()` / `avgTimeSeconds()` / `formatStatsTime()` — display helpers (time formatted as `m:ss.d` with deciseconds).
-- Fully tested in `StatsService.test.ts` (12 tests).
-
-**Stats recording (`GameContext.tsx`):**
-- `onFinishGame` saves a `GameRecord` to localStorage when `playerCount === PlayerCount.One` (single-player only).
-- Sets `lastGameRecord` state so the stats modal can show the just-finished game's result.
-- Sets `showStatsModal = true` to auto-open the stats modal.
-
-**Stats modal (`StatsModal.tsx` + `StatsModal.styled.tsx`):**
-- Bootstrap `Modal` with a table: Level / Win % / Avg Time / Games columns.
-- Rows: Easy, Medium, Hard, **Total** (bold).
-- If `lastGameRecord` is set, shows a game summary at top (won/lost icon + time).
-- Empty state: "No stats available. Play some games to see stats here!" with `Info` icon.
-- Icons: `Award` (title), `TrendingUp` (win %), `Clock` (time), `CheckCircle`/`XCircle` (won/lost), `Info` (empty).
-
-**App icon interaction (`Navbar.tsx`):**
-- Click → opens stats modal via `onToggleStatsModal()`.
-- Long press (10 seconds) → calls `clearRecords()` to wipe localStorage stats. Uses `onMouseDown`/`onTouchStart` to start a timer, `onMouseUp`/`onTouchEnd`/`onMouseLeave` to cancel. If 10s elapses without release, stats are cleared.
-
-**Context additions:**
-- `winner: number | null`, `currentPlayer: number`, `lastGameRecord: GameRecord | null`
-- `showStatsModal: boolean`, `onToggleStatsModal: () => void`
-
-**Files created:**
-- `src/game/StatsService.ts` + `StatsService.test.ts`
-- `src/components/StatsModal.tsx` + `StatsModal.styled.tsx`
-
-**Files changed:**
-- `src/context/GameContext.tsx` — win detection, stats recording, new state
-- `src/components/CodeRevealOverlay.tsx` — victory message
-- `src/components/Navbar.tsx` — stats modal, icon click/long-press
-
----
-
-### Stats Modal & Completion Flash Refinements
-
-**Stats modal cleanup:**
-- Removed `lastGameRecord` prop and `GameSummary` component from `StatsModal`. The stats modal now shows only the aggregated stats table or the empty state. The "You won!"/"You lost" per-game summary was confusing when there was no data yet.
-- Removed `lastGameRecord` from `GameContextValue` and `GameProvider` state — no component needs it anymore.
-- Added `moves: number` to `GameRecord` and `totalMoves: number` to `LevelStats`.
-- Added `avgMoves(stats)` helper to `StatsService.ts`.
-- Stats table columns updated: `Level` (with `BarChart2` icon), `Games` (with `Hash` icon), `Win %` (with `TrendingUp` icon), `Avg (m:ss)` (with `Clock` icon), `Moves` (with `MousePointer` icon).
-
-**Victory overlay stats:**
-- When `winner !== null`, `CodeRevealOverlay` now shows elapsed time (`Clock` icon) and move count (`MousePointer` icon) below the victory title via `RevealStats`/`RevealStat` styled-components.
-
-**Completion flash fix — reactive instead of timer-based:**
-- `completionFlash` in `usePatternLock` is now a **derived value** (`isMouseDown && !!targetLength && path.length >= targetLength`) instead of timer-driven state. Dots scale up when the user reaches the target length and **stay scaled up** until the mouse is released.
-- `complete` CSS class changed from `animation: popComplete 500ms` to `transform: scale(2.5); transition: transform 200ms ease` — a persistent transform, not a one-shot animation.
-- Only the first N dots (where N = `targetLength`) get the `complete` class. Dots selected after position N still receive the normal `pop` animation.
-- Removed `completionTimerRef` and the `useEffect` that managed it.
-
-**Files changed:**
-- `src/game/StatsService.ts` — `moves` in `GameRecord`, `totalMoves` in `LevelStats`, `avgMoves()`
-- `src/game/StatsService.test.ts` — updated test factories + new `avgMoves` tests
-- `src/components/StatsModal.tsx` — removed `GameSummary`, added icons to all columns, added `Moves` column
-- `src/components/StatsModal.styled.tsx` — removed `GameSummary` styled-component
-- `src/context/GameContext.tsx` — removed `lastGameRecord`, added `moves` to record, removed `GameRecord` import
-- `src/components/CodeRevealOverlay.tsx` — added time + moves stats on victory
-- `src/components/CodeRevealOverlay.styled.tsx` — added `RevealStats`/`RevealStat`
-- `src/components/usePatternLock.ts` — reactive `completionFlash`, removed timer
-- `src/components/PatternLock.css` — `complete` class: persistent transform instead of animation
-- `src/components/PatternLock.tsx` — `complete` limited to first `targetLength` dots
-
----
-
-### Multiplayer Player Colors, Sidebar Title, and Turn Announcement
-
-**Decision:** Implemented full multiplayer visual identity: player-specific colors, sidebar title, turn announcement modal, footer player indicator, and colored victory text.
-
-**Player Colors (`src/game/playerColors.ts`):**
-- Maps player number (1–4) to Bootstrap CSS vars: `primary`, `success`, `warning`, `info`.
-- `getPlayerColor(player)` falls back to `white` for unknown players.
-- Colors apply only in multiplayer (`playerCount > PlayerCount.One`).
-
-**`pathColor` prop (PatternLock, Connectors, Point):**
-- New optional `pathColor?: string` prop on `PatternLock`, forwarded to `Connectors` and `Point`.
-- `PatternLock.tsx` passes `disabled ? undefined : pathColor` to both children, ensuring disabled history locks are never colored.
-- `Connectors.tsx` applies `background: pathColor` inline on connector divs and `borderLeftColor: pathColor` on arrowheads.
-- `Point.tsx` applies `background: pathColor` inline only on selected points (via `pathColor && selected`).
-- `App.tsx` computes `pathColor` from current player color when multiplayer, else `undefined`.
-
-**History entry player indicator (`PatternHistory`, `PatternHistory.styled.tsx`):**
-- `HistoryEntry` gains a `$playerColor?: string` transient prop → 3px colored left border.
-- `GameContext` now tracks `playerHistory: number[]` (parallel to `pathHistory`), recording which player made each guess.
-- `PatternHistory` reads `playerHistory` and `playerCount` from context; passes player color only in multiplayer. The PatternLock preview colors inside entries remain unchanged.
-
-**Sidebar title:**
-- `HistoryTitle` styled-component added to `PatternHistory.styled.tsx`.
-- `PatternHistory.tsx` renders the title with a `List` icon from `react-feather`.
-
-**Footer current player (`Footer.tsx`, `Footer.styled.tsx`):**
-- `PlayerLabel` styled-component: absolutely centered via `position: absolute; left: 50%; transform: translateX(-50%)`.
-- `FooterContainer` gains `position: relative` as containing block.
-- Shows `User` icon + "Player N" in player color only when multiplayer.
-
-**Victory text coloring (`CodeRevealOverlay.tsx`):**
-- `renderTitle()` helper: in multiplayer wins, wraps "Player N" in a `<span>` with inline player color; leaves " wins!" white. Single-player and give-up cases unchanged.
-
-**Turn Announcement modal (`TurnAnnouncement.tsx`, `.styled.tsx`, `.utils.ts`):**
-- Shows "Player N's Turn" when `showTurnModal` is true and `playerCount > PlayerCount.One`.
-- Auto-dismisses after 2 seconds via `setTimeout` in a `useEffect`. Dismiss button (X) and backdrop click also dismiss.
-- `showTurnModal` set to `true` in `GameContext`: after each non-winning guess (turn switches), on `onPlayerCountChange(> 1)`, on `onLevelChange` (if multiplayer), on `onFinishGame` (if multiplayer).
-- `onDismissTurnModal` sets it to `false`. Added to `GameContextValue`.
-- `TurnBackdrop` uses `z-index: 2000` (above reveal overlay at 1000).
-
-**Files created:**
-- `src/game/playerColors.ts` + `playerColors.test.ts`
-- `src/components/TurnAnnouncement.tsx` + `TurnAnnouncement.styled.tsx` + `TurnAnnouncement.utils.ts` + `TurnAnnouncement.test.ts`
-
----
-
-### Config Persistence (`src/game/ConfigService.ts`)
-
-**Decision:** Level and playerCount are persisted to localStorage under `"locker-hacker-config"` and restored on app start.
-
-**`parseConfig(raw)`** — pure helper that parses a JSON string and validates each field against the known enum arrays (`ALL_LEVELS`, `ALL_PLAYER_COUNTS`). Returns `Partial<GameConfig>` with `undefined` for any invalid/missing field. Fully unit-tested without localStorage mocking.
-
-**`loadConfig()`** — thin wrapper that reads from localStorage and delegates to `parseConfig`.
-
-**`saveConfig(config)`** — stringifies and writes to localStorage.
-
-**`GameContext.tsx` integration:**
-- Loads config once via `React.useState(() => loadConfig())` (lazy init on mount).
-- `initialLevel`/`initialPlayerCount` derived from saved config with defaults (`?? DEFAULT_*`).
-- `code` initializer uses `initialLevel` so the generated code matches the loaded level.
-- `React.useEffect([level, playerCount])` calls `saveConfig` whenever either value changes.
-
-**Files created:**
-- `src/game/ConfigService.ts` + `ConfigService.test.ts` (9 tests for `parseConfig`)
-
-**Files changed:**
-- `src/context/GameContext.tsx` — load on init, save on change
-
----
-
-### Colored Player Count Icons in Navbar Dropdown
-
-**Decision:** Each player count dropdown item renders X colored `User` icons (one per player slot) instead of a single generic `Users` icon, using player colors from `playerColors.ts`.
-
-**Implementation:** `PlayerCountIcons` helper component defined above `Navbar` (not exported). Uses `Array.from({ length: count })` to render icons dynamically. Each icon gets `style={{ color: getPlayerColor(i + 1) }}` and `className="me-1"` for spacing.
-
-**Files changed:**
-- `src/components/Navbar.tsx` — added `User` import, `getPlayerColor` import, `PlayerCountIcons` component, updated dropdown items
-
----
-
-**Files changed:**
-- `src/components/PatternLock.tsx` — `pathColor` prop
-- `src/components/Connectors.tsx` — `pathColor` prop + inline styles
-- `src/components/Point.tsx` — `pathColor` prop + conditional inline background
-- `src/context/GameContext.tsx` — `playerHistory`, `showTurnModal`, `onDismissTurnModal`
-- `src/components/PatternHistory.tsx` — sidebar title + player color on entries
-- `src/components/PatternHistory.styled.tsx` — `HistoryTitle`, `HistoryEntry` with `$playerColor`
-- `src/components/Footer.tsx` — current player display
-- `src/components/Footer.styled.tsx` — `PlayerLabel` + `position: relative` on container
-- `src/components/CodeRevealOverlay.tsx` — colored winner text via `renderTitle()`
-- `src/App.tsx` — `pathColor` computed + `TurnAnnouncement` rendered
-
+- `src/theme/feedbackTheme.ts` — new central theme file
+- `src/theme/feedbackTheme.test.ts` — tests for theme constants and feedbackEntry
+- `src/components/FeedbackIndicator.utils.ts` — re-exports from theme; keeps deprecated `COLORS`/`dotColor`
+- `src/components/FeedbackIndicator.tsx` — uses `feedbackEntry`, renders `FeedbackShape` with symbol children
+- `src/components/FeedbackIndicator.styled.tsx` — `FeedbackDot` → `FeedbackShape` (text-based, no border-radius)
+- `src/components/FeedbackIndicator.test.ts` — extended with `feedbackEntry` and `FEEDBACK_THEME` tests
+- `src/components/HelpModal.tsx` — imports `FEEDBACK_THEME` instead of hardcoded hex values; shows shape symbols

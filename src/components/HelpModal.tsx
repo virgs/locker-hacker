@@ -1,6 +1,7 @@
 import * as React from "react";
 import Modal from "react-bootstrap/Modal";
 import { HelpList } from "./HelpModal.styled.tsx";
+import { FEEDBACK_THEME } from "./FeedbackIndicator.utils.ts";
 
 interface HelpModalProps {
     show    : boolean;
@@ -21,9 +22,9 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                 Submit guesses and receive feedback:
             </p>
             <HelpList>
-                <li><strong style={{ color: "#22c55e" }}>● Green dots</strong> — correct dot in the <em>correct position</em>.</li>
-                <li><strong style={{ color: "#eab308" }}>● Yellow dots</strong> — correct dot but <em>wrong position</em>.</li>
-                <li><strong style={{ color: "#6b7280" }}>● Gray dots</strong> — dot <em>not in the code</em>.</li>
+                <li><strong style={{ color: FEEDBACK_THEME.bull.color }}>{FEEDBACK_THEME.bull.symbol} Green</strong> — correct dot in the <em>correct position</em>.</li>
+                <li><strong style={{ color: FEEDBACK_THEME.cow.color }}>{FEEDBACK_THEME.cow.symbol} Yellow</strong> — correct dot but <em>wrong position</em>.</li>
+                <li><strong style={{ color: FEEDBACK_THEME.miss.color }}>{FEEDBACK_THEME.miss.symbol} Gray</strong> — dot <em>not in the code</em>.</li>
             </HelpList>
             <p className="mt-3 mb-0">
                 The game ends when <strong>all dots are in the correct position</strong>.

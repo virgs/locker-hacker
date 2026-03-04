@@ -2,15 +2,21 @@ import styled from "styled-components";
 
 const XS = "@media (max-width: 600px)";
 
-export const FeedbackDot = styled.div<{ $color: string }>`
+export const FeedbackShape = styled.span<{ $color: string }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 14px;
     height: 14px;
-    border-radius: 50%;
-    background: ${({ $color }) => $color};
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    color: ${({ $color }) => $color};
 
     ${XS} {
         width: 10px;
         height: 10px;
+        font-size: 10px;
     }
 `;
 
