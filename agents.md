@@ -180,5 +180,4 @@ Build incrementally and safely.
 
 # TODO list
 
-
-1. [ ] Add tooltips to every button and interactive element in the UI to improve accessibility and user understanding.
+1. [x] Add tooltips to every button and interactive element in the UI to improve accessibility and user understanding.

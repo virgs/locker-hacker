@@ -66,6 +66,12 @@ const useInferenceEngine = (
         const isSolved = currentCandidates <= 1;
         const percent = isSolved ? 100 : summary.progress.reducedPercent;
 
+        if (isSolved && summary.candidates.length === 1) {
+            console.log(
+                `🔓 AI is 100% confident. Predicted code: [${summary.candidates[0]!.join(", ")}]`,
+            );
+        }
+
         let prevCandidates: number;
         if (pathHistory.length >= 2) {
             const prevObservations = observations.slice(0, -1);

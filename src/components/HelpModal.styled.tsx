@@ -19,3 +19,40 @@ export const HelpList = styled.ul`
     }
 `;
 
+export const ExampleCaption = styled.h6`
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 16px 0 8px;
+`;
+
+export const ExampleTable = styled.table`
+    width: 100%;
+    font-size: 0.82rem;
+    border-collapse: collapse;
+
+    th {
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.5);
+        text-align: left;
+        padding: 4px 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    td {
+        padding: 6px 8px;
+        vertical-align: top;
+    }
+
+    tbody tr:nth-child(odd) {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    code {
+        font-size: 0.85em;
+        letter-spacing: 1px;
+    }
+`;
+

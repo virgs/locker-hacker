@@ -34,7 +34,7 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
                     aria-label={`AI progress: ${Math.round(aiProgress.percent)}%`}
                 >
                     <Unlock size={20} />
-                    {Math.round(aiProgress.percent)}%
+                    {Math.floor(aiProgress.percent)}%
                 </AiProgressStat>
             </Tip>
             {isMultiplayer && (

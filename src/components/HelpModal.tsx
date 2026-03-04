@@ -1,6 +1,6 @@
 import * as React from "react";
 import Modal from "react-bootstrap/Modal";
-import { HelpList } from "./HelpModal.styled.tsx";
+import { HelpList, ExampleTable, ExampleCaption } from "./HelpModal.styled.tsx";
 import { FEEDBACK_THEME } from "./FeedbackIndicator.utils.ts";
 
 interface HelpModalProps {
@@ -8,11 +8,23 @@ interface HelpModalProps {
     onClose : () => void;
 }
 
+const bull = FEEDBACK_THEME.bull;
+const cow  = FEEDBACK_THEME.cow;
+const miss = FEEDBACK_THEME.miss;
+
+const FeedbackCell: React.FunctionComponent<{ entries: typeof bull[] }> = ({ entries }): React.ReactElement => (
+    <td>
+        {entries.map((e, i) => (
+            <strong key={i} style={{ color: e.color, marginRight: 4 }}>{e.symbol}</strong>
+        ))}
+    </td>
+);
+
 const HelpModal: React.FunctionComponent<HelpModalProps> = ({
     show,
     onClose,
 }): React.ReactElement => (
-    <Modal show={show} onHide={onClose} centered>
+    <Modal show={show} onHide={onClose} centered size="lg">
         <Modal.Header closeButton>
             <Modal.Title>How to Play</Modal.Title>
         </Modal.Header>
@@ -22,10 +34,32 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                 Submit guesses and receive feedback:
             </p>
             <HelpList>
-                <li><strong style={{ color: FEEDBACK_THEME.bull.color }}>{FEEDBACK_THEME.bull.symbol} Green</strong> — correct dot in the <em>correct position</em>.</li>
-                <li><strong style={{ color: FEEDBACK_THEME.cow.color }}>{FEEDBACK_THEME.cow.symbol} Yellow</strong> — correct dot but <em>wrong position</em>.</li>
-                <li><strong style={{ color: FEEDBACK_THEME.miss.color }}>{FEEDBACK_THEME.miss.symbol} Gray</strong> — dot <em>not in the code</em>.</li>
+                <li><strong style={{ color: bull.color }}>{bull.symbol} Bull</strong> — correct dot in the <em>correct position</em>.</li>
+                <li><strong style={{ color: cow.color }}>{cow.symbol} Cow</strong> — correct dot but <em>wrong position</em>.</li>
+                <li><strong style={{ color: miss.color }}>{miss.symbol} Miss</strong> — dot <em>not in the code</em>.</li>
             </HelpList>
+
+            <ExampleCaption>Examples</ExampleCaption>
+            <ExampleTable>
+                <thead>
+                    <tr><th>Secret</th><th>Guess</th><th>Feedback</th><th>Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>A B C D</code></td>
+                        <td><code>A B E F</code></td>
+                        <FeedbackCell entries={[bull, bull, miss, miss]} />
+                        <td>A, B correct position; E, F not in code</td>
+                    </tr>
+                    <tr>
+                        <td><code>A B C D</code></td>
+                        <td><code>C D E A</code></td>
+                        <FeedbackCell entries={[cow, cow, cow, miss]} />
+                        <td>C, D, A are in code but wrong position; E not in code</td>
+                    </tr>
+                </tbody>
+            </ExampleTable>
+
             <p className="mt-3 mb-0">
                 The game ends when <strong>all dots are in the correct position</strong>.<br/>
                 Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.

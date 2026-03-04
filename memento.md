@@ -833,3 +833,65 @@ Sidebar (flex-col)
 - `.circleci/config.yml` — full pipeline definition
 - `README.md` — updated Development and CI/CD sections
 
+---
+
+### Tooltips on All Interactive Elements
+
+**Decision:** Added react-bootstrap `OverlayTrigger` + `Tooltip` to every button and interactive element in the UI. A reusable `Tip` wrapper component keeps the implementation DRY.
+
+**`Tip` component (`src/components/Tip.tsx`):** A thin wrapper around `OverlayTrigger` that accepts `text`, optional `placement` (default `"bottom"`), and a single child element. Delay values (`show: 400ms`, `hide: 150ms`) are extracted into `Tip.constants.ts` for testability.
+
+**Tooltipped elements:**
+
+| Location | Element | Tooltip text | Placement |
+|---|---|---|---|
+| Navbar | App icon | "Game stats" | bottom |
+| Navbar | Players dropdown | "Number of players" | bottom |
+| Navbar | Level dropdown | "Difficulty level" | bottom |
+| Navbar | Give Up button | "Give up and reveal the code" | bottom |
+| Navbar | Reveal button | "Show the secret code" | bottom |
+| Navbar | Finish button | "Start a new game" | bottom |
+| Navbar | Help icon | "How to play" | bottom |
+| Navbar | GitHub icon | "View source on GitHub" | bottom |
+| Footer | AI progress | "AI confidence" | top |
+| Footer | Code length | "Code length" | top |
+| Footer | Level | "Difficulty level" | top |
+| Footer | Elapsed time | "Elapsed time" | top |
+
+**Files:**
+- `src/components/Tip.tsx` — reusable tooltip wrapper
+- `src/components/Tip.constants.ts` — `TOOLTIP_DELAY` constant
+- `src/components/Tip.test.ts` — 3 tests for delay constants
+- `src/components/Navbar.tsx` — wrapped 8 interactive elements with `Tip`
+- `src/components/Footer.tsx` — wrapped 4 stats with `Tip` (placement `"top"`)
+
+---
+
+### HelpModal Worked Examples
+
+**Decision:** Added two worked examples to the "How to Play" modal using letter sequences (A, B, C, D…) for the secret and guess, with colored feedback shapes.
+
+**Examples:**
+1. Secret `A B C D`, Guess `A B E F` → `+ + ○ ○` — A, B in correct position; E, F not in code
+2. Secret `A B C D`, Guess `C D E A` → `− − − ○` — C, D, A in code but wrong position; E not in code
+
+**Feedback legend updated:** "Green/Yellow/Gray" labels → "Bull/Cow/Miss" to match game terminology.
+
+**New styled components:** `ExampleCaption` (section heading) and `ExampleTable` (minimal table with alternating row shading) added to `HelpModal.styled.tsx`.
+
+**`FeedbackCell` helper:** Inline component that renders a sequence of colored feedback symbols in a `<td>`.
+
+**Files:**
+- `src/components/HelpModal.tsx` — added `FeedbackCell` helper + examples table
+- `src/components/HelpModal.styled.tsx` — added `ExampleCaption`, `ExampleTable`
+
+---
+
+### AI Console Log at 100% Confidence
+
+**Decision:** When the inference engine reaches exactly 1 remaining candidate (`isSolved = true`), the predicted code is logged to the browser console: `🔓 AI is 100% confident. Predicted code: [3, 7, 11, 0, 5]`.
+
+**Rationale:** Provides a way to verify the AI's correctness. The user reported skepticism that 2 guesses could solve a 4×4 grid — the console output lets them verify. Hard mode (4×4, length 5) has 154,680 valid candidates, but spatial constraints (no-skip rule, path connectivity) combined with bulls/cows feedback can eliminate them very quickly.
+
+**Files:**
+- `src/components/useInferenceEngine.ts` — added `console.log` when `isSolved && summary.candidates.length === 1`
