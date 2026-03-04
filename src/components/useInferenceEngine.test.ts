@@ -6,7 +6,9 @@ import {
     getAiIndicatorColor,
     AI_COLOR_SUCCESS,
     AI_COLOR_DANGER,
+    AI_COLOR_WARNING,
 } from "./Footer.utils.ts";
+import { GuessQuality, classifyGuessQuality } from "./useInferenceEngine.ts";
 
 /**
  * Tests for the AI progress computation logic used by useInferenceEngine.
@@ -25,8 +27,10 @@ const computeAiProgress = (
     gridConfig: GridConfig,
     code: number[],
     pathHistory: number[][],
-): { percent: number; candidates: number; isSolved: boolean; lastGuessUseless: boolean } => {
-    if (pathHistory.length === 0) return { percent: 0, candidates: 0, isSolved: false, lastGuessUseless: false };
+): { percent: number; candidates: number; isSolved: boolean; lastGuessQuality: GuessQuality } => {
+    if (pathHistory.length === 0) {
+        return { percent: 0, candidates: 0, isSolved: false, lastGuessQuality: GuessQuality.Neutral };
+    }
 
     const engine = new InferenceEngine(gridConfig);
     const observations = buildObservations(code, pathHistory);
@@ -35,30 +39,32 @@ const computeAiProgress = (
     const isSolved = currentCandidates <= 1;
     const percent = isSolved ? 100 : summary.progress.reducedPercent;
 
-    let lastGuessUseless = false;
+    let lastGuessQuality = GuessQuality.Neutral;
     if (pathHistory.length >= 2) {
         const prevObservations = observations.slice(0, -1);
         const prevSummary = engine.applyAll(prevObservations);
-        lastGuessUseless = currentCandidates >= prevSummary.progress.candidateCount;
+        lastGuessQuality = classifyGuessQuality(
+            prevSummary.progress.candidateCount,
+            currentCandidates,
+        );
     }
 
-    return { percent, candidates: currentCandidates, isSolved, lastGuessUseless };
+    return { percent, candidates: currentCandidates, isSolved, lastGuessQuality };
 };
 
 describe("AI progress computation", () => {
     const config: GridConfig = { cols: 2, rows: 2, length: 2 };
-    // 2x2 grid, length 2 → 12 total candidates
 
     it("returns 0% with 0 candidates when no guesses made", () => {
         const result = computeAiProgress(config, [0, 1], []);
         expect(result.percent).toBe(0);
         expect(result.candidates).toBe(0);
         expect(result.isSolved).toBe(false);
-        expect(result.lastGuessUseless).toBe(false);
+        expect(result.lastGuessQuality).toBe(GuessQuality.Neutral);
     });
 
     it("reduces candidates after a guess", () => {
-        const code = [0, 3]; // top-left → bottom-right
+        const code = [0, 3];
         const result = computeAiProgress(config, code, [[0, 1]]);
         expect(result.candidates).toBeLessThan(12);
         expect(result.percent).toBeGreaterThan(0);
@@ -99,41 +105,97 @@ describe("AI progress computation", () => {
         expect(result.percent).toBeGreaterThan(0);
     });
 
-    it("detects lastGuessUseless when a duplicate guess is made", () => {
+    it("classifies duplicate guess as Bad quality", () => {
         const code = [0, 3];
-        // Two identical guesses — the second can't reduce candidates further
         const result = computeAiProgress(config, code, [[0, 1], [0, 1]]);
-        expect(result.lastGuessUseless).toBe(true);
+        expect(result.lastGuessQuality).toBe(GuessQuality.Bad);
     });
 
-    it("lastGuessUseless is false when a guess helps", () => {
-        const code = [0, 3];
-        const result = computeAiProgress(config, code, [[1, 2], [0, 1]]);
-        expect(result.lastGuessUseless).toBe(false);
-    });
-
-    it("lastGuessUseless is false on the first guess", () => {
+    it("lastGuessQuality is Neutral on the first guess", () => {
         const code = [0, 3];
         const result = computeAiProgress(config, code, [[0, 1]]);
-        expect(result.lastGuessUseless).toBe(false);
+        expect(result.lastGuessQuality).toBe(GuessQuality.Neutral);
+    });
+});
+
+describe("classifyGuessQuality", () => {
+    it("returns Neutral when prevCandidates is 0", () => {
+        expect(classifyGuessQuality(0, 0)).toBe(GuessQuality.Neutral);
+    });
+
+    it("returns Neutral when prevCandidates is negative", () => {
+        expect(classifyGuessQuality(-1, 0)).toBe(GuessQuality.Neutral);
+    });
+
+    it("returns Bad when candidates increased", () => {
+        expect(classifyGuessQuality(10, 12)).toBe(GuessQuality.Bad);
+    });
+
+    it("returns Bad when candidates stayed the same", () => {
+        expect(classifyGuessQuality(10, 10)).toBe(GuessQuality.Bad);
+    });
+
+    it("returns Mediocre for small relative reduction (< 50%)", () => {
+        // 100 → 80 = 20% reduction
+        expect(classifyGuessQuality(100, 80)).toBe(GuessQuality.Mediocre);
+    });
+
+    it("returns Mediocre just below the 50% threshold", () => {
+        // 100 → 51 = 49% reduction
+        expect(classifyGuessQuality(100, 51)).toBe(GuessQuality.Mediocre);
+    });
+
+    it("returns Good at exactly 50% reduction", () => {
+        expect(classifyGuessQuality(100, 50)).toBe(GuessQuality.Good);
+    });
+
+    it("returns Good for large relative reduction", () => {
+        // 100 → 10 = 90% reduction
+        expect(classifyGuessQuality(100, 10)).toBe(GuessQuality.Good);
+    });
+
+    it("returns Good when all candidates eliminated", () => {
+        expect(classifyGuessQuality(100, 0)).toBe(GuessQuality.Good);
+    });
+
+    it("treats relative reduction consistently regardless of scale", () => {
+        // 0→50% and 98→99% are both ~50% relative reduction of remaining space
+        // 1000 → 500 = 50% relative reduction
+        const bigScale = classifyGuessQuality(1000, 500);
+        // 4 → 2 = 50% relative reduction
+        const smallScale = classifyGuessQuality(4, 2);
+        expect(bigScale).toBe(smallScale);
+        expect(bigScale).toBe(GuessQuality.Good);
+    });
+
+    it("returns Bad for a tiny reduction (1 out of 1000)", () => {
+        expect(classifyGuessQuality(1000, 999)).toBe(GuessQuality.Mediocre);
     });
 });
 
 describe("getAiIndicatorColor", () => {
     it("returns success color when solved", () => {
-        expect(getAiIndicatorColor(true, false)).toBe(AI_COLOR_SUCCESS);
+        expect(getAiIndicatorColor(true, GuessQuality.Neutral)).toBe(AI_COLOR_SUCCESS);
     });
 
-    it("returns success color even when flashRed is also true (solved takes priority)", () => {
-        expect(getAiIndicatorColor(true, true)).toBe(AI_COLOR_SUCCESS);
+    it("returns success color even when flashQuality is Bad (solved takes priority)", () => {
+        expect(getAiIndicatorColor(true, GuessQuality.Bad)).toBe(AI_COLOR_SUCCESS);
     });
 
-    it("returns danger color when flashRed is true and not solved", () => {
-        expect(getAiIndicatorColor(false, true)).toBe(AI_COLOR_DANGER);
+    it("returns danger color for Bad quality", () => {
+        expect(getAiIndicatorColor(false, GuessQuality.Bad)).toBe(AI_COLOR_DANGER);
     });
 
-    it("returns undefined when neither solved nor flashing", () => {
-        expect(getAiIndicatorColor(false, false)).toBeUndefined();
+    it("returns warning color for Mediocre quality", () => {
+        expect(getAiIndicatorColor(false, GuessQuality.Mediocre)).toBe(AI_COLOR_WARNING);
+    });
+
+    it("returns success color for Good quality", () => {
+        expect(getAiIndicatorColor(false, GuessQuality.Good)).toBe(AI_COLOR_SUCCESS);
+    });
+
+    it("returns undefined for Neutral quality when not solved", () => {
+        expect(getAiIndicatorColor(false, GuessQuality.Neutral)).toBeUndefined();
     });
 });
 

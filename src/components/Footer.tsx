@@ -5,25 +5,25 @@ import { PlayerCount, LEVEL_LABELS } from "../game/GameConfig.ts";
 import { getPlayerColor } from "../game/playerColors.ts";
 import { useGameContext } from "../context/GameContext.tsx";
 import { formatTime, getAiIndicatorColor } from "./Footer.utils.ts";
-import useInferenceEngine from "./useInferenceEngine.ts";
+import useInferenceEngine, { GuessQuality } from "./useInferenceEngine.ts";
 
-const USELESS_FLASH_MS = 2500;
+const QUALITY_FLASH_MS = 2500;
 
 const Footer: React.FunctionComponent = (): React.ReactElement => {
     const { gridConfig, level, elapsedSeconds, playerCount, currentPlayer, code, pathHistory } = useGameContext();
     const isMultiplayer = playerCount !== PlayerCount.One;
     const playerColor   = getPlayerColor(currentPlayer);
     const aiProgress    = useInferenceEngine(gridConfig, code, pathHistory);
-    const [flashRed, setFlashRed] = React.useState(false);
+    const [flashQuality, setFlashQuality] = React.useState<GuessQuality>(GuessQuality.Neutral);
 
     React.useEffect(() => {
-        if (!aiProgress.lastGuessUseless || pathHistory.length === 0) return;
-        setFlashRed(true);
-        const id = setTimeout(() => setFlashRed(false), USELESS_FLASH_MS);
+        if (aiProgress.lastGuessQuality === GuessQuality.Neutral || pathHistory.length === 0) return;
+        setFlashQuality(aiProgress.lastGuessQuality);
+        const id = setTimeout(() => setFlashQuality(GuessQuality.Neutral), QUALITY_FLASH_MS);
         return () => clearTimeout(id);
-    }, [aiProgress.lastGuessUseless, pathHistory.length]);
+    }, [aiProgress.lastGuessQuality, pathHistory.length]);
 
-    const indicatorColor = getAiIndicatorColor(aiProgress.isSolved, flashRed);
+    const indicatorColor = getAiIndicatorColor(aiProgress.isSolved, flashQuality);
 
     return (
         <FooterContainer className="text-dark">

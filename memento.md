@@ -755,25 +755,26 @@ feedbackEntry(index, bulls, cows) — returns the correct entry for a position
 
 ---
 
-### AI Indicator Color Feedback (Success / Danger)
+### AI Indicator Color Feedback (Three-Tier Guess Quality)
 
-**Decision:** The AI progress indicator in the footer now changes color to provide visual cues:
-- **Green** (`var(--bs-success)`) — when the AI reaches 100% confidence (`isSolved = true`, exactly 1 candidate remaining). This also fires when the user wins, since the winning guess is added to `pathHistory` before the reveal modal opens.
-- **Red flash** (`var(--bs-danger)`) — briefly shown for 2.5 seconds when a guess didn't help the AI at all (candidate count unchanged). Then smoothly transitions back to the default color.
-- All color transitions use `transition: color 0.4s ease` for smooth visual feedback.
+**Decision:** The AI progress indicator in the footer changes color based on a **relative** assessment of each guess's quality, using three tiers:
+- **Green** (`var(--bs-success)`) — guess was good: eliminated ≥ 50% of the remaining candidate space
+- **Yellow** (`var(--bs-warning)`) — guess was mediocre: eliminated some candidates, but < 50% of the remaining space
+- **Red** (`var(--bs-danger)`) — guess was bad: no candidates eliminated (or candidates increased)
+- **Green** also shown permanently when `isSolved = true` (AI reaches 100%)
+- All color flashes last 2.5 seconds, with `transition: color 0.4s ease`
 
-**Problem fixed — AI not reaching 100% on win:** Previously, `percent` was computed as `reducedPercent` which is `(1 - candidateCount/initialCount) * 100`. With 1 candidate remaining out of many, this gives ~99.7% — not exactly 100%. Now when `candidateCount <= 1`, `percent` is forced to exactly `100` and `isSolved` is set to `true`.
+**Relative evaluation formula:** `relativeReduction = (prevCandidates - currentCandidates) / prevCandidates`. This ensures the feedback is proportional — going from 0% → 50% is rated the same as from 98% → 99%, since both represent a 50% reduction of the remaining candidate space. Thresholds: `≤ 0` = Bad, `< 0.5` = Mediocre, `≥ 0.5` = Good.
 
-**`lastGuessUseless` detection:** Computed by running the inference engine twice per render: once on the full history, once on history-minus-last. If the candidate count didn't decrease, the last guess was useless. This avoids storing mutable state in refs (which the ESLint `react-hooks/refs` rule forbids during render).
+**Replaced:** The binary `lastGuessUseless: boolean` field and `flashRed: boolean` state with `lastGuessQuality: GuessQuality` enum and `flashQuality: GuessQuality` state. The `classifyGuessQuality` function is pure, exported, and fully tested (12 tests).
 
-**Color priority:** `isSolved` (green) takes precedence over `flashRed` (red). The `getAiIndicatorColor` function in `Footer.utils.ts` encapsulates this logic and is fully tested.
+**Color priority:** `isSolved` (green) always takes precedence. The `getAiIndicatorColor` function in `Footer.utils.ts` maps `GuessQuality` to Bootstrap CSS variables.
 
 **Files changed:**
-- `src/components/useInferenceEngine.ts` — added `isSolved`, `lastGuessUseless` to `AiProgress`; percent forced to 100 when solved
-- `src/components/Footer.tsx` — added `flashRed` state with 2.5s auto-reset timer; passes color to `AiProgressStat`
-- `src/components/Footer.styled.tsx` — `AiProgressStat` accepts `$color` prop with `transition: color 0.4s ease`
-- `src/components/Footer.utils.ts` — added `getAiIndicatorColor`, `AI_COLOR_SUCCESS`, `AI_COLOR_DANGER`
-- `src/components/useInferenceEngine.test.ts` — extended with `isSolved`, `lastGuessUseless`, and `getAiIndicatorColor` tests (13 total)
+- `src/components/useInferenceEngine.ts` — added `GuessQuality` enum, `classifyGuessQuality` function, replaced `lastGuessUseless` with `lastGuessQuality`
+- `src/components/Footer.tsx` — replaced `flashRed` boolean with `flashQuality: GuessQuality` state
+- `src/components/Footer.utils.ts` — added `AI_COLOR_WARNING`, updated `getAiIndicatorColor` to accept `GuessQuality` and return three colors
+- `src/components/useInferenceEngine.test.ts` — 12 tests for `classifyGuessQuality`, 6 tests for `getAiIndicatorColor` (updated), 8 tests for AI progress computation
 
 ---
 
