@@ -88,7 +88,22 @@ jobs:
           paths:
             - docs
 
-  deploy:
+  build-android:
+    executor: node
+    steps:
+      - attach_and_install
+      - run:
+          name: Enable pnpm
+          command: corepack enable && corepack prepare pnpm@latest --activate
+      - run:
+          name: Build Android
+          command: pnpm run build:android
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - docs
+
+  deploy-web:
     executor: node
     steps:
       - attach_and_install
@@ -124,10 +139,13 @@ workflows:
           requires:
             - lint
             - test
-      - deploy:
+      - build-android:
+          requires:
+            - lint
+            - test
+      - deploy-web:
           requires:
             - build
           filters:
             branches:
               only: main
-

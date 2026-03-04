@@ -72,7 +72,6 @@ export const formatStatsTime = (seconds: number): string => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     const sWhole = Math.floor(s);
-    const ds = Math.floor((s - sWhole) * 10);
-    return `${m}:${sWhole.toString().padStart(2, "0")}.${ds}`;
+    return `${m}:${sWhole.toString().padStart(2, "0")}`;
 };
 

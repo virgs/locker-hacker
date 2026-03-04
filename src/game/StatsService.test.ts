@@ -93,19 +93,19 @@ describe("StatsService", () => {
 
     describe("formatStatsTime", () => {
         it("formats zero", () => {
-            expect(formatStatsTime(0)).toBe("0:00.0");
+            expect(formatStatsTime(0)).toBe("0:00");
         });
 
         it("formats whole seconds", () => {
-            expect(formatStatsTime(65)).toBe("1:05.0");
+            expect(formatStatsTime(65)).toBe("1:05");
         });
 
         it("formats fractional seconds", () => {
-            expect(formatStatsTime(61.7)).toBe("1:01.7");
+            expect(formatStatsTime(61.7)).toBe("1:01");
         });
 
         it("formats large values", () => {
-            expect(formatStatsTime(3600)).toBe("60:00.0");
+            expect(formatStatsTime(3600)).toBe("60:00");
         });
     });
 });
