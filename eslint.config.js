@@ -6,7 +6,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default [
-    { ignores: ['dist', 'docs', 'coverage'] },
+    { ignores: ['dist', 'docs', 'coverage', 'android'] },
     {
         files: ['**/*.test.ts', '**/*.test.tsx'],
         languageOptions: {

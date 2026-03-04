@@ -14,6 +14,8 @@ import {
 } from "../game/StatsService.ts";
 import useMediaQuery from "./useMediaQuery.ts";
 import {BREAKPOINT_QUERIES} from "../theme/breakpoints.ts";
+import {IS_CAPACITOR} from "../platform.ts";
+import {showBannerAd, hideBannerAd} from "../ads/AdService.ts";
 
 interface StatsModalProps {
     show: boolean;
@@ -30,6 +32,12 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
     const hasData = records.length > 0;
     const isMobile = useMediaQuery(BREAKPOINT_QUERIES.mobile);
     const labels = isMobile ? LEVEL_LABELS_SHORT : LEVEL_LABELS;
+
+    React.useEffect(() => {
+        if (!IS_CAPACITOR) return;
+        if (show) { showBannerAd(); } else { hideBannerAd(); }
+        return () => { hideBannerAd(); };
+    }, [show]);
 
     return (
         <Modal show={show} onHide={onClose} centered>

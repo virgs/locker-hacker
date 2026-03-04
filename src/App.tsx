@@ -13,7 +13,7 @@ import { useGameContext } from "./context/GameContext.tsx";
 import { HistoryTitle } from "./components/PatternHistory.tsx";
 
 export const App = (): ReactElement => {
-    const { phase, path, gameKey, gridConfig, playerCount, currentPlayer, onPathChange, onGuessFinish } = useGameContext();
+    const { phase, path, gameKey, gridConfig, playerCount, currentPlayer, revealedHints, onPathChange, onGuessFinish } = useGameContext();
     const pathColor = playerCount !== PlayerCount.One ? getPlayerColor(currentPlayer) : undefined;
 
     return (
@@ -34,6 +34,7 @@ export const App = (): ReactElement => {
                             disabled={phase !== GamePhase.Playing}
                             targetLength={gridConfig.length}
                             pathColor={pathColor}
+                            highlightedPoints={revealedHints}
                             onChange={onPathChange}
                             onFinish={onGuessFinish}
                         />

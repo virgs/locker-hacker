@@ -95,3 +95,21 @@
     transform: scale(2.5);
     transition: transform 200ms ease;
 }
+
+.react-pattern-lock__point-inner.highlighted {
+    background: var(--bs-warning, #ffc107);
+    animation: hint-pulse 1.5s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--bs-warning, #ffc107);
+}
+
+@keyframes hint-pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 4px var(--bs-warning, #ffc107);
+    }
+    50% {
+        transform: scale(1.6);
+        box-shadow: 0 0 12px var(--bs-warning, #ffc107);
+    }
+}
+

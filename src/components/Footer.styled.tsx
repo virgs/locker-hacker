@@ -77,3 +77,20 @@ export const FooterStat = styled.span`
     white-space: nowrap;
 `;
 
+export const HintButton = styled.button`
+    background: none;
+    border: none;
+    color: var(--bs-warning);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    transition: color 0.2s ease, transform 0.2s ease;
+    opacity: 0.7;
+
+    &:hover {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+`;
+

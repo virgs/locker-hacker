@@ -29,6 +29,7 @@ interface PatternLockProps {
     invisible?: boolean;
     targetLength?: number;
     pathColor?: string;
+    highlightedPoints?: number[];
     onChange?: (path: number[]) => void;
     onFinish?: () => void;
 }
@@ -55,6 +56,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     style = {},
     targetLength,
     pathColor,
+    highlightedPoints = [],
     onChange,
     onFinish,
     path,
@@ -81,6 +83,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                     complete={completionFlash && path.indexOf(i) > -1 && path.indexOf(i) < (targetLength ?? Infinity)}
                     pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
                     selected={path.indexOf(i) > -1}
+                    highlighted={highlightedPoints.includes(i)}
                     pathColor={disabled ? undefined : pathColor}
                 />
             ))}

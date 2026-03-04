@@ -9,6 +9,7 @@ interface PointProps {
     pop             : boolean;
     complete        : boolean;
     selected        : boolean;
+    highlighted     : boolean;
     pathColor      ?: string;
 }
 
@@ -21,10 +22,17 @@ const Point: React.FunctionComponent<PointProps> = ({
     selected,
     pop,
     complete,
+    highlighted,
     pathColor,
 }): React.ReactElement => {
     const colPercent = 100 / cols;
     const rowPercent = 100 / rows;
+
+    const innerClass = [
+        "react-pattern-lock__point-inner",
+        complete ? "complete" : pop ? "active" : "",
+        highlighted && !selected ? "highlighted" : "",
+    ].filter(Boolean).join(" ");
 
     return (
         <div
@@ -44,7 +52,7 @@ const Point: React.FunctionComponent<PointProps> = ({
                 }}
             >
                 <div
-                    className={ `react-pattern-lock__point-inner${complete ? " complete" : pop ? " active" : ""}` }
+                    className={innerClass}
                     style={{
                         minWidth   : pointSize,
                         minHeight  : pointSize,

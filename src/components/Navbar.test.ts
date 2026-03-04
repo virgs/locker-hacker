@@ -1,5 +1,6 @@
 import {
     GITHUB_URL,
+    PAYPAL_URL,
     APP_TITLE,
 } from "./Navbar.constants.ts";
 
@@ -11,6 +12,16 @@ describe("Navbar constants", () => {
 
         it("points to the locker-hacker repository", () => {
             expect(GITHUB_URL).toBe("https://github.com/virgs/locker-hacker");
+        });
+    });
+
+    describe("PAYPAL_URL", () => {
+        it("is a valid https PayPal URL", () => {
+            expect(PAYPAL_URL).toMatch(/^https:\/\/www\.paypal\.com\//);
+        });
+
+        it("is a non-empty string", () => {
+            expect(PAYPAL_URL.length).toBeGreaterThan(0);
         });
     });
 

@@ -87,6 +87,23 @@ export const GitHubLink = styled.a`
     }
 `;
 
+export const CoffeeLink = styled.a`
+    color: rgba(255, 255, 255, 0.55);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    transition: color 0.2s ease, transform 0.2s ease;
+
+    &:hover {
+        color: #ffc107;
+        transform: scale(1.1);
+    }
+
+    &:focus-visible {
+        color: #ffc107;
+    }
+`;
+
 export const HelpButton = styled.button`
     background: none;
     border: none;

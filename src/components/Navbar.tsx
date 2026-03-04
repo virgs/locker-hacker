@@ -1,12 +1,12 @@
 import * as React from "react";
-import {GitHub, HelpCircle, Eye, EyeOff, Users, User, BarChart2, Play} from "react-feather";
+import {GitHub, HelpCircle, Eye, EyeOff, Users, User, BarChart2, Play, Coffee} from "react-feather";
 import Dropdown from "react-bootstrap/Dropdown";
 import Button from "react-bootstrap/Button";
 import {
     NavbarContainer, NavbarRow, NavbarLeft, NavbarCenter, NavbarRight,
-    AppIconLink, AppIconImage, HelpButton, GitHubLink, ButtonLabel,
+    AppIconLink, AppIconImage, HelpButton, GitHubLink, CoffeeLink, ButtonLabel,
 } from "./Navbar.styled.tsx";
-import {GITHUB_URL, APP_TITLE} from "./Navbar.constants.ts";
+import {GITHUB_URL, PAYPAL_URL, APP_TITLE} from "./Navbar.constants.ts";
 import {
     Level, PlayerCount, GamePhase,
     LEVEL_LABELS, LEVEL_CONFIGS, PLAYER_LABELS, ALL_LEVELS, ALL_PLAYER_COUNTS,
@@ -17,6 +17,7 @@ import StatsModal from "./StatsModal.tsx";
 import {getPlayerColor} from "../game/playerColors.ts";
 import {useGameContext} from "../context/GameContext.tsx";
 import Tip from "./Tip.tsx";
+import {IS_WEB} from "../platform.ts";
 
 const LONG_PRESS_MS = 10_000;
 
@@ -162,12 +163,22 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                                 <HelpCircle size={20}/>
                             </HelpButton>
                         </Tip>
-                        <Tip text="View source on GitHub">
-                            <GitHubLink className="ms-2" href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
-                                        aria-label="View project on GitHub">
-                                <GitHub size={20}/>
-                            </GitHubLink>
-                        </Tip>
+                        {IS_WEB && (
+                            <Tip text="Buy me a coffee">
+                                <CoffeeLink href={PAYPAL_URL} target="_blank" rel="noopener noreferrer" className="ms-2"
+                                            aria-label="Buy me a coffee">
+                                    <Coffee size={20}/>
+                                </CoffeeLink>
+                            </Tip>
+                        )}
+                        {IS_WEB && (
+                            <Tip text="View source on GitHub">
+                                <GitHubLink className="ms-2" href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
+                                            aria-label="View project on GitHub">
+                                    <GitHub size={20}/>
+                                </GitHubLink>
+                            </Tip>
+                        )}
                     </NavbarRight>
                 </NavbarRow>
             </NavbarContainer>

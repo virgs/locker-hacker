@@ -1,7 +1,7 @@
 import * as React from "react";
-import {Hash, BarChart2, Clock, User, Unlock} from "react-feather";
-import {FooterContainer, FooterStat, AiProgressStat, PlayerLabel, ConfidenceDelta} from "./Footer.styled.tsx";
-import {PlayerCount, LEVEL_LABELS, LEVEL_LABELS_SHORT} from "../game/GameConfig.ts";
+import {Hash, BarChart2, Clock, User, Unlock, Gift} from "react-feather";
+import {FooterContainer, FooterStat, AiProgressStat, PlayerLabel, ConfidenceDelta, HintButton} from "./Footer.styled.tsx";
+import {PlayerCount, GamePhase, LEVEL_LABELS, LEVEL_LABELS_SHORT} from "../game/GameConfig.ts";
 import {getPlayerColor} from "../game/playerColors.ts";
 import {useGameContext} from "../context/GameContext.tsx";
 import {formatTime, formatPercentDelta, getAiIndicatorColor} from "./Footer.utils.ts";
@@ -9,12 +9,14 @@ import useInferenceEngine, {GuessQuality} from "./useInferenceEngine.ts";
 import Tip from "./Tip.tsx";
 import useMediaQuery from "./useMediaQuery.ts";
 import {BREAKPOINT_QUERIES} from "../theme/breakpoints.ts";
+import {IS_CAPACITOR} from "../platform.ts";
+import {showRewardedAd} from "../ads/AdService.ts";
 
 const QUALITY_FLASH_MS = 2500;
 const DELTA_DISPLAY_MS = 2000;
 
 const Footer: React.FunctionComponent = (): React.ReactElement => {
-    const {gridConfig, level, elapsedSeconds, playerCount, currentPlayer, code, pathHistory} = useGameContext();
+    const {gridConfig, level, elapsedSeconds, playerCount, currentPlayer, code, pathHistory, phase, revealedHints, onRevealHint} = useGameContext();
     const isMultiplayer = playerCount !== PlayerCount.One;
     const playerColor = getPlayerColor(currentPlayer);
     const aiProgress = useInferenceEngine(gridConfig, code, pathHistory);
@@ -23,6 +25,13 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
     const levelLabel = isMobile ? LEVEL_LABELS_SHORT[level] : LEVEL_LABELS[level];
     const [showDelta, setShowDelta] = React.useState(false);
     const [deltaKey, setDeltaKey] = React.useState(0);
+
+    const canHint = IS_CAPACITOR && phase === GamePhase.Playing && revealedHints.length < code.length - 1;
+
+    const handleHint = async (): Promise<void> => {
+        const rewarded = await showRewardedAd();
+        if (rewarded) onRevealHint();
+    };
 
     React.useEffect(() => {
         if (aiProgress.lastGuessQuality === GuessQuality.Neutral || pathHistory.length === 0) return;
@@ -57,6 +66,13 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
                     )}
                 </AiProgressStat>
             </Tip>
+            {canHint && (
+                <Tip text="Watch an ad to reveal one dot as a hint" placement="top">
+                    <HintButton onClick={handleHint} aria-label="Get a hint">
+                        <Gift size={18}/>
+                    </HintButton>
+                </Tip>
+            )}
             {isMultiplayer && (
                 <PlayerLabel $color={playerColor} aria-label={`Current player: Player ${currentPlayer}`}>
                     <User size={20}/>
