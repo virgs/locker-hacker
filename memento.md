@@ -774,3 +774,32 @@ feedbackEntry(index, bulls, cows) — returns the correct entry for a position
 - `src/components/Footer.styled.tsx` — `AiProgressStat` accepts `$color` prop with `transition: color 0.4s ease`
 - `src/components/Footer.utils.ts` — added `getAiIndicatorColor`, `AI_COLOR_SUCCESS`, `AI_COLOR_DANGER`
 - `src/components/useInferenceEngine.test.ts` — extended with `isSolved`, `lastGuessUseless`, and `getAiIndicatorColor` tests (13 total)
+
+---
+
+### Build to `docs/` + CircleCI Pipeline
+
+**Decision:** Configured the production build to output to `docs/` for GitHub Pages hosting, and added a CircleCI pipeline with multiple quality-gate jobs.
+
+**Vite config changes:**
+- `base: '/locker-hacker/'` — sets the correct asset prefix for GitHub Pages (`https://virgs.github.io/locker-hacker/`)
+- `build.outDir: 'docs'` — outputs the build to `docs/` instead of the default `dist/`
+
+**ESLint ignores:** Added `docs` and `coverage` to the ignore list in `eslint.config.js` — both are generated directories that should never be linted.
+
+**New script:** `test:coverage` — runs Jest with `--coverage` flag, producing an lcov report stored as a CircleCI artifact.
+
+**CircleCI pipeline (`.circleci/config.yml`):**
+- Uses `cimg/node:22.14` (Node 22 LTS) as the executor
+- Caches `node_modules` keyed on `pnpm-lock.yaml` checksum
+- Workspace persistence: `install` persists the full checkout+dependencies; downstream jobs attach it
+- Jobs: `install` → `lint` + `test` + `coverage` (parallel) → `build` → `deploy` (main only)
+- Deploy job commits the `docs/` folder back to `main` with `[skip ci]` in the commit message to avoid infinite loops
+
+**Files:**
+- `vite.config.ts` — `base` and `build.outDir` settings
+- `eslint.config.js` — `docs` and `coverage` in ignores
+- `package.json` — added `test:coverage` script
+- `.circleci/config.yml` — full pipeline definition
+- `README.md` — updated Development and CI/CD sections
+

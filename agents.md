@@ -181,4 +181,4 @@ Build incrementally and safely.
 # TODO list
 
 
-1. [x] I just won the game and didn't see the AI reach 100% confidence. This is expected when a user wins. Also, when the AI reaches 100% confidence, the AI indicator in the footer should change color to bootstrap success (green) to indicate it. If the user guesses something that didn't helped the AI at all, the AI indicator should change color to bootstrap danger (red) briefly (for a few seconds) to indicate that the user made a guess that didn't help the AI at all. This will provide a clear visual cue to the user about the game's outcome. Make sure this colors changes are smooth with a nice transition.
+1. [x] The `npm run build` command should build a project into a docs folder, that will be serves as a github pages. Also, create a circleci workflow with multiple jobs (like linting, testing, installing, code coverage, building) to ensure code quality. This will ensure that every time changes are pushed to the main branch, the documentation is automatically built and deployed without manual intervention.

@@ -98,10 +98,27 @@ See [ai-inference-rules.md](./ai-inference-rules.md) for a plain-language explan
 ## Development
 
 ```bash
-pnpm install   # install dependencies
-pnpm dev       # start dev server
-pnpm test      # run tests
-pnpm lint      # lint
-pnpm lint:fix  # auto-fix lint issues
-pnpm build     # production build
+pnpm install        # install dependencies
+pnpm dev            # start dev server
+pnpm test           # run tests
+pnpm test:coverage  # run tests with coverage report
+pnpm lint           # lint
+pnpm lint:fix       # auto-fix lint issues
+pnpm build          # production build (outputs to docs/)
 ```
+
+## CI/CD
+
+A CircleCI pipeline (`.circleci/config.yml`) runs on every push:
+
+| Job | Description |
+|---|---|
+| **install** | Installs dependencies with `pnpm install --frozen-lockfile` |
+| **lint** | Runs ESLint |
+| **test** | Runs the Jest test suite |
+| **coverage** | Runs tests with coverage report |
+| **build** | Compiles TypeScript and builds with Vite into `docs/` |
+| **deploy** | Commits the `docs/` folder to `main` for GitHub Pages (main branch only) |
+
+The production build outputs to `docs/` with `base: '/locker-hacker/'` for GitHub Pages hosting.
+

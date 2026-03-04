@@ -1,0 +1,133 @@
+version: 2.1
+
+executors:
+  node:
+    docker:
+      - image: cimg/node:22.14
+    working_directory: ~/project
+
+commands:
+  attach_and_install:
+    description: Attach workspace and install dependencies
+    steps:
+      - attach_workspace:
+          at: ~/project
+
+jobs:
+  install:
+    executor: node
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - pnpm-deps-{{ checksum "pnpm-lock.yaml" }}
+            - pnpm-deps-
+      - run:
+          name: Install pnpm
+          command: corepack enable && corepack prepare pnpm@latest --activate
+      - run:
+          name: Install dependencies
+          command: pnpm install --frozen-lockfile
+      - save_cache:
+          key: pnpm-deps-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - node_modules
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - .
+
+  lint:
+    executor: node
+    steps:
+      - attach_and_install
+      - run:
+          name: Enable pnpm
+          command: corepack enable && corepack prepare pnpm@latest --activate
+      - run:
+          name: Lint
+          command: pnpm run lint
+
+  test:
+    executor: node
+    steps:
+      - attach_and_install
+      - run:
+          name: Enable pnpm
+          command: corepack enable && corepack prepare pnpm@latest --activate
+      - run:
+          name: Run tests
+          command: pnpm run test
+
+  coverage:
+    executor: node
+    steps:
+      - attach_and_install
+      - run:
+          name: Enable pnpm
+          command: corepack enable && corepack prepare pnpm@latest --activate
+      - run:
+          name: Run tests with coverage
+          command: pnpm run test:coverage
+      - store_artifacts:
+          path: coverage
+          destination: coverage
+
+  build:
+    executor: node
+    steps:
+      - attach_and_install
+      - run:
+          name: Enable pnpm
+          command: corepack enable && corepack prepare pnpm@latest --activate
+      - run:
+          name: Build
+          command: pnpm run build
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - docs
+
+  deploy:
+    executor: node
+    steps:
+      - attach_and_install
+      - run:
+          name: Enable pnpm
+          command: corepack enable && corepack prepare pnpm@latest --activate
+      - run:
+          name: Configure Git
+          command: |
+            git config user.email "ci@circleci.com"
+            git config user.name "CircleCI"
+      - run:
+          name: Deploy to GitHub Pages
+          command: |
+            git add docs --force
+            git commit -m "ci: update GitHub Pages build [skip ci]" --allow-empty
+            git push origin main
+
+workflows:
+  build-and-deploy:
+    jobs:
+      - install
+      - lint:
+          requires:
+            - install
+      - test:
+          requires:
+            - install
+      - coverage:
+          requires:
+            - install
+      - build:
+          requires:
+            - lint
+            - test
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: main
+
