@@ -752,3 +752,25 @@ feedbackEntry(index, bulls, cows) — returns the correct entry for a position
 - `src/components/useInferenceEngine.test.ts` — 6 tests (progress computation logic)
 - `src/components/Footer.tsx` — added AI progress display
 - `src/components/Footer.styled.tsx` — added `AiProgressStat`
+
+---
+
+### AI Indicator Color Feedback (Success / Danger)
+
+**Decision:** The AI progress indicator in the footer now changes color to provide visual cues:
+- **Green** (`var(--bs-success)`) — when the AI reaches 100% confidence (`isSolved = true`, exactly 1 candidate remaining). This also fires when the user wins, since the winning guess is added to `pathHistory` before the reveal modal opens.
+- **Red flash** (`var(--bs-danger)`) — briefly shown for 2.5 seconds when a guess didn't help the AI at all (candidate count unchanged). Then smoothly transitions back to the default color.
+- All color transitions use `transition: color 0.4s ease` for smooth visual feedback.
+
+**Problem fixed — AI not reaching 100% on win:** Previously, `percent` was computed as `reducedPercent` which is `(1 - candidateCount/initialCount) * 100`. With 1 candidate remaining out of many, this gives ~99.7% — not exactly 100%. Now when `candidateCount <= 1`, `percent` is forced to exactly `100` and `isSolved` is set to `true`.
+
+**`lastGuessUseless` detection:** Computed by running the inference engine twice per render: once on the full history, once on history-minus-last. If the candidate count didn't decrease, the last guess was useless. This avoids storing mutable state in refs (which the ESLint `react-hooks/refs` rule forbids during render).
+
+**Color priority:** `isSolved` (green) takes precedence over `flashRed` (red). The `getAiIndicatorColor` function in `Footer.utils.ts` encapsulates this logic and is fully tested.
+
+**Files changed:**
+- `src/components/useInferenceEngine.ts` — added `isSolved`, `lastGuessUseless` to `AiProgress`; percent forced to 100 when solved
+- `src/components/Footer.tsx` — added `flashRed` state with 2.5s auto-reset timer; passes color to `AiProgressStat`
+- `src/components/Footer.styled.tsx` — `AiProgressStat` accepts `$color` prop with `transition: color 0.4s ease`
+- `src/components/Footer.utils.ts` — added `getAiIndicatorColor`, `AI_COLOR_SUCCESS`, `AI_COLOR_DANGER`
+- `src/components/useInferenceEngine.test.ts` — extended with `isSolved`, `lastGuessUseless`, and `getAiIndicatorColor` tests (13 total)

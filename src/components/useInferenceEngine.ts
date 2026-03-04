@@ -5,11 +5,26 @@ import type { GridConfig } from "../game/GameConfig.ts";
 import type { Observation } from "../ai/types.ts";
 
 export interface AiProgress {
-    percent: number;    // 0..100 — how much of the candidate space has been eliminated
-    candidates: number; // remaining candidate count
+    percent: number;         // 0..100 — how much of the candidate space has been eliminated
+    candidates: number;      // remaining candidate count
+    isSolved: boolean;       // true when exactly 1 candidate remains
+    lastGuessUseless: boolean; // true when the latest guess did not reduce candidates
 }
 
-const INITIAL_PROGRESS: AiProgress = { percent: 0, candidates: 0 };
+const INITIAL_PROGRESS: AiProgress = {
+    percent: 0,
+    candidates: 0,
+    isSolved: false,
+    lastGuessUseless: false,
+};
+
+const buildObservations = (code: number[], history: number[][]): Observation[] => {
+    const validator = new GuessValidator(code);
+    return history.map(guess => ({
+        guess,
+        feedback: validator.validate([...guess]),
+    }));
+};
 
 const useInferenceEngine = (
     gridConfig: GridConfig,
@@ -24,17 +39,20 @@ const useInferenceEngine = (
     return useMemo((): AiProgress => {
         if (pathHistory.length === 0) return INITIAL_PROGRESS;
 
-        const validator = new GuessValidator(code);
-        const observations: Observation[] = pathHistory.map(guess => ({
-            guess,
-            feedback: validator.validate([...guess]),
-        }));
-
+        const observations = buildObservations(code, pathHistory);
         const summary = engine.applyAll(observations);
-        return {
-            percent: summary.progress.reducedPercent,
-            candidates: summary.progress.candidateCount,
-        };
+        const currentCandidates = summary.progress.candidateCount;
+        const isSolved = currentCandidates <= 1;
+        const percent = isSolved ? 100 : summary.progress.reducedPercent;
+
+        let lastGuessUseless = false;
+        if (pathHistory.length >= 2) {
+            const prevObservations = observations.slice(0, -1);
+            const prevSummary = engine.applyAll(prevObservations);
+            lastGuessUseless = currentCandidates >= prevSummary.progress.candidateCount;
+        }
+
+        return { percent, candidates: currentCandidates, isSolved, lastGuessUseless };
     }, [engine, code, pathHistory]);
 };
 

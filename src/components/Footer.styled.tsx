@@ -20,13 +20,15 @@ export const FooterContainer = styled.footer`
     }
 `;
 
-export const AiProgressStat = styled.span`
+export const AiProgressStat = styled.span<{ $color?: string }>`
     display: flex;
     align-items: center;
     gap: 5px;
     font-size: 0.8rem;
     white-space: nowrap;
     margin-right: auto;
+    color: ${({ $color }) => $color ?? 'inherit'};
+    transition: color 0.4s ease;
 `;
 
 export const PlayerLabel = styled.span<{ $color: string }>`

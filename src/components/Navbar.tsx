@@ -22,7 +22,7 @@ const LONG_PRESS_MS = 10_000;
 const PlayerCountIcons: React.FunctionComponent<{ count: number }> = ({count}): React.ReactElement => (
     <>
         {Array.from({length: count}, (_, i) => (
-            <User key={i} size={14} className="me-1" style={{ color: count === 1 ? 'white' : getPlayerColor(i + 1) }} />
+            <User key={i} size={20} className="me-1" style={{ color: count === 1 ? 'white' : getPlayerColor(i + 1) }} />
         ))}
     </>
 );
@@ -64,10 +64,10 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                 <>
                     <Button variant="outline-secondary" size="sm" onClick={onToggleRevealModal}
                             aria-label="Toggle reveal">
-                        <EyeOff size={16}/><ButtonLabel className="ms-1">Reveal</ButtonLabel>
+                        <EyeOff size={20}/><ButtonLabel className="ms-1">Reveal</ButtonLabel>
                     </Button>
                     <Button variant="outline-danger" size="sm" onClick={onFinishGame} aria-label="Finish game">
-                        <XOctagon size={16}/><ButtonLabel className="ms-1">Finish</ButtonLabel>
+                        <XOctagon size={20}/><ButtonLabel className="ms-1">Finish</ButtonLabel>
                     </Button>
                 </>
             );
@@ -75,7 +75,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
         if (isRunning) {
             return (
                 <Button variant="danger" size="sm" onClick={onGiveUp} aria-label="Give up and reveal code">
-                    <Eye size={16}/><ButtonLabel className="ms-1">Give Up</ButtonLabel>
+                    <Eye size={20}/><ButtonLabel className="ms-1">Give Up</ButtonLabel>
                 </Button>
             );
         }
@@ -106,7 +106,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
 
                         <Dropdown>
                             <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
-                                <Users size={14}/><ButtonLabel
+                                <Users size={20}/><ButtonLabel
                                 className="ms-1">{PLAYER_LABELS[playerCount]}</ButtonLabel>
                             </Dropdown.Toggle>
                             <Dropdown.Menu style={{ minWidth: '220px' }}>
@@ -126,13 +126,13 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
 
                         <Dropdown>
                             <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
-                                <BarChart2 size={14}/><ButtonLabel
+                                <BarChart2 size={20}/><ButtonLabel
                                 className="ms-1">{levelDetailLabel(level)}</ButtonLabel>
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
                                 {ALL_LEVELS.map((l: Level) => (
                                     <Dropdown.Item key={l} active={l === level} onClick={() => onLevelChange(l)}>
-                                        <BarChart2 size={14} className="me-1"/>
+                                        <BarChart2 size={20} className="me-1"/>
                                         {`${LEVEL_LABELS[l]}`}
                                         <span className="float-end fst-italic"> {`${LEVEL_CONFIGS[l].length}`}</span>
                                     </Dropdown.Item>
