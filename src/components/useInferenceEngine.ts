@@ -16,6 +16,7 @@ const GOOD_THRESHOLD = 0.5;
 
 export interface AiProgress {
     percent: number;              // 0..100 — how much of the candidate space has been eliminated
+    percentDelta: number;         // change in percent from the previous guess (can be negative)
     candidates: number;           // remaining candidate count
     isSolved: boolean;            // true when exactly 1 candidate remains
     lastGuessQuality: GuessQuality;
@@ -23,6 +24,7 @@ export interface AiProgress {
 
 const INITIAL_PROGRESS: AiProgress = {
     percent: 0,
+    percentDelta: 0,
     candidates: 0,
     isSolved: false,
     lastGuessQuality: GuessQuality.Neutral,
@@ -73,17 +75,21 @@ const useInferenceEngine = (
         }
 
         let prevCandidates: number;
+        let prevPercent: number;
         if (pathHistory.length >= 2) {
             const prevObservations = observations.slice(0, -1);
             const prevSummary = engine.applyAll(prevObservations);
             prevCandidates = prevSummary.progress.candidateCount;
+            prevPercent = prevSummary.progress.reducedPercent;
         } else {
             prevCandidates = summary.progress.initialCandidateCount;
+            prevPercent = 0;
         }
 
         const lastGuessQuality = classifyGuessQuality(prevCandidates, currentCandidates);
+        const percentDelta = percent - prevPercent;
 
-        return { percent, candidates: currentCandidates, isSolved, lastGuessQuality };
+        return { percent, percentDelta, candidates: currentCandidates, isSolved, lastGuessQuality };
     }, [engine, code, pathHistory]);
 };
 

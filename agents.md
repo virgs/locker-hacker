@@ -181,7 +181,7 @@ Build incrementally and safely.
 # TODO list
 
 1. [x] Players turn announcements also should reuse react bootstrap modal instead of creating a custom one
-2. [ ] Every time a guess is made, add an animated feedback to the player telling how much the ai confidence increased. This should be a simple text that appears for ~0.5ms on the unlock icon showing the confidence change (e.g., "+5%" or "-3%") with a brief animation (like fading in and out, moving up a few pixels and getting bigger). Something like.
+2. [x] Every time a guess is made, add an animated feedback to the player telling how much the ai confidence increased. This should be a simple text that appears for ~0.5ms on the unlock icon showing the confidence change (e.g., "+5%" or "-3%") with a brief animation (like fading in and out, moving up a few pixels and getting bigger). Something like.
    ```@keyframes moveUpAndFadeOut (or any better naming) {
     0% {
         opacity: 1;
@@ -192,5 +192,5 @@ Build incrementally and safely.
         transform: translateY(-30px) translateX(10px) scale(2.5);
     }
 }```
-1. [ ] Add a confetti like animation or something similar (can be anything simple) when a player wins the game.
+3. [ ] Add a confetti like animation or something similar (can be anything simple) when a player wins the game.
 

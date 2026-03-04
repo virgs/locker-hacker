@@ -1,5 +1,16 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { BREAKPOINTS } from "../theme/breakpoints.ts";
+
+const moveUpAndFadeOut = keyframes`
+    0% {
+        opacity: 1;
+        transform: translateY(0) translateX(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-30px) translateX(10px) scale(2.5);
+    }
+`;
 
 export const FooterContainer = styled.footer`
     flex-shrink: 0;
@@ -29,6 +40,19 @@ export const AiProgressStat = styled.span<{ $color?: string }>`
     margin-right: auto;
     color: ${({ $color }) => $color ?? 'inherit'};
     transition: color 0.4s ease;
+    position: relative;
+`;
+
+export const ConfidenceDelta = styled.span<{ $color: string }>`
+    position: absolute;
+    top: -4px;
+    left: 10px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: ${({ $color }) => $color};
+    pointer-events: none;
+    animation: ${moveUpAndFadeOut} 2s ease-out forwards;
+    white-space: nowrap;
 `;
 
 export const PlayerLabel = styled.span<{ $color: string }>`
@@ -52,3 +76,4 @@ export const FooterStat = styled.span`
     font-size: 0.8rem;
     white-space: nowrap;
 `;
+

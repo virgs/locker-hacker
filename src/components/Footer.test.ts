@@ -1,4 +1,4 @@
-import { formatTime } from "./Footer.utils.ts";
+import { formatTime, formatPercentDelta } from "./Footer.utils.ts";
 
 describe("formatTime", () => {
     it("formats 0 seconds as 0:00", () => {
@@ -31,3 +31,18 @@ describe("formatTime", () => {
         expect(formatTime(3600)).toBe("60:00");
     });
 });
+
+describe("formatPercentDelta", () => {
+    it("formats positive delta with + sign", () => {
+        expect(formatPercentDelta(5)).toBe("+5.0%");
+    });
+
+    it("formats negative delta with - sign", () => {
+        expect(formatPercentDelta(-3.2)).toBe("-3.2%");
+    });
+
+    it("formats zero as +0.0%", () => {
+        expect(formatPercentDelta(0)).toBe("+0.0%");
+    });
+});
+

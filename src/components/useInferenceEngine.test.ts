@@ -4,6 +4,7 @@ import type { GridConfig } from "../game/GameConfig.ts";
 import type { Observation } from "../ai/types.ts";
 import {
     getAiIndicatorColor,
+    formatPercentDelta,
     AI_COLOR_SUCCESS,
     AI_COLOR_DANGER,
     AI_COLOR_WARNING,
@@ -27,9 +28,9 @@ const computeAiProgress = (
     gridConfig: GridConfig,
     code: number[],
     pathHistory: number[][],
-): { percent: number; candidates: number; isSolved: boolean; lastGuessQuality: GuessQuality } => {
+): { percent: number; percentDelta: number; candidates: number; isSolved: boolean; lastGuessQuality: GuessQuality } => {
     if (pathHistory.length === 0) {
-        return { percent: 0, candidates: 0, isSolved: false, lastGuessQuality: GuessQuality.Neutral };
+        return { percent: 0, percentDelta: 0, candidates: 0, isSolved: false, lastGuessQuality: GuessQuality.Neutral };
     }
 
     const engine = new InferenceEngine(gridConfig);
@@ -40,17 +41,21 @@ const computeAiProgress = (
     const percent = isSolved ? 100 : summary.progress.reducedPercent;
 
     let prevCandidates: number;
+    let prevPercent: number;
     if (pathHistory.length >= 2) {
         const prevObservations = observations.slice(0, -1);
         const prevSummary = engine.applyAll(prevObservations);
         prevCandidates = prevSummary.progress.candidateCount;
+        prevPercent = prevSummary.progress.reducedPercent;
     } else {
         prevCandidates = summary.progress.initialCandidateCount;
+        prevPercent = 0;
     }
 
     const lastGuessQuality = classifyGuessQuality(prevCandidates, currentCandidates);
+    const percentDelta = percent - prevPercent;
 
-    return { percent, candidates: currentCandidates, isSolved, lastGuessQuality };
+    return { percent, percentDelta, candidates: currentCandidates, isSolved, lastGuessQuality };
 };
 
 describe("AI progress computation", () => {
@@ -59,6 +64,7 @@ describe("AI progress computation", () => {
     it("returns 0% with 0 candidates when no guesses made", () => {
         const result = computeAiProgress(config, [0, 1], []);
         expect(result.percent).toBe(0);
+        expect(result.percentDelta).toBe(0);
         expect(result.candidates).toBe(0);
         expect(result.isSolved).toBe(false);
         expect(result.lastGuessQuality).toBe(GuessQuality.Neutral);
@@ -118,6 +124,25 @@ describe("AI progress computation", () => {
         // First guess always eliminates a significant portion of candidates
         expect(result.lastGuessQuality).not.toBe(GuessQuality.Neutral);
         expect(result.lastGuessQuality).not.toBe(GuessQuality.Bad);
+    });
+
+    it("percentDelta equals percent on first guess (baseline is 0)", () => {
+        const code = [0, 3];
+        const result = computeAiProgress(config, code, [[0, 1]]);
+        expect(result.percentDelta).toBe(result.percent);
+    });
+
+    it("percentDelta reflects increase across successive guesses", () => {
+        const code = [0, 3];
+        const after1 = computeAiProgress(config, code, [[1, 2]]);
+        const after2 = computeAiProgress(config, code, [[1, 2], [0, 1]]);
+        expect(after2.percentDelta).toBeCloseTo(after2.percent - after1.percent, 5);
+    });
+
+    it("percentDelta is 0 when duplicate guess adds no info", () => {
+        const code = [0, 3];
+        const result = computeAiProgress(config, code, [[0, 1], [0, 1]]);
+        expect(result.percentDelta).toBe(0);
     });
 });
 
@@ -199,6 +224,29 @@ describe("getAiIndicatorColor", () => {
 
     it("returns undefined for Neutral quality when not solved", () => {
         expect(getAiIndicatorColor(false, GuessQuality.Neutral)).toBeUndefined();
+    });
+});
+
+describe("formatPercentDelta", () => {
+    it("formats positive delta with + prefix", () => {
+        expect(formatPercentDelta(5.0)).toBe("+5.0%");
+    });
+
+    it("formats negative delta with - prefix", () => {
+        expect(formatPercentDelta(-3.2)).toBe("-3.2%");
+    });
+
+    it("formats zero as +0.0%", () => {
+        expect(formatPercentDelta(0)).toBe("+0.0%");
+    });
+
+    it("formats fractional values to one decimal place", () => {
+        expect(formatPercentDelta(12.345)).toBe("+12.3%");
+        expect(formatPercentDelta(-0.15)).toBe("-0.1%");
+    });
+
+    it("formats large positive values", () => {
+        expect(formatPercentDelta(99.9)).toBe("+99.9%");
     });
 });
 

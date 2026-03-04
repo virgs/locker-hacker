@@ -694,7 +694,7 @@ feedbackEntry(index, bulls, cows) — returns the correct entry for a position
 
 **Decision:** Replaced the custom `RevealBackdrop`/`RevealCard`/`RevealTitle` overlay with a standard `react-bootstrap Modal`, matching the existing pattern used by `StatsModal` and `HelpModal`.
 
-**Rationale:** The custom overlay reimplemented modal behavior (backdrop click-to-close, fade animation, centering, z-index management) that Bootstrap's Modal already provides with better accessibility (focus trapping, ARIA attributes, ESC key handling). The `NavbarContainer` z-index hack (`z-index: 1100`) was only needed to render above the custom overlay's `z-index: 1000` — Bootstrap modals use portals with their own z-index, making the hack unnecessary.
+**Rationale:** The custom overlay duplicated modal behaviour (backdrop click-to-close, fade animation, centering, z-index management) that Bootstrap's Modal already provides with better accessibility (focus trapping, ARIA attributes, ESC key handling). The `NavbarContainer` z-index hack (`z-index: 1100`) was only needed to render above the custom overlay's `z-index: 1000` — Bootstrap modals use portals with their own z-index, making the hack unnecessary.
 
 **Changes:**
 - `src/components/CodeRevealOverlay.tsx` — uses `<Modal>` with `show`/`onHide` from `useGameContext()`
@@ -741,17 +741,10 @@ feedbackEntry(index, bulls, cows) — returns the correct entry for a position
 **Implementation:**
 - `src/components/useInferenceEngine.ts` — custom React hook that wraps `InferenceEngine`. Uses `useMemo` (not `useState`+`useEffect`) to avoid the `react-hooks/set-state-in-effect` ESLint error. The engine is memoized on `gridConfig` and recomputed when `pathHistory` changes. Returns `{ percent, candidates }`.
 - `src/components/Footer.tsx` — calls `useInferenceEngine(gridConfig, code, pathHistory)` and renders the progress stat with the `Unlock` icon.
-- `src/components/Footer.styled.tsx` — added `AiProgressStat` styled component with `margin-right: auto` to push it to the far left while other stats stay right-aligned.
-
-**Reset behaviour:** When `pathHistory` is empty (new game / level change / finish game), the hook returns `{ percent: 0, candidates: 0 }` immediately without running any inference, matching the TODO requirement that "every time a new game starts, the percentage should reset to 0%".
-
-**Why `useMemo` over `useState`+`useEffect`:** The project's ESLint config enforces `react-hooks/set-state-in-effect` which forbids calling `setState` synchronously inside effects. `useMemo` computes the progress synchronously during render — no cascading re-renders, no effect cleanup issues. The `InferenceEngine` constructor (candidate generation) is expensive for large grids, so it's memoized separately on `gridConfig`.
-
-**Files:**
-- `src/components/useInferenceEngine.ts` — new hook
-- `src/components/useInferenceEngine.test.ts` — 6 tests (progress computation logic)
-- `src/components/Footer.tsx` — added AI progress display
-- `src/components/Footer.styled.tsx` — added `AiProgressStat`
+- `src/components/Footer.styled.tsx` — added `moveUpAndFadeOut` keyframe + `ConfidenceDelta` styled component; added `position: relative` to `AiProgressStat`
+- `src/components/Footer.tsx` — added `showDelta`/`deltaKey` state, effect to trigger on `pathHistory.length`, and `ConfidenceDelta` rendering
+- `src/components/useInferenceEngine.test.ts` — added `percentDelta` tests + `formatPercentDelta` tests
+- `src/components/Footer.test.ts` — added `formatPercentDelta` tests
 
 ---
 
@@ -932,3 +925,22 @@ Sidebar (flex-col)
 - `src/components/TurnAnnouncement.tsx` — rewrote to use `react-bootstrap/Modal`
 - `src/components/TurnAnnouncement.styled.tsx` — removed `TurnBackdrop`, `TurnCard`, `TurnMessage`, `DismissButton`; kept `TurnPlayerName`
 
+---
+
+### Animated AI Confidence Delta on Guess
+
+**Decision:** After each guess, display a floating animated text (e.g., "+12.3%" or "-3.0%") near the unlock icon in the footer, showing how much the AI confidence changed from the previous guess.
+
+**Implementation:**
+- Added `percentDelta` field to `AiProgress` interface — computed as `currentPercent - previousPercent` in the `useInferenceEngine` hook.
+- Added `formatPercentDelta` utility in `Footer.utils.ts` — formats delta with sign prefix (e.g., "+5.0%", "-3.2%").
+- Added `ConfidenceDelta` styled component with `moveUpAndFadeOut` keyframe animation: starts at normal size/opacity, then floats up 30px, shifts right 10px, scales to 2.5×, and fades to 0 over 2 seconds.
+- In `Footer.tsx`, the delta element is shown for 2 seconds after each guess, using a `deltaKey` counter to re-trigger the CSS animation on each new guess. Color is green (`--bs-success`) for positive deltas, red (`--bs-danger`) for negative.
+
+**Files:**
+- `src/components/useInferenceEngine.ts` — added `percentDelta` to `AiProgress` interface and computation
+- `src/components/Footer.utils.ts` — added `formatPercentDelta` function
+- `src/components/Footer.styled.tsx` — added `moveUpAndFadeOut` keyframe + `ConfidenceDelta` styled component; added `position: relative` to `AiProgressStat`
+- `src/components/Footer.tsx` — added `showDelta`/`deltaKey` state, effect to trigger on `pathHistory.length`, and `ConfidenceDelta` rendering
+- `src/components/useInferenceEngine.test.ts` — added `percentDelta` tests + `formatPercentDelta` tests
+- `src/components/Footer.test.ts` — added `formatPercentDelta` tests

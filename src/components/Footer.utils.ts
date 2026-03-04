@@ -6,6 +6,11 @@ export const formatTime = (totalSeconds: number): string => {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 };
 
+export const formatPercentDelta = (delta: number): string => {
+    const sign = delta >= 0 ? "+" : "";
+    return `${sign}${delta.toFixed(1)}%`;
+};
+
 export const AI_COLOR_SUCCESS = "var(--bs-success)";
 export const AI_COLOR_WARNING = "var(--bs-warning)";
 export const AI_COLOR_DANGER  = "var(--bs-danger)";

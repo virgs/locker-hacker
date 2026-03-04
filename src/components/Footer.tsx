@@ -1,16 +1,17 @@
 import * as React from "react";
 import { Hash, BarChart2, Clock, User, Unlock } from "react-feather";
-import { FooterContainer, FooterStat, AiProgressStat, PlayerLabel } from "./Footer.styled.tsx";
+import { FooterContainer, FooterStat, AiProgressStat, PlayerLabel, ConfidenceDelta } from "./Footer.styled.tsx";
 import { PlayerCount, LEVEL_LABELS, LEVEL_LABELS_SHORT } from "../game/GameConfig.ts";
 import { getPlayerColor } from "../game/playerColors.ts";
 import { useGameContext } from "../context/GameContext.tsx";
-import { formatTime, getAiIndicatorColor } from "./Footer.utils.ts";
+import { formatTime, formatPercentDelta, getAiIndicatorColor } from "./Footer.utils.ts";
 import useInferenceEngine, { GuessQuality } from "./useInferenceEngine.ts";
 import Tip from "./Tip.tsx";
 import useMediaQuery from "./useMediaQuery.ts";
 import { BREAKPOINT_QUERIES } from "../theme/breakpoints.ts";
 
 const QUALITY_FLASH_MS = 2500;
+const DELTA_DISPLAY_MS = 2000;
 
 const Footer: React.FunctionComponent = (): React.ReactElement => {
     const { gridConfig, level, elapsedSeconds, playerCount, currentPlayer, code, pathHistory } = useGameContext();
@@ -20,6 +21,8 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
     const [flashQuality, setFlashQuality] = React.useState<GuessQuality>(GuessQuality.Neutral);
     const isMobile      = useMediaQuery(BREAKPOINT_QUERIES.mobile);
     const levelLabel    = isMobile ? LEVEL_LABELS_SHORT[level] : LEVEL_LABELS[level];
+    const [showDelta, setShowDelta]     = React.useState(false);
+    const [deltaKey, setDeltaKey]       = React.useState(0);
 
     React.useEffect(() => {
         if (aiProgress.lastGuessQuality === GuessQuality.Neutral || pathHistory.length === 0) return;
@@ -28,7 +31,16 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
         return () => clearTimeout(id);
     }, [aiProgress.lastGuessQuality, pathHistory.length]);
 
+    React.useEffect(() => {
+        if (pathHistory.length === 0) return;
+        setShowDelta(true);
+        setDeltaKey(prev => prev + 1);
+        const id = setTimeout(() => setShowDelta(false), DELTA_DISPLAY_MS);
+        return () => clearTimeout(id);
+    }, [pathHistory.length]);
+
     const indicatorColor = getAiIndicatorColor(aiProgress.isSolved, flashQuality);
+    const deltaColor     = aiProgress.percentDelta >= 0 ? "var(--bs-success)" : "var(--bs-danger)";
 
     return (
         <FooterContainer className="text-dark">
@@ -39,6 +51,11 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
                 >
                     <Unlock size={20} />
                     {aiProgress.percent.toFixed(1)}%
+                    {showDelta && (
+                        <ConfidenceDelta key={deltaKey} $color={deltaColor}>
+                            {formatPercentDelta(aiProgress.percentDelta)}
+                        </ConfidenceDelta>
+                    )}
                 </AiProgressStat>
             </Tip>
             {isMultiplayer && (
