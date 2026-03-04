@@ -1,6 +1,5 @@
 import styled from "styled-components";
-
-const XS = "@media (max-width: 600px)";
+import { BREAKPOINTS } from "../theme/breakpoints.ts";
 
 export const FeedbackShape = styled.span<{ $color: string }>`
     display: flex;
@@ -13,7 +12,7 @@ export const FeedbackShape = styled.span<{ $color: string }>`
     line-height: 1;
     color: ${({ $color }) => $color};
 
-    ${XS} {
+    ${BREAKPOINTS.mobile} {
         width: 10px;
         height: 10px;
         font-size: 10px;
@@ -28,7 +27,7 @@ export const FeedbackColumn = styled.div`
     align-items: center;
     justify-content: center;
 
-    ${XS} {
+    ${BREAKPOINTS.mobile} {
         padding-left: 20px;
         gap: 5px;
     }

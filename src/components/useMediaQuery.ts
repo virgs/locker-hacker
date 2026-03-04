@@ -4,7 +4,8 @@ import { useCallback, useSyncExternalStore } from "react";
  * Returns `true` when the given CSS media query matches.
  *
  * @example
- * const isXL = useMediaQuery("(min-width: 1400px)");
+ * import { BREAKPOINT_QUERIES } from "../theme/breakpoints";
+ * const isMobile = useMediaQuery(BREAKPOINT_QUERIES.mobile);
  */
 const useMediaQuery = (query: string): boolean => {
     const subscribe = useCallback(

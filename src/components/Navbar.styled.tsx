@@ -1,6 +1,5 @@
 import styled from "styled-components";
-
-const MOBILE = "@media (max-width: 600px)";
+import { BREAKPOINTS } from "../theme/breakpoints.ts";
 
 export const NavbarContainer = styled.nav`
     flex-shrink: 0;
@@ -10,7 +9,7 @@ export const NavbarContainer = styled.nav`
     box-sizing: border-box;
     padding: 0 16px;
 
-    ${MOBILE} {
+    ${BREAKPOINTS.mobile} {
         padding: 0 8px;
     }
 `;
@@ -24,7 +23,7 @@ export const NavbarRow = styled.div`
     gap: 8px;
     flex-wrap: wrap;
 
-    ${MOBILE} {
+    ${BREAKPOINTS.mobile} {
         min-height: 44px;
         gap: 6px;
         padding: 4px 0;
@@ -37,7 +36,7 @@ export const NavbarLeft = styled.div`
     gap: 8px;
     flex-wrap: wrap;
 
-    ${MOBILE} {
+    ${BREAKPOINTS.mobile} {
         gap: 4px;
     }
 `;
@@ -68,7 +67,7 @@ export const AppIconImage = styled.img`
     height: 28px;
     width: auto;
 
-    ${MOBILE} {
+    ${BREAKPOINTS.mobile} {
         height: 22px;
     }
 `;
@@ -112,7 +111,7 @@ export const HelpButton = styled.button`
 `;
 
 export const ButtonLabel = styled.span`
-    ${MOBILE} {
+    ${BREAKPOINTS.mobile} {
         display: none;
     }
 `;

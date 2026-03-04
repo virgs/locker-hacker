@@ -1,7 +1,5 @@
 import styled from "styled-components";
-
-const MOBILE = "@media (max-width: 600px)";
-const XL     = "@media (min-width: 1400px)";
+import { BREAKPOINTS } from "./theme/breakpoints.ts";
 
 export const AppLayout = styled.div`
     display: flex;
@@ -17,7 +15,7 @@ export const ContentArea = styled.div`
     min-height: 0;
     overflow: hidden;
 
-    ${MOBILE} {
+    ${BREAKPOINTS.mobile} {
         flex-direction: column;
     }
 `;
@@ -34,11 +32,11 @@ export const MainArea = styled.main`
     padding: 24px;
     padding-left: calc(220px + 24px); /* mirrors sidebar width + breathing room */
 
-    ${XL} {
+    ${BREAKPOINTS.xl} {
         padding-left: calc(440px + 24px);
     }
 
-    ${MOBILE} {
+    ${BREAKPOINTS.mobile} {
         flex: none;
         width: 100%;
         height: auto;
@@ -73,11 +71,11 @@ export const Sidebar = styled.aside`
         border-radius: 3px;
     }
 
-    ${XL} {
+    ${BREAKPOINTS.xl} {
         width: 440px;
     }
 
-    ${MOBILE} {
+    ${BREAKPOINTS.mobile} {
         width: 100%;
         /* flex: 1 + min-height: 0 lets this child grow into remaining space
            AND enables overflow-y: scroll to actually scroll (without min-height: 0
@@ -101,7 +99,7 @@ export const PatternLockSizer = styled.div`
     max-width: 100%;
     max-height: 100%;
 
-    ${MOBILE} {
+    ${BREAKPOINTS.mobile} {
         width: calc(100vw - 32px);
         height: calc(100vw - 32px);
     }

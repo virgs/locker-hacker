@@ -7,6 +7,7 @@ import { GuessValidator } from "../game/GuessValidator.ts";
 import { PlayerCount } from "../game/GameConfig.ts";
 import { getPlayerColor } from "../game/playerColors.ts";
 import { useGameContext } from "../context/GameContext.tsx";
+import { BREAKPOINT_QUERIES } from "../theme/breakpoints.ts";
 import useMediaQuery from "./useMediaQuery.ts";
 
 interface PatternHistoryProps {
@@ -18,7 +19,7 @@ const PatternHistory: React.FunctionComponent<PatternHistoryProps> = ({
 }): React.ReactElement => {
     const { pathHistory, playerHistory, playerCount, code, gridConfig } = useGameContext();
     const isMultiplayer = playerCount !== PlayerCount.One;
-    const isXS       = useMediaQuery("(max-width: 600px)");
+    const isXS       = useMediaQuery(BREAKPOINT_QUERIES.mobile);
     const size        = isXS ? Math.round(entrySize * 0.65) : entrySize;
     const validator   = new GuessValidator(code);
     const dotSize     = Math.round(size / 10);

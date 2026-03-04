@@ -1,7 +1,5 @@
 import styled from "styled-components";
-
-const XS = "@media (max-width: 600px)";
-const XL = "@media (min-width: 1400px)";
+import { BREAKPOINTS } from "../theme/breakpoints.ts";
 
 export const HistoryTitle = styled.h6`
     display: flex;
@@ -24,11 +22,11 @@ export const HistoryList = styled.div`
     grid-template-columns: 1fr;
     width: 100%;
 
-    ${XL} {
+    ${BREAKPOINTS.xl} {
         grid-template-columns: 1fr 1fr;
     }
 
-    ${XS} {
+    ${BREAKPOINTS.mobile} {
         grid-template-columns: 1fr 1fr;
     }
 `;
@@ -45,7 +43,7 @@ export const HistoryEntry = styled.div<{ $playerColor?: string }>`
     border-left: 3px solid ${({ $playerColor }) => $playerColor ?? 'transparent'};
     padding-left: ${({ $playerColor }) => $playerColor ? '8px' : '0'};
 
-    ${XS} {
+    ${BREAKPOINTS.mobile} {
         gap: 10px;
         padding: 8px 0;
         padding-left: ${({ $playerColor }) => $playerColor ? '6px' : '0'};
@@ -68,7 +66,7 @@ export const GuessNumber = styled.span`
     line-height: 1;
     pointer-events: none;
 
-    ${XS} {
+    ${BREAKPOINTS.mobile} {
         font-size: 8px;
         left: 2px;
     }

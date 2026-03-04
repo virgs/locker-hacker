@@ -665,3 +665,28 @@ feedbackEntry(index, bulls, cows) — returns the correct entry for a position
 - `src/components/FeedbackIndicator.styled.tsx` — `FeedbackDot` → `FeedbackShape` (text-based, no border-radius)
 - `src/components/FeedbackIndicator.test.ts` — extended with `feedbackEntry` and `FEEDBACK_THEME` tests
 - `src/components/HelpModal.tsx` — imports `FEEDBACK_THEME` instead of hardcoded hex values; shows shape symbols
+
+---
+
+### Centralized Breakpoints (`src/theme/breakpoints.ts`)
+
+**Decision:** Extracted all hardcoded media-query breakpoint strings (`@media (max-width: 600px)`, `@media (min-width: 1400px)`) from 5 styled-component files into a single `src/theme/breakpoints.ts` module.
+
+**Problem:** The same breakpoint values were redefined as local constants (`const MOBILE`, `const XS`, `const XL`) in `App.styled.tsx`, `Navbar.styled.tsx`, `Footer.styled.tsx`, `PatternHistory.styled.tsx`, and `FeedbackIndicator.styled.tsx`. The `useMediaQuery` call in `PatternHistory.tsx` also had a hardcoded `"(max-width: 600px)"` string. Changing a breakpoint would require updating 7 locations.
+
+**Exports (three levels of abstraction):**
+- `BREAKPOINT_VALUES` — raw pixel numbers (`{ mobile: 600, xl: 1400 }`), for tests or programmatic use.
+- `BREAKPOINT_QUERIES` — bare query strings without `@media` prefix (`"(max-width: 600px)"`), for `useMediaQuery()` / `window.matchMedia()`.
+- `BREAKPOINTS` — full `@media (…)` strings (`"@media (max-width: 600px)"`), for styled-components template literals.
+
+**Files changed:**
+- `src/theme/breakpoints.ts` — new central breakpoints file
+- `src/theme/breakpoints.test.ts` — tests for all three export levels
+- `src/App.styled.tsx` — imports `BREAKPOINTS` instead of local `MOBILE`/`XL`
+- `src/components/Navbar.styled.tsx` — imports `BREAKPOINTS` instead of local `MOBILE`
+- `src/components/Footer.styled.tsx` — imports `BREAKPOINTS` instead of local `MOBILE`
+- `src/components/PatternHistory.styled.tsx` — imports `BREAKPOINTS` instead of local `XS`/`XL`
+- `src/components/FeedbackIndicator.styled.tsx` — imports `BREAKPOINTS` instead of local `XS`
+- `src/components/PatternHistory.tsx` — uses `BREAKPOINT_QUERIES.mobile` instead of hardcoded string
+- `src/components/useMediaQuery.ts` — updated JSDoc example to reference `BREAKPOINT_QUERIES`
+

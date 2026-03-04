@@ -1,6 +1,5 @@
 import styled from "styled-components";
-
-const MOBILE = "@media (max-width: 600px)";
+import { BREAKPOINTS } from "../theme/breakpoints.ts";
 
 export const FooterContainer = styled.footer`
     flex-shrink: 0;
@@ -14,7 +13,7 @@ export const FooterContainer = styled.footer`
     box-sizing: border-box;
     gap: 16px;
 
-    ${MOBILE} {
+    ${BREAKPOINTS.mobile} {
         padding: 0 8px;
         min-height: 32px;
         gap: 12px;
