@@ -1,40 +1,44 @@
 import * as React from "react";
+import Modal from "react-bootstrap/Modal";
 import { Award, Clock, MousePointer } from "react-feather";
 import PatternLock from "./PatternLock.tsx";
-import { RevealBackdrop, RevealCard, RevealTitle, RevealStats, RevealStat } from "./CodeRevealOverlay.styled.tsx";
+import { RevealStats, RevealStat } from "./CodeRevealOverlay.styled.tsx";
 import { PlayerCount } from "../game/GameConfig.ts";
 import { getPlayerColor } from "../game/playerColors.ts";
 import { useGameContext } from "../context/GameContext.tsx";
 import { formatTime } from "./Footer.utils.ts";
 
-const CodeRevealOverlay: React.FunctionComponent = (): React.ReactElement | null => {
+const CodeRevealOverlay: React.FunctionComponent = (): React.ReactElement => {
     const { showRevealModal, code, gridConfig, winner, playerCount, elapsedSeconds, pathHistory, onToggleRevealModal } = useGameContext();
 
-    if (!showRevealModal) return null;
-
-    const isWin        = winner !== null;
-    const isMultiWin   = isWin && playerCount !== PlayerCount.One;
-    const singleTitle  = isWin ? "You win!" : "Secret Code";
+    const isWin      = winner !== null;
+    const isMultiWin = isWin && playerCount !== PlayerCount.One;
 
     const renderTitle = (): React.ReactNode => {
         if (isMultiWin) {
             return (
                 <>
-                    <span style={{ color: getPlayerColor(winner!) }}>Player {winner}</span>
-                    {' wins!'}
+                    {isWin && <Award size={22} className="me-2" />}
+                    <span style={{ color: getPlayerColor(winner!) }}>Player {winner} wins!</span>
                 </>
             );
         }
-        return <>{singleTitle}</>;
+        return (
+            <>
+                {isWin && <Award size={22} className="me-2" />}
+                {isWin ? "You win!" : "Secret Code"}
+            </>
+        );
     };
 
     return (
-        <RevealBackdrop onClick={onToggleRevealModal}>
-            <RevealCard onClick={(e) => e.stopPropagation()}>
-                <RevealTitle>
-                    {isWin && <Award size={22} className="me-2" />}
+        <Modal show={showRevealModal} onHide={onToggleRevealModal} centered>
+            <Modal.Header closeButton>
+                <Modal.Title className="d-flex align-items-center">
                     {renderTitle()}
-                </RevealTitle>
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="d-flex flex-column align-items-center gap-3">
                 {isWin && (
                     <RevealStats>
                         <RevealStat><Clock size={15} />{formatTime(elapsedSeconds)}</RevealStat>
@@ -53,8 +57,8 @@ const CodeRevealOverlay: React.FunctionComponent = (): React.ReactElement | null
                     arrowHeads={true}
                     allowJumping={false}
                 />
-            </RevealCard>
-        </RevealBackdrop>
+            </Modal.Body>
+        </Modal>
     );
 };
 

@@ -3,8 +3,6 @@ import { BREAKPOINTS } from "../theme/breakpoints.ts";
 
 export const NavbarContainer = styled.nav`
     flex-shrink: 0;
-    position: relative;
-    z-index: 1100;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-sizing: border-box;
     padding: 0 16px;

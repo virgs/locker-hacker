@@ -30,13 +30,19 @@ See [rules.md](./rules.md) for the full specification.
 
 ```
 src/
+├── ai/                  # AI inference engine (candidate elimination)
+│   ├── types.ts             — shared types (DotId, Path, Observation, etc.)
+│   ├── CandidateGenerator.ts — enumerates all valid paths via DFS
+│   ├── CandidateFilter.ts    — filters candidates against observed feedback
+│   ├── SummaryBuilder.ts     — computes domains, mustHave/mustNotHave, progress
+│   └── InferenceEngine.ts    — orchestrates candidate generation & filtering
 ├── components/          # React components
 │   ├── PatternLock.tsx        — main grid + drawing component
 │   ├── PatternLock.styled.tsx — global CSS-in-JS styles
 │   ├── PatternHistory.tsx     — renders the list of past guesses
 │   ├── Navbar.tsx             — game controls (dropdowns, play/reveal, help)
 │   ├── HelpModal.tsx          — how-to-play modal
-│   ├── CodeRevealOverlay.tsx  — secret code reveal overlay
+│   ├── CodeRevealOverlay.tsx  — secret code reveal modal
 │   ├── Connectors.tsx
 │   ├── Point.tsx
 │   └── usePatternLock.ts
@@ -44,9 +50,13 @@ src/
 │   ├── CodeGenerator.ts   — generates a valid hidden code
 │   ├── GameConfig.ts      — level/player types and constants
 │   └── GuessValidator.ts  — computes bulls/cows feedback
-└── math/                # Geometry utilities shared by game and component
-    ├── math.ts
-    └── point.ts
+├── math/                # Geometry utilities shared by game and component
+│   ├── math.ts
+│   ├── grid.ts          — coordinate ↔ id conversion utilities
+│   └── point.ts
+└── theme/               # Centralized design tokens
+    ├── breakpoints.ts   — responsive breakpoint constants
+    └── feedbackTheme.ts — feedback colors, symbols, and labels
 ```
 
 ### `CodeGenerator`
@@ -67,6 +77,23 @@ const validator = new GuessValidator(code);
 const feedback  = validator.validate(guess); // { bulls: 1, cows: 2 }
 const solved    = validator.isSolved(guess); // true when bulls === code.length
 ```
+
+### AI Inference Engine
+
+The `src/ai/` module narrows down possible secret codes using candidate elimination. It enumerates all valid paths, then filters them as guesses and feedback accumulate.
+
+```ts
+import { InferenceEngine } from './src/ai/InferenceEngine';
+
+const engine  = new InferenceEngine({ cols: 3, rows: 3, length: 4 });
+const summary = engine.applyAll([
+    { guess: [0, 1, 4, 3], feedback: { bulls: 1, cows: 2 } },
+]);
+console.log(summary.progress.candidateCount); // remaining possibilities
+console.log(summary.mustHave);                // dots in every candidate
+```
+
+See [ai-inference-rules.md](./ai-inference-rules.md) for a plain-language explanation of the AI inference logic and rules.
 
 ## Development
 

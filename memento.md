@@ -624,8 +624,6 @@ String enums (`GamePhase`, `Level`) preserve their string values at runtime so e
 
 **`CodeRevealOverlay` simplified:** No action buttons. The overlay shows code only; clicking the backdrop calls `onDismissReveal`. Navbar owns all control buttons during Revealing phase.
 
-**`NavbarContainer`** gains `position: relative; z-index: 1100` so it renders above the overlay backdrop (`z-index: 1000`).
-
 **Files changed/added:**
 - `src/game/GameConfig.ts` — `GamePhase` union + `ALL_GAME_PHASES` constant
 - `src/game/GameConfig.test.ts` — tests for `ALL_GAME_PHASES`
@@ -690,3 +688,44 @@ feedbackEntry(index, bulls, cows) — returns the correct entry for a position
 - `src/components/PatternHistory.tsx` — uses `BREAKPOINT_QUERIES.mobile` instead of hardcoded string
 - `src/components/useMediaQuery.ts` — updated JSDoc example to reference `BREAKPOINT_QUERIES`
 
+---
+
+### CodeRevealOverlay → react-bootstrap Modal
+
+**Decision:** Replaced the custom `RevealBackdrop`/`RevealCard`/`RevealTitle` overlay with a standard `react-bootstrap Modal`, matching the existing pattern used by `StatsModal` and `HelpModal`.
+
+**Rationale:** The custom overlay reimplemented modal behavior (backdrop click-to-close, fade animation, centering, z-index management) that Bootstrap's Modal already provides with better accessibility (focus trapping, ARIA attributes, ESC key handling). The `NavbarContainer` z-index hack (`z-index: 1100`) was only needed to render above the custom overlay's `z-index: 1000` — Bootstrap modals use portals with their own z-index, making the hack unnecessary.
+
+**Changes:**
+- `src/components/CodeRevealOverlay.tsx` — uses `<Modal>` with `show`/`onHide` from `useGameContext()`
+- `src/components/CodeRevealOverlay.styled.tsx` — removed `RevealBackdrop`, `RevealCard`, `RevealTitle`, `keyframes fadeIn`; kept `RevealStats`/`RevealStat` for stat row layout
+- `src/components/Navbar.styled.tsx` — removed `position: relative; z-index: 1100`
+
+---
+
+### AI Inference Module (`src/ai/`)
+
+**Decision:** Split the monolithic 403-line `src/ai/summary-buider.ts` (note: original had filename typo) into 5 focused files, removing duplicated logic and reusing existing modules.
+
+**Duplications removed:**
+- `Board` class → replaced with `GridConfig` from `GameConfig.ts` + `dotCount()` from new `src/math/grid.ts`
+- `Geometry.intermediates()` → replaced with `getPointsInTheMiddle()` from `math.ts`
+- `PatternValidator` → inlined into `CandidateGenerator.ts` using `getPointsInTheMiddle()`
+- `FeedbackEngine.compute()` → replaced with `GuessValidator.validate()` from `GuessValidator.ts`
+- Local `Feedback` type → reuses `Feedback` from `GuessValidator.ts`
+
+**New file structure:**
+- `src/ai/types.ts` — `DotId`, `Path`, `Observation`, `Progress`, `InferenceSummary` (imports `Feedback` from GuessValidator)
+- `src/ai/CandidateGenerator.ts` — `generateCandidates(config)` — DFS enumeration of all valid paths
+- `src/ai/CandidateFilter.ts` — `filterCandidates(candidates, observation)` — filters via GuessValidator
+- `src/ai/SummaryBuilder.ts` — `buildSummary(config, candidates, initialCount)` — domains, mustHave, mustNotHave, progress
+- `src/ai/InferenceEngine.ts` — `InferenceEngine` class orchestrating generation → filtering → summary
+- `src/math/grid.ts` — `toCoord()`, `toId()`, `dotCount()` shared grid coordinate utilities
+
+**Design principles:**
+- Functions over classes where possible (CandidateGenerator, CandidateFilter, SummaryBuilder are all exported functions, not classes)
+- Only `InferenceEngine` is a class — it holds state (initial candidates, config) across multiple `applyObservation` calls
+- All AI modules are pure TypeScript with no React dependency
+- Each file is under 90 lines (well within the 200-line limit)
+
+**Tests:** `CandidateGenerator.test.ts` (7 tests), `CandidateFilter.test.ts` (5 tests), `SummaryBuilder.test.ts` (13 tests), `InferenceEngine.test.ts` (5 tests), `grid.test.ts` (5 tests)
