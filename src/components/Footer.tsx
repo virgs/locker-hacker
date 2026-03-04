@@ -6,6 +6,7 @@ import { getPlayerColor } from "../game/playerColors.ts";
 import { useGameContext } from "../context/GameContext.tsx";
 import { formatTime, getAiIndicatorColor } from "./Footer.utils.ts";
 import useInferenceEngine, { GuessQuality } from "./useInferenceEngine.ts";
+import Tip from "./Tip.tsx";
 
 const QUALITY_FLASH_MS = 2500;
 
@@ -27,31 +28,39 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
 
     return (
         <FooterContainer className="text-dark">
-            <AiProgressStat
-                $color={indicatorColor}
-                aria-label={`AI progress: ${Math.round(aiProgress.percent)}%`}
-            >
-                <Unlock size={20} />
-                {Math.round(aiProgress.percent)}%
-            </AiProgressStat>
+            <Tip text="AI confidence" placement="top">
+                <AiProgressStat
+                    $color={indicatorColor}
+                    aria-label={`AI progress: ${Math.round(aiProgress.percent)}%`}
+                >
+                    <Unlock size={20} />
+                    {Math.round(aiProgress.percent)}%
+                </AiProgressStat>
+            </Tip>
             {isMultiplayer && (
                 <PlayerLabel $color={playerColor} aria-label={`Current player: Player ${currentPlayer}`}>
                     <User size={20} />
                     Player {currentPlayer}
                 </PlayerLabel>
             )}
-            <FooterStat aria-label="Code length">
-                <Hash size={20} />
-                {gridConfig.length}
-            </FooterStat>
-            <FooterStat aria-label={`Level: ${LEVEL_LABELS[level]}`}>
-                <BarChart2 size={20} />
-                {LEVEL_LABELS[level]}
-            </FooterStat>
-            <FooterStat aria-label="Elapsed time">
-                <Clock size={20} />
-                {formatTime(elapsedSeconds)}
-            </FooterStat>
+            <Tip text="Code length" placement="top">
+                <FooterStat aria-label="Code length">
+                    <Hash size={20} />
+                    {gridConfig.length}
+                </FooterStat>
+            </Tip>
+            <Tip text="Difficulty level" placement="top">
+                <FooterStat aria-label={`Level: ${LEVEL_LABELS[level]}`}>
+                    <BarChart2 size={20} />
+                    {LEVEL_LABELS[level]}
+                </FooterStat>
+            </Tip>
+            <Tip text="Elapsed time" placement="top">
+                <FooterStat aria-label="Elapsed time">
+                    <Clock size={20} />
+                    {formatTime(elapsedSeconds)}
+                </FooterStat>
+            </Tip>
         </FooterContainer>
     );
 };

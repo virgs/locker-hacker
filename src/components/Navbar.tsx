@@ -16,6 +16,7 @@ import HelpModal from "./HelpModal.tsx";
 import StatsModal from "./StatsModal.tsx";
 import {getPlayerColor} from "../game/playerColors.ts";
 import {useGameContext} from "../context/GameContext.tsx";
+import Tip from "./Tip.tsx";
 
 const LONG_PRESS_MS = 10_000;
 
@@ -62,21 +63,27 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
         if (phase === GamePhase.Revealing) {
             return (
                 <>
-                    <Button variant="outline-secondary" size="sm" onClick={onToggleRevealModal}
-                            aria-label="Toggle reveal">
-                        <EyeOff size={20}/><ButtonLabel className="ms-1">Reveal</ButtonLabel>
-                    </Button>
-                    <Button variant="outline-danger" size="sm" onClick={onFinishGame} aria-label="Finish game">
-                        <XOctagon size={20}/><ButtonLabel className="ms-1">Finish</ButtonLabel>
-                    </Button>
+                    <Tip text="Show the secret code">
+                        <Button variant="outline-secondary" size="sm" onClick={onToggleRevealModal}
+                                aria-label="Toggle reveal">
+                            <EyeOff size={20}/><ButtonLabel className="ms-1">Reveal</ButtonLabel>
+                        </Button>
+                    </Tip>
+                    <Tip text="Start a new game">
+                        <Button variant="outline-danger" size="sm" onClick={onFinishGame} aria-label="Finish game">
+                            <XOctagon size={20}/><ButtonLabel className="ms-1">Finish</ButtonLabel>
+                        </Button>
+                    </Tip>
                 </>
             );
         }
         if (isRunning) {
             return (
-                <Button variant="danger" size="sm" onClick={onGiveUp} aria-label="Give up and reveal code">
-                    <Eye size={20}/><ButtonLabel className="ms-1">Give Up</ButtonLabel>
-                </Button>
+                <Tip text="Give up and reveal the code">
+                    <Button variant="danger" size="sm" onClick={onGiveUp} aria-label="Give up and reveal code">
+                        <Eye size={20}/><ButtonLabel className="ms-1">Give Up</ButtonLabel>
+                    </Button>
+                </Tip>
             );
         }
         return null;
@@ -87,28 +94,32 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
             <NavbarContainer>
                 <NavbarRow>
                     <NavbarLeft>
-                        <AppIconLink
-                            className="me-2 ms-1"
-                            aria-label={APP_TITLE}
-                            onMouseDown={handleIconDown}
-                            onMouseUp={handleIconUp}
-                            onMouseLeave={() => {
-                                if (longPressRef.current) {
-                                    clearTimeout(longPressRef.current);
-                                    longPressRef.current = null;
-                                }
-                            }}
-                            onTouchStart={handleIconDown}
-                            onTouchEnd={handleIconUp}
-                        >
-                            <AppIconImage src={`${import.meta.env.BASE_URL}icon.png`} alt={APP_TITLE}/>
-                        </AppIconLink>
+                        <Tip text="Game stats">
+                            <AppIconLink
+                                className="me-2 ms-1"
+                                aria-label={APP_TITLE}
+                                onMouseDown={handleIconDown}
+                                onMouseUp={handleIconUp}
+                                onMouseLeave={() => {
+                                    if (longPressRef.current) {
+                                        clearTimeout(longPressRef.current);
+                                        longPressRef.current = null;
+                                    }
+                                }}
+                                onTouchStart={handleIconDown}
+                                onTouchEnd={handleIconUp}
+                            >
+                                <AppIconImage src={`${import.meta.env.BASE_URL}icon.png`} alt={APP_TITLE}/>
+                            </AppIconLink>
+                        </Tip>
 
                         <Dropdown>
-                            <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
-                                <Users size={20}/><ButtonLabel
-                                className="ms-1">{PLAYER_LABELS[playerCount]}</ButtonLabel>
-                            </Dropdown.Toggle>
+                            <Tip text="Number of players">
+                                <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
+                                    <Users size={20}/><ButtonLabel
+                                    className="ms-1">{PLAYER_LABELS[playerCount]}</ButtonLabel>
+                                </Dropdown.Toggle>
+                            </Tip>
                             <Dropdown.Menu style={{ minWidth: '220px' }}>
                                 {ALL_PLAYER_COUNTS.map((c: PlayerCount) => (
                                     <Dropdown.Item key={c} active={c === playerCount}
@@ -125,10 +136,12 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                         </Dropdown>
 
                         <Dropdown>
-                            <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
-                                <BarChart2 size={20}/><ButtonLabel
-                                className="ms-1">{levelDetailLabel(level)}</ButtonLabel>
-                            </Dropdown.Toggle>
+                            <Tip text="Difficulty level">
+                                <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
+                                    <BarChart2 size={20}/><ButtonLabel
+                                    className="ms-1">{levelDetailLabel(level)}</ButtonLabel>
+                                </Dropdown.Toggle>
+                            </Tip>
                             <Dropdown.Menu>
                                 {ALL_LEVELS.map((l: Level) => (
                                     <Dropdown.Item key={l} active={l === level} onClick={() => onLevelChange(l)}>
@@ -144,13 +157,17 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                     <NavbarCenter>{centerContent()}</NavbarCenter>
 
                     <NavbarRight>
-                        <HelpButton onClick={() => setHelpOpen(true)} aria-label="How to play">
-                            <HelpCircle size={20}/>
-                        </HelpButton>
-                        <GitHubLink className="ms-2" href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
-                                    aria-label="View project on GitHub">
-                            <GitHub size={20}/>
-                        </GitHubLink>
+                        <Tip text="How to play">
+                            <HelpButton onClick={() => setHelpOpen(true)} aria-label="How to play">
+                                <HelpCircle size={20}/>
+                            </HelpButton>
+                        </Tip>
+                        <Tip text="View source on GitHub">
+                            <GitHubLink className="ms-2" href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
+                                        aria-label="View project on GitHub">
+                                <GitHub size={20}/>
+                            </GitHubLink>
+                        </Tip>
                     </NavbarRight>
                 </NavbarRow>
             </NavbarContainer>

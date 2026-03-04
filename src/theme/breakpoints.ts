@@ -18,7 +18,7 @@
 /** Raw pixel values (exported for tests / programmatic use). */
 export const BREAKPOINT_VALUES = {
     mobile: 600,
-    xl:     1400,
+    xl:     1200,
 } as const;
 
 /**

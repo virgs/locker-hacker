@@ -27,7 +27,7 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                 <li><strong style={{ color: FEEDBACK_THEME.miss.color }}>{FEEDBACK_THEME.miss.symbol} Gray</strong> — dot <em>not in the code</em>.</li>
             </HelpList>
             <p className="mt-3 mb-0">
-                The game ends when <strong>all dots are in the correct position</strong>.
+                The game ends when <strong>all dots are in the correct position</strong>.<br/>
                 Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
             </p>
         </Modal.Body>

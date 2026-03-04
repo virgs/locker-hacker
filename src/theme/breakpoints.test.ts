@@ -5,8 +5,8 @@ describe("BREAKPOINT_VALUES", () => {
         expect(BREAKPOINT_VALUES.mobile).toBe(600);
     });
 
-    it("defines xl as 1400", () => {
-        expect(BREAKPOINT_VALUES.xl).toBe(1400);
+    it("defines xl as 1200", () => {
+        expect(BREAKPOINT_VALUES.xl).toBe(1200);
     });
 });
 
@@ -17,7 +17,7 @@ describe("BREAKPOINT_QUERIES", () => {
     });
 
     it("xl is a min-width query without @media prefix", () => {
-        expect(BREAKPOINT_QUERIES.xl).toBe("(min-width: 1400px)");
+        expect(BREAKPOINT_QUERIES.xl).toBe("(min-width: 1200px)");
         expect(BREAKPOINT_QUERIES.xl).not.toContain("@media");
     });
 });
@@ -28,7 +28,7 @@ describe("BREAKPOINTS", () => {
     });
 
     it("xl includes @media prefix", () => {
-        expect(BREAKPOINTS.xl).toBe("@media (min-width: 1400px)");
+        expect(BREAKPOINTS.xl).toBe("@media (min-width: 1200px)");
     });
 
     it("BREAKPOINTS are derived from BREAKPOINT_QUERIES", () => {
