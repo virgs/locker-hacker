@@ -741,7 +741,7 @@ feedbackEntry(index, bulls, cows) — returns the correct entry for a position
 **Implementation:**
 - `src/components/useInferenceEngine.ts` — custom React hook that wraps `InferenceEngine`. Uses `useMemo` (not `useState`+`useEffect`) to avoid the `react-hooks/set-state-in-effect` ESLint error. The engine is memoized on `gridConfig` and recomputed when `pathHistory` changes. Returns `{ percent, candidates }`.
 - `src/components/Footer.tsx` — calls `useInferenceEngine(gridConfig, code, pathHistory)` and renders the progress stat with the `Unlock` icon.
-- `src/components/Footer.styled.tsx` — added `moveUpAndFadeOut` keyframe + `ConfidenceDelta` styled component; added `position: relative` to `AiProgressStat`
+- `src/components/Footer.styled.tsx` — added `moveUpAndFadeOut` keyframe animation: starts at normal size/opacity, then floats up 30px, shifts right 10px, scales to 2.5×, and fades to 0 over 2 seconds.
 - `src/components/Footer.tsx` — added `showDelta`/`deltaKey` state, effect to trigger on `pathHistory.length`, and `ConfidenceDelta` rendering
 - `src/components/useInferenceEngine.test.ts` — added `percentDelta` tests + `formatPercentDelta` tests
 - `src/components/Footer.test.ts` — added `formatPercentDelta` tests
@@ -880,67 +880,18 @@ Sidebar (flex-col)
 
 ---
 
-### AI Console Log at 100% Confidence
+### Confetti Animation on Win
 
-**Decision:** When the inference engine reaches exactly 1 remaining candidate (`isSolved = true`), the predicted code is logged to the browser console: `🔓 AI is 100% confident. Predicted code: [3, 7, 11, 0, 5]`.
+**Decision:** Added a confetti celebration animation that fires when a player wins the game (guesses the secret code correctly).
 
-**Rationale:** Provides a way to verify the AI's correctness. The user reported skepticism that 2 guesses could solve a 4×4 grid — the console output lets them verify. Hard mode (4×4, length 5) has 154,680 valid candidates, but spatial constraints (no-skip rule, path connectivity) combined with bulls/cows feedback can eliminate them very quickly.
-
-**Files:**
-- `src/components/useInferenceEngine.ts` — added `console.log` when `isSolved && summary.candidates.length === 1`
-
----
-
-### Small Screen (Mobile) Responsive Adjustments
-
-**Decision:** On mobile screens (≤600px, matching Bootstrap xs breakpoint via `BREAKPOINT_QUERIES.mobile`), apply three condensed-layout changes:
-
-1. **Stats table:** Hide header text labels, keeping only the icons (e.g., the clock icon remains, but "Time avg" text is hidden).
-2. **Footer level label:** Show abbreviated single-letter labels (E/M/H) instead of full words (Easy/Medium/Hard).
-3. **Footer player label:** Show only the player icon + number (e.g., `👤 2`) instead of "Player 2".
-
-**Rationale:** On xs screens the footer and stats modal were cramped. Abbreviating text while preserving icons keeps the UI readable without horizontal overflow. The `LEVEL_LABELS_SHORT` map centralizes short labels in `GameConfig.ts` alongside `LEVEL_LABELS` for consistency.
-
-**Files:**
-- `src/game/GameConfig.ts` — added `LEVEL_LABELS_SHORT` map
-- `src/game/GameConfig.test.ts` — added tests for `LEVEL_LABELS_SHORT`
-- `src/components/Footer.tsx` — uses `useMediaQuery` to switch between full/short labels and full/short player text
-- `src/components/StatsModal.tsx` — uses `useMediaQuery` to conditionally hide header text and use short level labels
-
----
-
-### TurnAnnouncement Refactor to React Bootstrap Modal
-
-**Decision:** Replaced the custom overlay implementation (`TurnBackdrop`, `TurnCard`, `DismissButton`) with `react-bootstrap/Modal`, consistent with how `StatsModal`, `HelpModal`, and `CodeRevealOverlay` work.
-
-**Rationale:** The custom overlay duplicated modal behaviour (backdrop, dismiss, centering, animation) that React Bootstrap already provides. Reusing the same `<Modal>` component ensures consistent styling, accessibility (focus trap, Escape key), and animation across the app. Also uses `formatTurnMessage` from `TurnAnnouncement.utils.ts` for the title text.
-
-**Behaviour preserved:**
-- Auto-dismiss after 2 seconds via `setTimeout`
-- Click backdrop or close button to dismiss
-- Player-colored name in the title
-- Only renders in multiplayer mode
-
-**Files:**
-- `src/components/TurnAnnouncement.tsx` — rewrote to use `react-bootstrap/Modal`
-- `src/components/TurnAnnouncement.styled.tsx` — removed `TurnBackdrop`, `TurnCard`, `TurnMessage`, `DismissButton`; kept `TurnPlayerName`
-
----
-
-### Animated AI Confidence Delta on Guess
-
-**Decision:** After each guess, display a floating animated text (e.g., "+12.3%" or "-3.0%") near the unlock icon in the footer, showing how much the AI confidence changed from the previous guess.
+**Library:** `canvas-confetti` (v1.9.4) — lightweight (~6KB), no React dependency, renders directly onto a temporary canvas overlay. Supports `disableForReducedMotion` for accessibility.
 
 **Implementation:**
-- Added `percentDelta` field to `AiProgress` interface — computed as `currentPercent - previousPercent` in the `useInferenceEngine` hook.
-- Added `formatPercentDelta` utility in `Footer.utils.ts` — formats delta with sign prefix (e.g., "+5.0%", "-3.2%").
-- Added `ConfidenceDelta` styled component with `moveUpAndFadeOut` keyframe animation: starts at normal size/opacity, then floats up 30px, shifts right 10px, scales to 2.5×, and fades to 0 over 2 seconds.
-- In `Footer.tsx`, the delta element is shown for 2 seconds after each guess, using a `deltaKey` counter to re-trigger the CSS animation on each new guess. Color is green (`--bs-success`) for positive deltas, red (`--bs-danger`) for negative.
+- `useConfetti(trigger: boolean)` hook fires 3 bursts of confetti from both sides of the screen (left at 60° angle, right at 120°), staggered by 400ms each. Uses `useEffect` that cleans up pending timeouts on unmount.
+- Triggered in `CodeRevealOverlay` when `isWin && showRevealModal` — confetti only fires on wins, not on "Give Up" reveals.
+- Constants (`BURST_COUNT`, `BURST_DELAY`, `PARTICLE_COUNT`, `CONFETTI_DEFAULTS`) are exported for testability.
 
 **Files:**
-- `src/components/useInferenceEngine.ts` — added `percentDelta` to `AiProgress` interface and computation
-- `src/components/Footer.utils.ts` — added `formatPercentDelta` function
-- `src/components/Footer.styled.tsx` — added `moveUpAndFadeOut` keyframe + `ConfidenceDelta` styled component; added `position: relative` to `AiProgressStat`
-- `src/components/Footer.tsx` — added `showDelta`/`deltaKey` state, effect to trigger on `pathHistory.length`, and `ConfidenceDelta` rendering
-- `src/components/useInferenceEngine.test.ts` — added `percentDelta` tests + `formatPercentDelta` tests
-- `src/components/Footer.test.ts` — added `formatPercentDelta` tests
+- `src/components/useConfetti.ts` — custom hook wrapping canvas-confetti
+- `src/components/useConfetti.test.ts` — tests for exported constants
+- `src/components/CodeRevealOverlay.tsx` — imports and calls `useConfetti`

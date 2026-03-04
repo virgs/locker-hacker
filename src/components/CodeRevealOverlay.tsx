@@ -7,12 +7,15 @@ import { PlayerCount } from "../game/GameConfig.ts";
 import { getPlayerColor } from "../game/playerColors.ts";
 import { useGameContext } from "../context/GameContext.tsx";
 import { formatTime } from "./Footer.utils.ts";
+import useConfetti from "./useConfetti.ts";
 
 const CodeRevealOverlay: React.FunctionComponent = (): React.ReactElement => {
     const { showRevealModal, code, gridConfig, winner, playerCount, elapsedSeconds, pathHistory, onToggleRevealModal } = useGameContext();
 
     const isWin      = winner !== null;
     const isMultiWin = isWin && playerCount !== PlayerCount.One;
+
+    useConfetti(isWin && showRevealModal);
 
     const renderTitle = (): React.ReactNode => {
         if (isMultiWin) {
