@@ -1,7 +1,7 @@
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import { HANDLE_SIZE_PX, GRAB_BAR_LENGTH_PX, GRAB_BAR_THICKNESS_PX } from "./ResizeHandle.constants.ts";
 
-const sharedHandle = css`
+const BaseHandle = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
@@ -18,8 +18,7 @@ const sharedHandle = css`
     }
 `;
 
-export const VerticalHandle = styled.div`
-    ${sharedHandle}
+export const VerticalHandle = styled(BaseHandle)`
     width: ${HANDLE_SIZE_PX}px;
     height: 100%;
     border-top-left-radius: 8px;
@@ -27,8 +26,7 @@ export const VerticalHandle = styled.div`
     border-left: 1px solid rgba(255, 255, 255, 0.15);
 `;
 
-export const HorizontalHandle = styled.div`
-    ${sharedHandle}
+export const HorizontalHandle = styled(BaseHandle)`
     height: ${HANDLE_SIZE_PX}px;
     width: 100%;
     border-top-left-radius: 8px;
@@ -36,20 +34,18 @@ export const HorizontalHandle = styled.div`
     border-top: 1px solid rgba(255, 255, 255, 0.15);
 `;
 
-const sharedGrabBar = css`
+const BaseGrabBar = styled.div`
     background: rgba(255, 255, 255, 0.35);
     border-radius: ${GRAB_BAR_THICKNESS_PX / 2}px;
     pointer-events: none;
 `;
 
-export const VerticalGrabBar = styled.div`
-    ${sharedGrabBar}
+export const VerticalGrabBar = styled(BaseGrabBar)`
     width: ${GRAB_BAR_THICKNESS_PX}px;
     height: ${GRAB_BAR_LENGTH_PX}px;
 `;
 
-export const HorizontalGrabBar = styled.div`
-    ${sharedGrabBar}
+export const HorizontalGrabBar = styled(BaseGrabBar)`
     height: ${GRAB_BAR_THICKNESS_PX}px;
     width: ${GRAB_BAR_LENGTH_PX}px;
 `;
