@@ -541,7 +541,7 @@ String enums (`GamePhase`, `Level`) preserve their string values at runtime so e
 
 ---
 
-### `finishGame` — Return to Idle From Overlay
+### `finishGame` - Return to Idle From Overlay
 
 **Decision:** Added a separate `finishGame()` callback (called by the overlay "Finish" button) that resets all state and returns to `GamePhase.Idle`. This is distinct from `startGame()` which goes directly to `GamePhase.Playing`.
 
@@ -581,7 +581,7 @@ String enums (`GamePhase`, `Level`) preserve their string values at runtime so e
 
 ---
 
-### gameKey — Forced PatternLock Remount on Game Reset
+### gameKey - Forced PatternLock Remount on Game Reset
 
 **Problem:** After the code reveal overlay dismissed, the PatternLock disappeared entirely — no dots visible, just the navbar. The PatternLock component was the same React instance across game resets (never unmounted), but the `usePatternLock` hook's internal state (container dimensions, points array, ResizeObserver) could become stale or out of sync when the game state changed underneath it.
 
@@ -598,7 +598,7 @@ String enums (`GamePhase`, `Level`) preserve their string values at runtime so e
 
 ---
 
-### GameContext Refactor — Centralized Game State
+### GameContext Refactor - Centralized Game State
 
 **Decision:** Moved all game state and logic from `App.tsx` into a new `src/context/GameContext.tsx` using React Context API. `App.tsx` is now a pure layout component.
 
@@ -792,7 +792,7 @@ Sidebar (flex-col)
 
 **Files changed:**
 - `src/App.styled.tsx` — `Sidebar` split into `Sidebar` + `SidebarHeader` + `SidebarContent`
-- `src/App.tsx` — imports `HistoryTitle`, wraps in `SidebarHeader`/`SidebarContent`
+- `src/App.tsx` — `HistoryTitle` component rendered in `SidebarHeader`
 - `src/components/PatternHistory.tsx` — exports `HistoryTitle` component, removes title from render
 - `src/components/PatternHistory.styled.tsx` — renamed `HistoryTitle` → `HistoryTitleContainer`
 
@@ -981,3 +981,85 @@ Sidebar (flex-col)
 - `src/components/PatternLock.css` — `.highlighted` class + `hint-pulse` keyframe
 - `src/App.tsx` — passes `revealedHints` as `highlightedPoints`
 
+---
+
+### Resizable Sidebar (Expand/Collapse Feedback Area)
+
+**Decision:** Added a draggable/clickable resize handle between the `MainArea` and `Sidebar` that expands the feedback area to 90% of the screen, overlaying the PatternLock.
+
+**Problem:** On screens smaller than the XL breakpoint (< 1200px), the 220px sidebar is too narrow — users must constantly scroll to review guess history, harming UX.
+
+**Solution — expand/collapse with visual handle:**
+
+| State | Desktop (sidebar right) | Mobile (sidebar bottom) |
+|---|---|---|
+| Collapsed | Sidebar = 220px (or 440px on XL) | Sidebar fills remaining flex space |
+| Expanded | Sidebar = 90% width, `position: absolute`, overlays MainArea | Sidebar = 90% height, `position: absolute`, overlays MainArea |
+
+**ResizeHandle component:** A thin strip (12px) between MainArea and Sidebar with a centered grab bar indicator. Orientation adapts to layout:
+- Desktop: vertical handle with vertical grab bar, rounded corners on the left
+- Mobile: horizontal handle with horizontal grab bar, rounded corners on the top
+
+**Interaction model:**
+- **Click** the handle → toggles expanded/collapsed
+- **Drag** past threshold (40px) → expands (drag toward MainArea) or collapses (drag away)
+- **Click outside** (on the semi-transparent overlay) → collapses
+
+**Pointer capture for drag:** Uses `setPointerCapture`/`releasePointerCapture` for reliable tracking across touch and mouse, preventing text selection and tracking even when the pointer leaves the handle element.
+
+**Click-outside detection:** A `ClickOutsideOverlay` (positioned absolute, `z-index: 9`) renders behind the sidebar (`z-index: 10`) when expanded. Clicking it calls `collapse()`. The overlay has a semi-transparent black background (`rgba(0,0,0,0.3)`) to visually indicate the modal-like state.
+
+**CSS transition:** `transition: width 0.3s ease, height 0.3s ease` on Sidebar for smooth animation on click-toggle. During active drag, the threshold-based snap means the transition animates the final state change.
+
+**`useSidebarResize` hook:** Manages `expanded` state, drag origin tracking, and pointer event handlers. Accepts `isMobile` to determine drag axis (X for desktop, Y for mobile). Returns `{ expanded, toggle, collapse, onPointerDown, onPointerMove, onPointerUp }`.
+
+**Tooltip:** `Tip` component wraps the handle with text "Click or drag here to expand/collapse feedback area".
+
+**New files:**
+- `src/components/useSidebarResize.ts` — custom hook for expand/collapse state + drag logic
+- `src/components/useSidebarResize.test.ts` — tests for drag direction, threshold logic
+- `src/components/ResizeHandle.tsx` — presentational handle component
+- `src/components/ResizeHandle.styled.tsx` — styled components for vertical/horizontal handle variants
+- `src/components/ResizeHandle.constants.ts` — tooltip text, drag threshold, handle dimensions
+- `src/components/ResizeHandle.test.ts` — tests for constants
+
+**Files changed:**
+- `src/App.tsx` — `ResizeHandle` moved inside `Sidebar`, `SidebarInner` wraps header+content, passes `expanded` to `PatternHistory`
+- `src/App.styled.tsx` — `Sidebar` flex-direction: row (desktop) / column (mobile), added `SidebarInner`, reduced expanded widths
+- `src/components/PatternHistory.tsx` — accepts `expanded` prop, passes `$expanded` to `HistoryList`
+- `src/components/PatternHistory.styled.tsx` — `HistoryList` accepts `$expanded`, uses auto-fill grid when expanded
+- `src/components/ResizeHandle.styled.tsx` — handle z-index raised to 11
+
+---
+
+### Mobile Sidebar: Expand Guard + 80% Height
+
+**Problems:**
+1. On mobile (iPhone 14 Pro Max portrait), tapping the resize handle caused the sidebar to expand momentarily then immediately collapse. Root cause: when `toggle()` sets `expanded=true`, React renders the `ClickOutsideOverlay` on the next frame. The browser then fires a synthetic `click` event (from the same touch) that lands on the newly-rendered overlay, calling `collapse()` — a classic touch event race condition.
+2. Expanded height of 65% was still too small — user requested 80%.
+
+**Fix 1 — Expand guard timestamp:**
+- `useSidebarResize` now tracks `lastExpandTime` ref (set to `Date.now()` whenever expanding).
+- `collapse()` checks `Date.now() - lastExpandTime.current < 300ms` — if within the guard window, the collapse is ignored. This prevents the synthetic click on the overlay from immediately undoing the expand.
+- The `expand()` helper and `toggle()` both set the timestamp when transitioning to expanded.
+- `EXPAND_GUARD_MS = 300` matches the typical browser touch-to-click delay.
+
+**Fix 2 — Mobile expanded height increased to 80%:**
+- Changed from `65%` to `80%` of ContentArea height when expanded.
+
+**Files changed:**
+- `src/components/useSidebarResize.ts` — `lastExpandTime` ref, `expand()` helper, guard in `collapse()`
+- `src/App.styled.tsx` — mobile expanded height 65% → 80%
+
+---
+
+### Mobile Sidebar: Fix Empty Gap Below Sidebar
+
+**Decision:** Collapsed mobile sidebar now uses `flex: 1; height: auto` — it fills whatever space remains after `MainArea`. The expanded state keeps `flex: none; height: 80%; position: absolute` (overlay). This eliminates the gap because `flex: 1` always consumes remaining space by definition.
+
+**Trade-off — no CSS transition on collapse/expand on mobile:** `flex: 1` → `position: absolute; height: 80%` can't be animated with CSS transitions (different layout modes). The expand guard timestamp (300ms) provides a visual "snap" that feels intentional. Desktop still transitions smoothly (both states use `width` with numeric values in normal flow).
+
+**Files changed:**
+- `src/App.styled.tsx` — mobile Sidebar: collapsed `flex: 1; height: auto`, expanded `flex: none; height: 80%`
+
+---

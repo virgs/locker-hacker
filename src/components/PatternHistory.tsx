@@ -19,10 +19,12 @@ export const HistoryTitle: React.FunctionComponent = (): React.ReactElement => (
 
 interface PatternHistoryProps {
     entrySize ?: number;
+    expanded ?: boolean;
 }
 
 const PatternHistory: React.FunctionComponent<PatternHistoryProps> = ({
     entrySize = 120,
+    expanded = false,
 }): React.ReactElement => {
     const { pathHistory, playerHistory, playerCount, code, gridConfig } = useGameContext();
     const isMultiplayer = playerCount !== PlayerCount.One;
@@ -37,7 +39,7 @@ const PatternHistory: React.FunctionComponent<PatternHistoryProps> = ({
     }, [pathHistory.length]);
 
     return (
-        <HistoryList>
+        <HistoryList $expanded={expanded}>
             {pathHistory.map((path, index) => {
                 const { bulls, cows } = validator.validate(path);
                 const playerColor = isMultiplayer ? getPlayerColor(playerHistory[index]) : undefined;

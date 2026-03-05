@@ -14,6 +14,7 @@ export const ContentArea = styled.div`
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    position: relative;
 
     ${BREAKPOINTS.mobile} {
         flex-direction: column;
@@ -44,27 +45,58 @@ export const MainArea = styled.main`
     }
 `;
 
-export const Sidebar = styled.aside`
+export const Sidebar = styled.aside<{ $expanded?: boolean }>`
     width: 220px;
     height: 100%;
     flex-shrink: 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     box-sizing: border-box;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    transition: width 0.3s ease, height 0.3s ease;
+
+    ${({ $expanded }) => $expanded && `
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 75%;
+        z-index: 10;
+        background: var(--bs-body-bg, #060606);
+    `}
 
     ${BREAKPOINTS.xl} {
-        width: 440px;
+        width: ${({ $expanded }) => $expanded ? '75%' : '440px'};
     }
 
     ${BREAKPOINTS.mobile} {
         width: 100%;
-        flex: 1;
+        flex-direction: column;
         min-height: 0;
-        height: auto;
-        border-left: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+        ${({ $expanded }) => $expanded ? `
+            flex: none;
+            height: 80%;
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: auto;
+            z-index: 10;
+            background: var(--bs-body-bg, #060606);
+        ` : `
+            flex: 1;
+            height: auto;
+        `}
     }
+`;
+
+export const SidebarInner = styled.div`
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 `;
 
 export const SidebarHeader = styled.div`
@@ -122,3 +154,12 @@ export const PatternLockSizer = styled.div`
         height: calc(100vw - 32px);
     }
 `;
+
+export const ClickOutsideOverlay = styled.div`
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+    background: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+`;
+

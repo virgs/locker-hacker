@@ -17,17 +17,20 @@ export const HistoryTitleContainer = styled.h6`
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 `;
 
-export const HistoryList = styled.div`
+export const HistoryList = styled.div<{ $expanded?: boolean }>`
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: ${({ $expanded }) =>
+        $expanded ? 'repeat(auto-fill, minmax(180px, 1fr))' : '1fr'};
     width: 100%;
 
     ${BREAKPOINTS.xl} {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: ${({ $expanded }) =>
+            $expanded ? 'repeat(auto-fill, minmax(180px, 1fr))' : '1fr 1fr'};
     }
 
     ${BREAKPOINTS.mobile} {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: ${({ $expanded }) =>
+            $expanded ? 'repeat(auto-fill, minmax(140px, 1fr))' : '1fr 1fr'};
     }
 `;
 
@@ -41,7 +44,7 @@ export const HistoryEntry = styled.div<{ $playerColor?: string }>`
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     border-right: 1px solid rgba(255, 255, 255, 0.08);
     border-left: 3px solid ${({ $playerColor }) => $playerColor ?? 'transparent'};
-    padding-left: ${({ $playerColor }) => $playerColor ? '8px' : '0'};
+    padding-left: ${({ $playerColor }) => $playerColor ? '8px' : '4px'};
 
     ${BREAKPOINTS.mobile} {
         gap: 10px;
@@ -57,7 +60,7 @@ export const PatternLockWrapper = styled.div`
 
 export const GuessNumber = styled.span`
     position: absolute;
-    left: 4px;
+    left: 1px;
     top: 50%;
     transform: translateY(-50%);
     font-size: 10px;
