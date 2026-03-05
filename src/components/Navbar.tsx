@@ -6,7 +6,7 @@ import {
     NavbarContainer, NavbarRow, NavbarLeft, NavbarCenter, NavbarRight,
     AppIconLink, AppIconImage, HelpButton, GitHubLink, CoffeeLink, ButtonLabel,
 } from "./Navbar.styled.tsx";
-import {GITHUB_URL, PAYPAL_URL, APP_TITLE} from "./Navbar.constants.ts";
+import {GITHUB_URL, BUY_ME_A_COFFEE_URL, APP_TITLE} from "./Navbar.constants.ts";
 import {
     Level, PlayerCount, GamePhase,
     LEVEL_LABELS, LEVEL_CONFIGS, PLAYER_LABELS, ALL_LEVELS, ALL_PLAYER_COUNTS,
@@ -165,7 +165,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                         </Tip>
                         {IS_WEB && (
                             <Tip text="Buy me a coffee">
-                                <CoffeeLink href={PAYPAL_URL} target="_blank" rel="noopener noreferrer" className="ms-2"
+                                <CoffeeLink href={BUY_ME_A_COFFEE_URL} target="_blank" rel="noopener noreferrer" className="ms-2"
                                             aria-label="Buy me a coffee">
                                     <Coffee size={20}/>
                                 </CoffeeLink>

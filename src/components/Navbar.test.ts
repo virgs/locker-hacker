@@ -1,6 +1,6 @@
 import {
     GITHUB_URL,
-    PAYPAL_URL,
+    BUY_ME_A_COFFEE_URL,
     APP_TITLE,
 } from "./Navbar.constants.ts";
 
@@ -15,13 +15,13 @@ describe("Navbar constants", () => {
         });
     });
 
-    describe("PAYPAL_URL", () => {
-        it("is a valid https PayPal URL", () => {
-            expect(PAYPAL_URL).toMatch(/^https:\/\/www\.paypal\.com\//);
+    describe("BUY_ME_A_COFFEE_URL", () => {
+        it("is a valid https Buy Me a Coffee URL", () => {
+            expect(BUY_ME_A_COFFEE_URL).toMatch(/^https:\/\/buymeacoffee\.com\//);
         });
 
         it("is a non-empty string", () => {
-            expect(PAYPAL_URL.length).toBeGreaterThan(0);
+            expect(BUY_ME_A_COFFEE_URL.length).toBeGreaterThan(0);
         });
     });
 
