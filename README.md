@@ -2,6 +2,18 @@
 
 A *Bulls and Cows* code-breaking game played with pattern lock paths over a grid of dots.
 
+Yeap. As you might think, this is yet another game development project of mine.
+If you haven't done it yet, I highly recommend checking the other ones I have on GitHub:
+
+- [Pacman](https://github.com/virgs/pacman)
+- [Minesweeper AI](https://github.com/virgs/minesweeper-ai)
+- [Flappy Bird AI](https://github.com/virgs/flappy-bird-ai)
+- [2048 AI](https://github.com/virgs/2048-ai)
+- [Rubik's Cubes AI](https://github.com/virgs/rubiks-cubes-ai)
+- [Mancala](https://github.com/virgs/mancala)
+- [Tetris](https://github.com/virgs/tetris)
+- [Navigator's Gamble](https://github.com/virgs/navigators-gamble)
+
 ## How It Works
 
 A hidden code is a **sequence of distinct dots** drawn on a rectangular grid. Players submit guesses and receive feedback:
@@ -14,7 +26,8 @@ The game ends when Bulls == code length.
 ## Features
 
 * **Level selection** — Easy (3×2, length 3), Medium (3×3, length 4), Hard (4×4, length 5)
-* **Play/Give Up flow** — Press Play to start; press Give Up to surrender and reveal the secret code, then choose Dismiss (keeps history visible, lock disabled) or Finish (resets to idle so you can reconfigure and play again)
+* **Hint dropdown during play** — the center action is a Hint menu with `Get a hint` (eliminates one random non-code dot with a red `X` marker) and `Give up` (reveals the code)
+* **Reliable stats persistence** — single-player wins are saved immediately on solve, and started games that are abandoned are counted as losses
 * **Player count** — Select 1–4 players (future multiplayer support)
 * **Help modal** — In-app game rules with a "Play Now" button
 * **Responsive** — Works on desktop and mobile, navbar wraps to two rows on small screens
@@ -120,5 +133,6 @@ A CircleCI pipeline (`.circleci/config.yml`) runs on every push:
 | **build** | Compiles TypeScript and builds with Vite into `docs/` |
 | **deploy** | Commits the `docs/` folder to `main` for GitHub Pages (main branch only) |
 
-The production build outputs to `docs/` with `base: '/locker-hacker/'` for GitHub Pages hosting.
+The deploy step is configured for non-interactive GitHub auth (seeded `known_hosts`, token-based push URL, and `GIT_TERMINAL_PROMPT=0`) to avoid hanging jobs.
 
+The production build outputs to `docs/` with `base: '/locker-hacker/'` for GitHub Pages hosting.
