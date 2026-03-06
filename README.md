@@ -2,6 +2,8 @@
 
 A *Bulls and Cows* code-breaking game played with pattern lock paths over a grid of dots.
 
+![Is it any familiar?](./screenshot.png)
+
 Yeap. As you might think, this is yet another game development project of mine.
 If you haven't done it yet, I highly recommend checking the other ones I have on GitHub:
 
