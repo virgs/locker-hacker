@@ -111,16 +111,24 @@ jobs:
           name: Enable pnpm
           command: corepack enable && corepack prepare pnpm@latest --activate
       - run:
+          name: Prepare non-interactive GitHub access
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run:
           name: Configure Git
           command: |
             git config user.email "ci@circleci.com"
             git config user.name "CircleCI"
       - run:
           name: Deploy to GitHub Pages
+          environment:
+            GIT_TERMINAL_PROMPT: "0"
+            GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=accept-new"
           command: |
             git add docs --force
             git commit -m "ci: update GitHub Pages build [skip ci]" --allow-empty
-            git push https://${GITHUB_TOKEN}@github.com/virgs/locker-hacker.git main
+            git push https://x-access-token:${GITHUB_TOKEN}@github.com/virgs/locker-hacker.git HEAD:main
 
 workflows:
   build-and-deploy:
