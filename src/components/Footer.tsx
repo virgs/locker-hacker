@@ -18,6 +18,7 @@ import useMediaQuery from "./useMediaQuery.ts";
 import {BREAKPOINT_QUERIES} from "../theme/breakpoints.ts";
 import {IS_CAPACITOR} from "../platform.ts";
 import {showRewardedAd} from "../ads/AdService.ts";
+import {hasEliminationHintCandidates} from "../game/HintService.ts";
 
 const QUALITY_FLASH_MS = 2500;
 const DELTA_DISPLAY_MS = 2000;
@@ -44,7 +45,11 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
     const [showDelta, setShowDelta] = React.useState(false);
     const [deltaKey, setDeltaKey] = React.useState(0);
 
-    const canHint = IS_CAPACITOR && phase === GamePhase.Playing && revealedHints.length < code.length - 1;
+    const canHint = IS_CAPACITOR && phase === GamePhase.Playing && hasEliminationHintCandidates({
+        totalDots: gridConfig.cols * gridConfig.rows,
+        code,
+        alreadyEliminated: revealedHints,
+    });
 
     const handleHint = async (): Promise<void> => {
         const rewarded = await showRewardedAd();
@@ -85,7 +90,7 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
                 </AiProgressStat>
             </Tip>
             {canHint && (
-                <Tip text="Watch an ad to reveal one dot as a hint" placement="top">
+                <Tip text="Watch an ad to eliminate one wrong dot" placement="top">
                     <HintButton onClick={handleHint} aria-label="Get a hint">
                         <Gift size={18}/>
                     </HintButton>

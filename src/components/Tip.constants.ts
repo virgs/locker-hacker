@@ -1,2 +1,2 @@
-export const TOOLTIP_DELAY = { show: 400, hide: 150 };
+export const TOOLTIP_DELAY = { show: 750, hide: 50 };
 

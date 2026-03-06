@@ -7,6 +7,7 @@ export interface GameRecord {
     won             : boolean;
     durationSeconds : number;
     moves           : number;
+    hintsUsed       : number;
     date            : string;
 }
 
@@ -15,6 +16,7 @@ export interface LevelStats {
     wins           : number;
     totalSeconds   : number;
     totalMoves     : number;
+    totalHints     : number;
 }
 
 export const loadRecords = (): GameRecord[] => {
@@ -47,6 +49,7 @@ export const computeLevelStats = (records: GameRecord[]): Record<Level, LevelSta
             wins         : filtered.filter(r => r.won).length,
             totalSeconds : filtered.reduce((sum, r) => sum + r.durationSeconds, 0),
             totalMoves   : filtered.reduce((sum, r) => sum + (r.moves ?? 0), 0),
+            totalHints   : filtered.reduce((sum, r) => sum + (r.hintsUsed ?? 0), 0),
         };
     }
     return result;
@@ -57,6 +60,7 @@ export const computeTotalStats = (records: GameRecord[]): LevelStats => ({
     wins         : records.filter(r => r.won).length,
     totalSeconds : records.reduce((sum, r) => sum + r.durationSeconds, 0),
     totalMoves   : records.reduce((sum, r) => sum + (r.moves ?? 0), 0),
+    totalHints   : records.reduce((sum, r) => sum + (r.hintsUsed ?? 0), 0),
 });
 
 export const winPercent = (stats: LevelStats): number =>
@@ -68,10 +72,12 @@ export const avgTimeSeconds = (stats: LevelStats): number =>
 export const avgMoves = (stats: LevelStats): number =>
     stats.gamesPlayed === 0 ? 0 : stats.totalMoves / stats.gamesPlayed;
 
+export const avgHints = (stats: LevelStats): number =>
+    stats.gamesPlayed === 0 ? 0 : stats.totalHints / stats.gamesPlayed;
+
 export const formatStatsTime = (seconds: number): string => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     const sWhole = Math.floor(s);
     return `${m}:${sWhole.toString().padStart(2, "0")}`;
 };
-

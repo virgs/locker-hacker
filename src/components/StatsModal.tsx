@@ -1,7 +1,7 @@
 import * as React from "react";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
-import {Award, Clock, Info, BarChart2, Hash, GitCommit} from "react-feather";
+import {Award, Clock, Info, BarChart2, Hash, GitCommit, Zap} from "react-feather";
 import {EmptyState} from "./StatsModal.styled.tsx";
 import {LEVEL_LABELS, LEVEL_LABELS_SHORT, ALL_LEVELS} from "../game/GameConfig.ts";
 import {
@@ -10,6 +10,7 @@ import {
     computeTotalStats,
     avgTimeSeconds,
     avgMoves,
+    avgHints,
     formatStatsTime,
 } from "../game/StatsService.ts";
 import useMediaQuery from "./useMediaQuery.ts";
@@ -59,6 +60,7 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
                             <th className="text-end"><Award size={14} className="me-1"/>{!isMobile && "Wins"}</th>
                             <th className="text-end"><Clock size={14} className="me-1"/>{!isMobile && "Time avg"}</th>
                             <th className="text-end"><GitCommit size={14} className="me-1"/>{!isMobile && "Moves avg"}</th>
+                            <th className="text-end"><Zap size={14} className="me-1"/>{!isMobile && "Hints avg"}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -69,6 +71,7 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
                                 <td className="text-end">{levelStats[l].wins}</td>
                                 <td className="text-end">{formatStatsTime(avgTimeSeconds(levelStats[l]))}</td>
                                 <td className="text-end">{avgMoves(levelStats[l]).toFixed(1)}</td>
+                                <td className="text-end">{avgHints(levelStats[l]).toFixed(1)}</td>
                             </tr>
                         ))}
                         <tr className="fw-bold">
@@ -76,6 +79,7 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
                             <td className="text-end">{totalStats.gamesPlayed}</td>
                             <td className="text-end">{totalStats.wins}</td>
                             <td className="text-end">{formatStatsTime(totalStats.totalSeconds)}</td>
+                            <td className="text-end">-</td>
                             <td className="text-end">-</td>
                         </tr>
                         </tbody>
@@ -87,4 +91,3 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
 };
 
 export default StatsModal;
-

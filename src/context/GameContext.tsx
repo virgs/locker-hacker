@@ -4,6 +4,7 @@ import { GuessValidator } from "../game/GuessValidator.ts";
 import { saveRecord } from "../game/StatsService.ts";
 import { loadConfig, saveConfig } from "../game/ConfigService.ts";
 import { GameSessionStatsTracker } from "./GameSessionStatsTracker.ts";
+import { pickEliminationHint } from "../game/HintService.ts";
 import {
     Level, PlayerCount, GamePhase, GridConfig,
     LEVEL_CONFIGS, DEFAULT_LEVEL, DEFAULT_PLAYER_COUNT,
@@ -72,7 +73,6 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const [playerHistory, setPlayerHistory]     = React.useState<number[]>([]);
     const [revealedHints, setRevealedHints]     = React.useState<number[]>([]);
     const sessionTrackerRef                      = React.useRef(new GameSessionStatsTracker());
-
     const gridConfig = LEVEL_CONFIGS[level];
     const isRunning  = pathHistory.length > 0;
 
@@ -85,7 +85,6 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     React.useEffect(() => {
         saveConfig({ level, playerCount });
     }, [level, playerCount]);
-
     const persistCurrentGameRecord = React.useCallback((won: boolean, movesOverride?: number): void => {
         if (!sessionTrackerRef.current.canPersist(playerCount)) return;
         saveRecord({
@@ -93,17 +92,16 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
             won,
             durationSeconds: elapsedSeconds,
             moves: movesOverride ?? pathHistory.length,
+            hintsUsed: revealedHints.length,
             date: new Date().toISOString(),
         });
         sessionTrackerRef.current.markPersisted();
-    }, [elapsedSeconds, level, pathHistory.length, playerCount]);
-
+    }, [elapsedSeconds, level, pathHistory.length, playerCount, revealedHints.length]);
     React.useEffect(() => {
         const onPageHide = (): void => persistCurrentGameRecord(false);
         window.addEventListener("pagehide", onPageHide);
         return () => window.removeEventListener("pagehide", onPageHide);
     }, [persistCurrentGameRecord]);
-
     const onLevelChange = React.useCallback((newLevel: Level): void => {
         persistCurrentGameRecord(false);
         setLevel(newLevel);
@@ -114,12 +112,10 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         setGameKey(prev => prev + 1);
         if (playerCount > PlayerCount.One) setShowTurnModal(true);
     }, [persistCurrentGameRecord, playerCount]);
-
     const onPlayerCountChange = React.useCallback((count: PlayerCount): void => {
         setPlayerCount(count);
         if (count > PlayerCount.One) setShowTurnModal(true);
     }, []);
-
     const onGiveUp = React.useCallback((): void => {
         persistCurrentGameRecord(false);
         setPhase(GamePhase.Revealing);
@@ -157,16 +153,17 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const onDismissTurnModal = React.useCallback((): void => {
         setShowTurnModal(false);
     }, []);
-
     const onRevealHint = React.useCallback((): void => {
         setRevealedHints(prev => {
-            const unrevealed = code.filter(dot => !prev.includes(dot));
-            if (unrevealed.length <= 1) return prev;
-            const next = unrevealed[Math.floor(Math.random() * unrevealed.length)]!;
+            const next = pickEliminationHint({
+                totalDots: gridConfig.cols * gridConfig.rows,
+                code,
+                alreadyEliminated: prev,
+            });
+            if (next === null) return prev;
             return [...prev, next];
         });
-    }, [code]);
-
+    }, [code, gridConfig.cols, gridConfig.rows]);
     const onGuessFinish = React.useCallback((): void => {
         if (path.length !== gridConfig.length) { setPath([]); return; }
         const validator = new GuessValidator(code);
@@ -185,7 +182,6 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
             if (playerCount > PlayerCount.One) setShowTurnModal(true);
         }
     }, [code, currentPlayer, gridConfig.length, path, pathHistory.length, persistCurrentGameRecord, playerCount]);
-
     const value: GameContextValue = {
         level, playerCount, gridConfig, code, gameKey,
         phase, path, pathHistory, playerHistory, isRunning,
@@ -195,6 +191,5 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         onGiveUp, onToggleRevealModal, onFinishGame,
         onPathChange, onGuessFinish, onToggleStatsModal, onDismissTurnModal, onRevealHint,
     };
-
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 };

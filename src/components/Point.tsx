@@ -44,17 +44,23 @@ const Point: React.FunctionComponent<PointProps> = ({
             }}
             data-index={ index }
         >
-            <div
-                className="react-pattern-lock__point"
-                style={{
-                    width  : pointActiveSize,
-                    height : pointActiveSize
-                }}
-            >
                 <div
-                    className={innerClass}
+                    className="react-pattern-lock__point"
                     style={{
-                        minWidth   : pointSize,
+                        width  : pointActiveSize,
+                        height : pointActiveSize
+                    }}
+                >
+                    {highlighted && (
+                        <div
+                            className="react-pattern-lock__point-eliminated"
+                            aria-hidden={true}
+                        />
+                    )}
+                    <div
+                        className={innerClass}
+                        style={{
+                            minWidth   : pointSize,
                         minHeight  : pointSize,
                         ...(pathColor && selected ? { background: pathColor } : {}),
                     }}

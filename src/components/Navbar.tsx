@@ -1,5 +1,5 @@
 import * as React from "react";
-import {GitHub, HelpCircle, Eye, EyeOff, Users, User, BarChart2, Play, Coffee} from "react-feather";
+import {GitHub, HelpCircle, EyeOff, Users, User, BarChart2, Play, Coffee, Zap, Flag} from "react-feather";
 import Dropdown from "react-bootstrap/Dropdown";
 import Button from "react-bootstrap/Button";
 import {
@@ -18,6 +18,7 @@ import {getPlayerColor} from "../game/playerColors.ts";
 import {useGameContext} from "../context/GameContext.tsx";
 import Tip from "./Tip.tsx";
 import {IS_WEB} from "../platform.ts";
+import {hasEliminationHintCandidates} from "../game/HintService.ts";
 
 const LONG_PRESS_MS = 10_000;
 
@@ -37,12 +38,16 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
     const longPressRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const {
-        phase, level, playerCount, isRunning,
+        phase, level, playerCount, isRunning, gridConfig, code, revealedHints,
         showStatsModal, onToggleStatsModal,
-        onLevelChange, onPlayerCountChange, onGiveUp, onToggleRevealModal, onFinishGame,
+        onLevelChange, onPlayerCountChange, onGiveUp, onRevealHint, onToggleRevealModal, onFinishGame,
     } = useGameContext();
-
     const configDisabled = isRunning || phase === GamePhase.Revealing;
+    const canEliminateDot = phase === GamePhase.Playing && hasEliminationHintCandidates({
+        totalDots: gridConfig.cols * gridConfig.rows,
+        code,
+        alreadyEliminated: revealedHints,
+    });
 
     const handleIconDown = (): void => {
         longPressRef.current = setTimeout(() => {
@@ -80,16 +85,27 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
         }
         if (isRunning) {
             return (
-                <Tip text="Give up and reveal the code">
-                    <Button variant="danger" size="sm" onClick={onGiveUp} aria-label="Give up and reveal code">
-                        <Eye size={20}/><ButtonLabel className="ms-1">Give Up</ButtonLabel>
-                    </Button>
+                <Tip text="Get an elimination hint or give up" placement="right-end">
+                    <Dropdown>
+                        <Dropdown.Toggle variant="warning" size="sm" aria-label="Hint actions">
+                            <Zap size={20}/><ButtonLabel className="ms-1">Hint</ButtonLabel>
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            <Dropdown.Item onClick={onRevealHint} disabled={!canEliminateDot}>
+                                <Zap size={16} className="me-2"/>
+                                Get a hint
+                            </Dropdown.Item>
+                            <Dropdown.Item onClick={onGiveUp}>
+                                <Flag size={16} className="me-2"/>
+                                Give up
+                            </Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
                 </Tip>
             );
         }
         return null;
     };
-
     return (
         <>
             <NavbarContainer>
@@ -113,7 +129,6 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                                 <AppIconImage src={`${import.meta.env.BASE_URL}icon.png`} alt={APP_TITLE}/>
                             </AppIconLink>
                         </Tip>
-
                         <Dropdown>
                             <Tip text="Number of players">
                                 <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
@@ -135,7 +150,6 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                                 ))}
                             </Dropdown.Menu>
                         </Dropdown>
-
                         <Dropdown>
                             <Tip text="Difficulty level">
                                 <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
@@ -154,9 +168,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                             </Dropdown.Menu>
                         </Dropdown>
                     </NavbarLeft>
-
                     <NavbarCenter>{centerContent()}</NavbarCenter>
-
                     <NavbarRight>
                         <Tip text="How to play">
                             <HelpButton onClick={() => setHelpOpen(true)} aria-label="How to play">
@@ -182,7 +194,6 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                     </NavbarRight>
                 </NavbarRow>
             </NavbarContainer>
-
             <HelpModal show={helpOpen} onClose={() => setHelpOpen(false)}/>
             <StatsModal show={showStatsModal} onClose={onToggleStatsModal}/>
         </>
@@ -190,4 +201,3 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
 };
 
 export default Navbar;
-
