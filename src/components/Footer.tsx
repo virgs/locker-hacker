@@ -1,6 +1,13 @@
 import * as React from "react";
-import {Hash, BarChart2, Clock, User, Unlock, Gift} from "react-feather";
-import {FooterContainer, FooterStat, AiProgressStat, PlayerLabel, ConfidenceDelta, HintButton} from "./Footer.styled.tsx";
+import {Hash, BarChart2, Clock, User, Unlock, Gift, Lock} from "react-feather";
+import {
+    FooterContainer,
+    FooterStat,
+    AiProgressStat,
+    PlayerLabel,
+    ConfidenceDelta,
+    HintButton
+} from "./Footer.styled.tsx";
 import {PlayerCount, GamePhase, LEVEL_LABELS, LEVEL_LABELS_SHORT} from "../game/GameConfig.ts";
 import {getPlayerColor} from "../game/playerColors.ts";
 import {useGameContext} from "../context/GameContext.tsx";
@@ -16,7 +23,18 @@ const QUALITY_FLASH_MS = 2500;
 const DELTA_DISPLAY_MS = 2000;
 
 const Footer: React.FunctionComponent = (): React.ReactElement => {
-    const {gridConfig, level, elapsedSeconds, playerCount, currentPlayer, code, pathHistory, phase, revealedHints, onRevealHint} = useGameContext();
+    const {
+        gridConfig,
+        level,
+        elapsedSeconds,
+        playerCount,
+        currentPlayer,
+        code,
+        pathHistory,
+        phase,
+        revealedHints,
+        onRevealHint
+    } = useGameContext();
     const isMultiplayer = playerCount !== PlayerCount.One;
     const playerColor = getPlayerColor(currentPlayer);
     const aiProgress = useInferenceEngine(gridConfig, code, pathHistory);
@@ -57,7 +75,7 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
                     $color={indicatorColor}
                     aria-label={`AI progress: ${aiProgress.percent.toFixed(1)}%`}
                 >
-                    <Unlock size={20}/>
+                    {aiProgress.isSolved ? <Unlock size={20}/> : <Lock size={20}/>}
                     {aiProgress.percent.toFixed(1)}%
                     {showDelta && (
                         <ConfidenceDelta key={deltaKey} $color={indicatorColor}>

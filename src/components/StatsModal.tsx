@@ -68,7 +68,7 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
                                 <td className="text-end">{levelStats[l].gamesPlayed}</td>
                                 <td className="text-end">{levelStats[l].wins}</td>
                                 <td className="text-end">{formatStatsTime(avgTimeSeconds(levelStats[l]))}</td>
-                                <td className="text-end">{avgMoves(levelStats[l])}</td>
+                                <td className="text-end">{avgMoves(levelStats[l]).toFixed(1)}</td>
                             </tr>
                         ))}
                         <tr className="fw-bold">

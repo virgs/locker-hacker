@@ -60,13 +60,13 @@ export const computeTotalStats = (records: GameRecord[]): LevelStats => ({
 });
 
 export const winPercent = (stats: LevelStats): number =>
-    stats.gamesPlayed === 0 ? 0 : Math.round((stats.wins / stats.gamesPlayed) * 100);
+    stats.gamesPlayed === 0 ? 0 : (stats.wins / stats.gamesPlayed) * 100;
 
 export const avgTimeSeconds = (stats: LevelStats): number =>
     stats.gamesPlayed === 0 ? 0 : stats.totalSeconds / stats.gamesPlayed;
 
 export const avgMoves = (stats: LevelStats): number =>
-    stats.gamesPlayed === 0 ? 0 : Math.round(stats.totalMoves / stats.gamesPlayed * 10) / 10;
+    stats.gamesPlayed === 0 ? 0 : stats.totalMoves / stats.gamesPlayed;
 
 export const formatStatsTime = (seconds: number): string => {
     const m = Math.floor(seconds / 60);
