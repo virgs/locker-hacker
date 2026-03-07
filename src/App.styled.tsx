@@ -15,10 +15,6 @@ export const ContentArea = styled.div`
     min-height: 0;
     overflow: hidden;
     position: relative;
-
-    ${BREAKPOINTS.mobile} {
-        flex-direction: column;
-    }
 `;
 
 export const MainArea = styled.main`
@@ -31,62 +27,41 @@ export const MainArea = styled.main`
     overflow: hidden;
     box-sizing: border-box;
     padding: 24px;
-    padding-left: calc(220px + 24px); /* mirrors sidebar width + breathing room */
-
-    ${BREAKPOINTS.xl} {
-        padding-left: calc(440px + 24px);
-    }
 
     ${BREAKPOINTS.mobile} {
-        flex: none;
-        width: 100%;
-        height: auto;
         padding: 16px;
     }
 `;
 
 export const Sidebar = styled.aside<{ $expanded?: boolean }>`
-    width: 220px;
-    height: 100%;
-    flex-shrink: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    background: var(--bs-body-bg, #060606);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     flex-direction: row;
     box-sizing: border-box;
-    transition: width 0.3s ease, height 0.3s ease;
-
-    ${({ $expanded }) => $expanded && `
-        position: absolute;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        width: 75%;
-        z-index: 10;
-        background: var(--bs-body-bg, #060606);
-    `}
+    width: ${({ $expanded }) => $expanded ? '75%' : '220px'};
+    transition: width 0.3s ease;
 
     ${BREAKPOINTS.xl} {
         width: ${({ $expanded }) => $expanded ? '75%' : '440px'};
     }
 
     ${BREAKPOINTS.mobile} {
+        left: 0;
+        right: 0;
+        top: auto;
+        bottom: 0;
         width: 100%;
         flex-direction: column;
-        min-height: 0;
-
-        ${({ $expanded }) => $expanded ? `
-            flex: none;
-            height: 80%;
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            top: auto;
-            z-index: 10;
-            background: var(--bs-body-bg, #060606);
-        ` : `
-            flex: 1;
-            height: auto;
-        `}
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        height: ${({ $expanded }) => $expanded ? '80%' : '220px'};
+        transition: height 0.3s ease;
     }
 `;
 
@@ -144,6 +119,7 @@ export const SidebarContent = styled.div`
  *  On intermediate screens, max-width/max-height ensure the lock
  *  shrinks gracefully rather than touching the edges. */
 export const PatternLockSizer = styled.div`
+    padding: 2rem !important;
     width: 500px;
     height: 500px;
     max-width: 100%;

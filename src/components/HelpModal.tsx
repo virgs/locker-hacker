@@ -34,9 +34,9 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                 Submit guesses and receive feedback:
             </p>
             <HelpList>
-                <li><strong style={{ color: bull.color }}>{bull.symbol} Bull</strong> — correct dot in the <em>correct position</em>.</li>
-                <li><strong style={{ color: cow.color }}>{cow.symbol} Cow</strong> — correct dot but <em>wrong position</em>.</li>
-                <li><strong style={{ color: miss.color }}>{miss.symbol} Miss</strong> — dot <em>not in the code</em>.</li>
+                <li><strong style={{ color: bull.color }}>{bull.symbol}</strong> — correct dot in the <em>correct position</em>.</li>
+                <li><strong style={{ color: cow.color }}>{cow.symbol}</strong> — correct dot but <em>wrong position</em>.</li>
+                <li><strong style={{ color: miss.color }}>{miss.symbol}</strong> — dot <em>not in the code</em>.</li>
             </HelpList>
 
             <ExampleCaption>Examples</ExampleCaption>
