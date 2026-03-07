@@ -1063,3 +1063,116 @@ Sidebar (flex-col)
 - `src/App.styled.tsx` — mobile Sidebar: collapsed `flex: 1; height: auto`, expanded `flex: none; height: 80%`
 
 ---
+
+### CircleCI `deploy-web` Hang on GitHub Host Verification
+
+**Problem:** The `deploy-web` job intermittently hung after the `git commit` step and then timed out. Logs showed SSH host authenticity output for `github.com`, which means the job was entering an interactive trust/auth path instead of completing a non-interactive push.
+
+**Decision:** Hardened deploy to be explicitly non-interactive and resilient to SSH host checks:
+- Seed `~/.ssh/known_hosts` with `ssh-keyscan github.com`
+- Set `GIT_TERMINAL_PROMPT=0` in deploy step to fail fast instead of hanging on prompts
+- Push with explicit token URL form: `https://x-access-token:${GITHUB_TOKEN}@github.com/...`
+- Keep `GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=accept-new'` as a safety fallback if SSH is invoked by environment config
+
+**Files changed:**
+- `.circleci/config.yml`
+- `README.md`
+
+---
+### Stats Persistence: Immediate Wins + Abandoned-Game Losses
+
+**Problem:** Stats were only persisted in `onFinishGame` for single-player, which caused two data integrity gaps:
+- A win could be lost if the player closed/reloaded immediately after solving, before pressing Finish.
+- An in-progress game could be dropped from stats entirely if the player left mid-run.
+
+**Decision:** Introduced single-player session tracking in `GameContext` using `GameSessionStatsTracker` to guarantee one record per started game:
+- Mark session as started on first valid guess submission.
+- Persist **win immediately** when a solved guess is submitted.
+- Persist **loss** for started single-player sessions when leaving/resetting (`onGiveUp`, `onLevelChange`, `onFinishGame`, and browser `pagehide`).
+- Guard against duplicates with tracker state (`started` + `persisted`) and reset tracker on new game.
+
+**Files changed:**
+- `src/context/GameContext.tsx`
+- `src/context/GameSessionStatsTracker.ts`
+- `src/context/GameSessionStatsTracker.test.ts`
+- `README.md`
+- `agents.md`
+
+---
+### Hint Dropdown + Elimination Hints + Hint Stats
+
+**Problem:** The running-game action only offered a single "Give Up" button, and hints were not represented in game stats.
+
+**Decision:** Replaced the running-state center action with a `Hint` dropdown in `Navbar`:
+- `Get a hint` selects a random dot that is **not** in the secret code and marks it in red (danger) on the board.
+- `Give up` keeps the existing surrender/reveal flow.
+
+**Implementation details:**
+- Added `pickEliminationHint` in `src/game/HintService.ts` (pure utility with deterministic test hook via injected `random`).
+- `GameContext.onRevealHint` now uses `pickEliminationHint` with `totalDots = cols * rows` and excludes both secret-code dots and already eliminated dots.
+- Pattern lock highlighted hint styling changed from warning/yellow to danger/red.
+
+**Stats changes:**
+- `GameRecord` now includes `hintsUsed`.
+- `LevelStats` now includes `totalHints`.
+- Added `avgHints` helper and displayed `Hints avg` in `StatsModal` with `toFixed(1)` formatting.
+- Persistence paths in `GameContext` now store `hintsUsed: revealedHints.length` per saved game.
+
+**Files changed:**
+- `src/components/Navbar.tsx`
+- `src/context/GameContext.tsx`
+- `src/game/HintService.ts`
+- `src/game/HintService.test.ts`
+- `src/components/PatternLock.css`
+- `src/game/StatsService.ts`
+- `src/game/StatsService.test.ts`
+- `src/components/StatsModal.tsx`
+- `README.md`
+
+---
+### Elimination Hint Visual: Red X Behind Dot
+
+**Change:** Updated elimination hint rendering from a pulsing red dot fill to a static red `X` behind the dot.
+
+**Rationale:** An `X` communicates "not part of the secret" more explicitly than a color-only pulse and reduces motion noise during play.
+
+**Files changed:**
+- `src/components/Point.tsx`
+- `src/components/PatternLock.css`
+- `README.md`
+
+---
+### Hint Eligibility Hardening (No Secret / No Repeat / Disable When Empty)
+
+**Decision:** Centralized elimination-hint availability in `HintService` and reused it in UI controls.
+
+**Rules now guaranteed:**
+- A hint candidate cannot be part of the secret code.
+- A hint candidate cannot be a previously eliminated dot.
+- `Get a hint` is disabled when no candidates remain.
+
+**Implementation:**
+- Added `getEliminationHintCandidates` and `hasEliminationHintCandidates` in `src/game/HintService.ts`.
+- `pickEliminationHint` now reuses candidate generation.
+- `Navbar` and `Footer` use `hasEliminationHintCandidates` for consistent enable/disable behavior.
+
+**Files changed:**
+- `src/game/HintService.ts`
+- `src/game/HintService.test.ts`
+- `src/components/Navbar.tsx`
+- `src/components/Footer.tsx`
+
+---
+### Build Pipeline Fix: Remove `@jest/globals` Imports From Test Files
+
+**Date:** 2026-03-05
+
+**Issue:** CircleCI `build` job (`tsc && vite build`) failed with `TS2307` because two `.test.ts` files imported `@jest/globals`, but that package is not installed in dev dependencies.
+
+**Decision:** Use Jest globals provided by the current setup (`@types/jest` + Jest runtime) and remove explicit `@jest/globals` imports instead of adding another dependency.
+
+**Files changed:**
+- `src/context/GameSessionStatsTracker.test.ts`
+- `src/game/HintService.test.ts`
+
+---
