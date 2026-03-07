@@ -7,7 +7,7 @@ export const FeedbackShape = styled.span<{ $color: string }>`
     justify-content: center;
     width: 14px;
     height: 14px;
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 700;
     line-height: 1;
     color: ${({ $color }) => $color};
@@ -15,7 +15,7 @@ export const FeedbackShape = styled.span<{ $color: string }>`
     ${BREAKPOINTS.mobile} {
         width: 10px;
         height: 10px;
-        font-size: 10px;
+        font-size: 24px;
     }
 `;
 

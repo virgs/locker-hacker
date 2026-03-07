@@ -128,7 +128,7 @@ jobs:
           command: |
             git add docs --force
             git commit -m "ci: update GitHub Pages build [skip ci]" --allow-empty
-            git push https://x-access-token:${GITHUB_TOKEN}@github.com/virgs/locker-hacker.git HEAD:main
+            git push https://x-access-token:${GITHUB_TOKEN}@github.com/virgs/locker-hacker.git HEAD:gh-pages
 
 workflows:
   build-and-deploy:
