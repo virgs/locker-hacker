@@ -8,7 +8,7 @@ export const NavbarContainer = styled.nav`
     padding: 0 16px;
 
     ${BREAKPOINTS.mobile} {
-        padding: 0 8px;
+        padding: 8px;
     }
 `;
 
