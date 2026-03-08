@@ -10,7 +10,7 @@
     position: relative;
 }
 
-.react-pattern-lock__dots-wrapper {
+.react-pattern-lock--animated .react-pattern-lock__dots-wrapper {
     animation: patternLockFadeIn 1250ms ease;
 }
 

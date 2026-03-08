@@ -34,6 +34,7 @@ export const App = (): ReactElement => {
                         <PatternLockSizer $size={lockSize}>
                             <PatternLock
                                 key={gameKey}
+                                className="react-pattern-lock--animated"
                                 containerSize="100%"
                                 pointSize={20}
                                 cols={gridConfig.cols}
