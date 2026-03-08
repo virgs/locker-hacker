@@ -45,6 +45,7 @@ export const AiProgressStat = styled.span<{ $color?: string }>`
 
 export const ConfidenceDelta = styled.span<{ $color?: string }>`
     position: absolute;
+    z-index: 99;
     top: -4px;
     left: 10px;
     font-size: 0.65rem;

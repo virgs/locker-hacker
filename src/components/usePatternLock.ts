@@ -16,9 +16,17 @@ interface UsePatternLockOptions {
     onFinish?: () => void;
 }
 
+export interface GridLayout {
+    offsetX: number;
+    offsetY: number;
+    width: number;
+    height: number;
+}
+
 export interface UsePatternLockResult {
     wrapperRef: React.MutableRefObject<HTMLDivElement>;
     points: PointType[];
+    gridLayout: GridLayout;
     wrapperPosition: PointType;
     isMouseDown: boolean;
     initialMousePosition: PointType | null;
@@ -45,6 +53,7 @@ export const usePatternLock = ({
     const [containerHeight, setContainerHeight] = React.useState<number>(0);
     const [points, setPoints]                   = React.useState<PointType[]>([]);
     const [wrapperPosition, setWrapperPosition] = React.useState<PointType>({ x: 0, y: 0 });
+    const [gridLayout, setGridLayout]           = React.useState<GridLayout>({ offsetX: 0, offsetY: 0, width: 0, height: 0 });
     const [isMouseDown, setIsMouseDown]         = React.useState<boolean>(false);
     const [initialMousePosition, setInitialMousePosition] = React.useState<PointType | null>(null);
     const [flashingPoints, setFlashingPoints]     = React.useState<Set<number>>(new Set());
@@ -130,6 +139,15 @@ export const usePatternLock = ({
     React.useEffect(() => {
         const rafId = window.requestAnimationFrame(() => {
             setPoints(getPoints({ pointActiveSize, containerWidth, containerHeight, cols, rows }));
+            const cellSize = containerWidth > 0 && containerHeight > 0
+                ? Math.min(containerWidth / cols, containerHeight / rows)
+                : 0;
+            setGridLayout({
+                offsetX: (containerWidth  - cellSize * cols) / 2,
+                offsetY: (containerHeight - cellSize * rows) / 2,
+                width  : cellSize * cols,
+                height : cellSize * rows,
+            });
             onResize();
         });
         return () => window.cancelAnimationFrame(rafId);
@@ -157,5 +175,5 @@ export const usePatternLock = ({
         };
     }, []);
 
-    return { wrapperRef, points, wrapperPosition, isMouseDown, initialMousePosition, flashingPoints, completionFlash, onHold, onTouch };
+    return { wrapperRef, points, gridLayout, wrapperPosition, isMouseDown, initialMousePosition, flashingPoints, completionFlash, onHold, onTouch };
 };
