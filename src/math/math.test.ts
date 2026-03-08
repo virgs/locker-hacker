@@ -11,13 +11,28 @@ describe("Utils", () => {
             expect(points[8]).toEqual({ x: 245, y: 245 }); // bottom-right
         });
 
-        it("Should place points correctly in a rectangular container with a square grid", () => {
+        it("Should use equal spacing and center the grid in a wide rectangular container", () => {
+            // containerWidth=200, containerHeight=100, cols=2, rows=2
+            // cellSize = min(200/2, 100/2) = 50  →  offsetX=50, offsetY=0
             const points = utils.getPoints({ pointActiveSize: 10, containerWidth: 200, containerHeight: 100, cols: 2, rows: 2 });
             expect(points).toHaveLength(4);
-            expect(points[0]).toEqual({ x: 45, y: 20 });   // top-left  (cellW=100, cellH=50)
-            expect(points[1]).toEqual({ x: 145, y: 20 });  // top-right
-            expect(points[2]).toEqual({ x: 45, y: 70 });   // bottom-left
-            expect(points[3]).toEqual({ x: 145, y: 70 });  // bottom-right
+            expect(points[0]).toEqual({ x: 70, y: 20 });   // top-left
+            expect(points[1]).toEqual({ x: 120, y: 20 });  // top-right
+            expect(points[2]).toEqual({ x: 70, y: 70 });   // bottom-left
+            expect(points[3]).toEqual({ x: 120, y: 70 });  // bottom-right
+        });
+
+        it("Should use equal spacing and center the grid for a non-square grid in a square container", () => {
+            // containerWidth=300, containerHeight=300, cols=3, rows=2 (Easy mode shape)
+            // cellSize = min(300/3, 300/2) = 100  →  offsetX=0, offsetY=50
+            const points = utils.getPoints({ pointActiveSize: 10, containerWidth: 300, containerHeight: 300, cols: 3, rows: 2 });
+            expect(points).toHaveLength(6);
+            expect(points[0]).toEqual({ x: 45, y: 95 });   // col=0, row=0
+            expect(points[1]).toEqual({ x: 145, y: 95 });  // col=1, row=0
+            expect(points[2]).toEqual({ x: 245, y: 95 });  // col=2, row=0
+            expect(points[3]).toEqual({ x: 45, y: 195 });  // col=0, row=1
+            expect(points[4]).toEqual({ x: 145, y: 195 }); // col=1, row=1
+            expect(points[5]).toEqual({ x: 245, y: 195 }); // col=2, row=1
         });
 
         it("Should place 6 points correctly for a 2-column × 3-row non-square grid", () => {

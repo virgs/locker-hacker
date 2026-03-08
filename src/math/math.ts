@@ -18,11 +18,12 @@ export const getPoints = ({
     rows
 }: { pointActiveSize: number, containerWidth: number, containerHeight: number, cols: number, rows: number }): Point[] => {
     const halfPointSize = pointActiveSize / 2;
-    const cellWidth     = containerWidth  / cols;
-    const cellHeight    = containerHeight / rows;
+    const cellSize      = Math.min(containerWidth / cols, containerHeight / rows);
+    const offsetX       = (containerWidth  - cellSize * cols) / 2;
+    const offsetY       = (containerHeight - cellSize * rows) / 2;
     return Array.from({ length: cols * rows }).map((_x, i) => ({
-        x: cellWidth  * (i % cols)           + cellWidth  / 2 - halfPointSize,
-        y: cellHeight * Math.floor(i / cols) + cellHeight / 2 - halfPointSize
+        x: offsetX + cellSize * (i % cols)           + cellSize / 2 - halfPointSize,
+        y: offsetY + cellSize * Math.floor(i / cols) + cellSize / 2 - halfPointSize
     }));
 };
 

@@ -27,9 +27,15 @@ export const MainArea = styled.main`
     overflow: hidden;
     box-sizing: border-box;
     padding: 24px;
+    padding-right: calc(220px + 24px);
+
+    ${BREAKPOINTS.xl} {
+        padding-right: calc(440px + 24px);
+    }
 
     ${BREAKPOINTS.mobile} {
         padding: 16px;
+        padding-bottom: calc(160px + 16px);
     }
 `;
 
@@ -60,7 +66,7 @@ export const Sidebar = styled.aside<{ $expanded?: boolean }>`
         flex-direction: column;
         border-left: none;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
-        height: ${({ $expanded }) => $expanded ? '80%' : '220px'};
+        height: ${({ $expanded }) => $expanded ? '80%' : '160px'};
         transition: height 0.3s ease;
     }
 `;
@@ -114,21 +120,15 @@ export const SidebarContent = styled.div`
     }
 `;
 
-/** Constrains the active PatternLock to 500 px on desktop and to the
- *  viewport width (minus padding) on mobile so it never overflows.
- *  On intermediate screens, max-width/max-height ensure the lock
- *  shrinks gracefully rather than touching the edges. */
+/** Constrains the active PatternLock to a square up to 500 px.
+ *  aspect-ratio: 1 ensures the element stays square when either
+ *  max-width or max-height kicks in, so the PatternLock always
+ *  receives a square container regardless of screen size. */
 export const PatternLockSizer = styled.div`
-    padding: 2rem !important;
-    width: 500px;
-    height: 500px;
-    max-width: 100%;
+    width: 100%;
+    max-width: 500px;
     max-height: 100%;
-
-    ${BREAKPOINTS.mobile} {
-        width: calc(100vw - 32px);
-        height: calc(100vw - 32px);
-    }
+    aspect-ratio: 1;
 `;
 
 export const ClickOutsideOverlay = styled.div`
