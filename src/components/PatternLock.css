@@ -10,6 +10,21 @@
     position: relative;
 }
 
+.react-pattern-lock__dots-wrapper {
+    animation: patternLockFadeIn 1250ms ease;
+}
+
+@keyframes patternLockFadeIn {
+    from {
+        opacity: 0;
+        filter: blur(7px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
 .react-pattern-lock__connector-wrapper {
     position: absolute;
     top: 0;

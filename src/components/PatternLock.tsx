@@ -72,31 +72,36 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
             onTouchStart={onTouch}
             ref={wrapperRef}
         >
-            <div style={{
-                position : 'absolute',
-                left     : gridLayout.offsetX,
-                top      : gridLayout.offsetY,
-                width    : gridLayout.width,
-                height   : gridLayout.height,
-                display  : 'flex',
-                flexWrap : 'wrap',
-            }}>
-                {Array.from({ length: cols * rows }).map((_, i) => (
-                    <Point
-                        key={i}
-                        index={i}
-                        cols={cols}
-                        rows={rows}
-                        pointSize={pointSize}
-                        pointActiveSize={pointActiveSize}
-                        complete={completionFlash && path.indexOf(i) > -1 && path.indexOf(i) < (targetLength ?? Infinity)}
-                        pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
-                        selected={path.indexOf(i) > -1}
-                        highlighted={highlightedPoints.includes(i)}
-                        pathColor={disabled ? undefined : pathColor}
-                    />
-                ))}
-            </div>
+            {gridLayout.width > 0 && (
+                <div
+                    className="react-pattern-lock__dots-wrapper"
+                    style={{
+                        position : 'absolute',
+                        left     : gridLayout.offsetX,
+                        top      : gridLayout.offsetY,
+                        width    : gridLayout.width,
+                        height   : gridLayout.height,
+                        display  : 'flex',
+                        flexWrap : 'wrap',
+                    }}
+                >
+                    {Array.from({ length: cols * rows }).map((_, i) => (
+                        <Point
+                            key={i}
+                            index={i}
+                            cols={cols}
+                            rows={rows}
+                            pointSize={pointSize}
+                            pointActiveSize={pointActiveSize}
+                            complete={completionFlash && path.indexOf(i) > -1 && path.indexOf(i) < (targetLength ?? Infinity)}
+                            pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
+                            selected={path.indexOf(i) > -1}
+                            highlighted={highlightedPoints.includes(i)}
+                            pathColor={disabled ? undefined : pathColor}
+                        />
+                    ))}
+                </div>
+            )}
             {!invisible && points.length > 0 && (
                 <Connectors
                     initialMousePosition={initialMousePosition}

@@ -30,24 +30,26 @@ export const App = (): ReactElement => {
             <Navbar />
             <ContentArea>
                 <MainArea ref={mainAreaRef}>
-                    <PatternLockSizer $size={lockSize}>
-                        <PatternLock
-                            key={gameKey}
-                            containerSize="100%"
-                            pointSize={20}
-                            cols={gridConfig.cols}
-                            rows={gridConfig.rows}
-                            path={path}
-                            allowJumping={false}
-                            invisible={false}
-                            disabled={phase !== GamePhase.Playing}
-                            targetLength={gridConfig.length}
-                            pathColor={pathColor}
-                            highlightedPoints={revealedHints}
-                            onChange={onPathChange}
-                            onFinish={onGuessFinish}
-                        />
-                    </PatternLockSizer>
+                    {lockSize > 0 && (
+                        <PatternLockSizer $size={lockSize}>
+                            <PatternLock
+                                key={gameKey}
+                                containerSize="100%"
+                                pointSize={20}
+                                cols={gridConfig.cols}
+                                rows={gridConfig.rows}
+                                path={path}
+                                allowJumping={false}
+                                invisible={false}
+                                disabled={phase !== GamePhase.Playing}
+                                targetLength={gridConfig.length}
+                                pathColor={pathColor}
+                                highlightedPoints={revealedHints}
+                                onChange={onPathChange}
+                                onFinish={onGuessFinish}
+                            />
+                        </PatternLockSizer>
+                    )}
                 </MainArea>
                 {expanded && <ClickOutsideOverlay onClick={collapse} />}
                 <Sidebar $expanded={expanded}>
