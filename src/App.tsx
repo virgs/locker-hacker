@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react'
+import { useRef, type ReactElement } from 'react'
 import './App.scss'
 import PatternLock from "./components/PatternLock.tsx";
 import PatternHistory from "./components/PatternHistory.tsx";
@@ -15,19 +15,22 @@ import { HistoryTitle } from "./components/PatternHistory.tsx";
 import useSidebarResize from "./components/useSidebarResize.ts";
 import useMediaQuery from "./components/useMediaQuery.ts";
 import { BREAKPOINT_QUERIES } from "./theme/breakpoints.ts";
+import useLockSize from "./components/useLockSize.ts";
 
 export const App = (): ReactElement => {
     const { phase, path, gameKey, gridConfig, playerCount, currentPlayer, revealedHints, onPathChange, onGuessFinish } = useGameContext();
     const pathColor = playerCount !== PlayerCount.One ? getPlayerColor(currentPlayer) : undefined;
     const isMobile = useMediaQuery(BREAKPOINT_QUERIES.mobile);
     const { expanded, collapse, onPointerDown, onPointerMove, onPointerUp } = useSidebarResize(isMobile);
+    const mainAreaRef = useRef<HTMLElement>(null);
+    const lockSize = useLockSize(mainAreaRef);
 
     return (
         <AppLayout>
             <Navbar />
             <ContentArea>
-                <MainArea>
-                    <PatternLockSizer>
+                <MainArea ref={mainAreaRef}>
+                    <PatternLockSizer $size={lockSize}>
                         <PatternLock
                             key={gameKey}
                             containerSize="100%"

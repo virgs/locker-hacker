@@ -120,15 +120,11 @@ export const SidebarContent = styled.div`
     }
 `;
 
-/** Constrains the active PatternLock to a square up to 500 px.
- *  aspect-ratio: 1 ensures the element stays square when either
- *  max-width or max-height kicks in, so the PatternLock always
- *  receives a square container regardless of screen size. */
-export const PatternLockSizer = styled.div`
-    width: 100%;
-    max-width: 500px;
-    max-height: 100%;
-    aspect-ratio: 1;
+/** Always a perfect square at the measured available size.
+ *  Size is computed by useLockSize watching MainArea's content area. */
+export const PatternLockSizer = styled.div<{ $size: number }>`
+    width: ${({ $size }) => $size}px;
+    height: ${({ $size }) => $size}px;
 `;
 
 export const ClickOutsideOverlay = styled.div`
