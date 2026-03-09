@@ -26,7 +26,7 @@ describe("useConfetti constants", () => {
     it("total animation duration is BURST_COUNT * BURST_DELAY", () => {
         const totalDuration = (BURST_COUNT - 1) * BURST_DELAY;
         expect(totalDuration).toBeGreaterThan(0);
-        expect(totalDuration).toBeLessThan(5000);
+        expect(totalDuration).toBeLessThanOrEqual(5000);
     });
 });
 

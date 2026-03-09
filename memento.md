@@ -1252,3 +1252,31 @@ Sidebar (flex-col)
 - `src/components/CodeRevealOverlay.styled.tsx` (deleted)
 
 ---
+
+### Playwright E2E Test Suite
+
+**Date:** 2026-03-08
+
+**Feature:** 5 end-to-end tests covering the main user flows, run via Playwright on Chromium. Added to the CircleCI pipeline as an independent `e2e` job after `install`.
+
+**Tests (`e2e/game.spec.ts`):**
+1. Correct grid size and code length for the default Medium level
+2. Short paths don't submit a guess (history stays empty)
+3. Correct-length paths submit a guess and appear in history
+4. Give up shows the code with Bootstrap danger/success colour and Play Again button
+5. Play Again resets history and returns to Playing phase
+
+**Key decisions:**
+- Use `pnpm dev` (port 5173) as the webServer — avoids the `/locker-hacker/` base-path used in production builds.
+- Scope all dot selectors to `.react-pattern-lock--animated` (the main lock's unique class) to avoid collisions with history PatternLocks.
+- React-Bootstrap `Dropdown.Item` renders `<a class="dropdown-item">`, not `role="menuitem"` — use `.dropdown-menu.show .dropdown-item` selectors.
+- Secret code is random (≈0.8% chance of winning on first Easy guess); tests handle both "win" and "normal guess" outcomes gracefully.
+- Jest `testPathIgnorePatterns` excludes `e2e/` to prevent Jest from picking up Playwright spec files.
+
+**Files added/changed:**
+- `playwright.config.ts` (new)
+- `e2e/game.spec.ts` (new)
+- `package.json` — added `test:e2e` script, `testPathIgnorePatterns` to Jest config
+- `.circleci/config.yml` — added `e2e` job with `cimg/node:22.14-browsers` image
+
+---

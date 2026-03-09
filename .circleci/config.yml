@@ -88,6 +88,24 @@ jobs:
           paths:
             - docs
 
+  e2e:
+    docker:
+      - image: cimg/node:22.14-browsers
+    steps:
+      - attach_and_install
+      - run:
+          name: Enable pnpm
+          command: corepack enable && corepack prepare pnpm@latest --activate
+      - run:
+          name: Install Playwright browsers
+          command: pnpm exec playwright install chromium --with-deps
+      - run:
+          name: Run E2E tests
+          command: pnpm run test:e2e
+      - store_artifacts:
+          path: playwright-report
+          destination: playwright-report
+
   build-android:
     executor: node
     steps:
@@ -141,6 +159,9 @@ workflows:
           requires:
             - install
       - coverage:
+          requires:
+            - install
+      - e2e:
           requires:
             - install
       - build:

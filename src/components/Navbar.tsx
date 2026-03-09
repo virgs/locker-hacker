@@ -40,6 +40,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
     const {
         phase, level, playerCount, isRunning, gridConfig, code, revealedHints,
         showStatsModal, onToggleStatsModal,
+        winner,
         onLevelChange, onPlayerCountChange, onGiveUp, onRevealHint, onFinishGame,
     } = useGameContext();
     const configDisabled = isRunning || phase === GamePhase.Revealing;
@@ -69,7 +70,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
         if (phase === GamePhase.Revealing) {
             return (
                 <Tip text="Start a new game">
-                    <Button variant="primary" size="sm" onClick={onFinishGame} aria-label="Finish game">
+                    <Button variant={winner ? "success" : "danger"} size="sm" onClick={onFinishGame} aria-label="Finish game">
                         <Play size={20}/><ButtonLabel className="ms-1">Play again</ButtonLabel>
                     </Button>
                 </Tip>

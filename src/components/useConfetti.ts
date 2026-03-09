@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
 
-const BURST_COUNT   = 3;
-const BURST_DELAY   = 400;
+const BURST_COUNT   = 5;
+const BURST_DELAY   = 1250;
 const PARTICLE_COUNT = 60;
 
 const CONFETTI_DEFAULTS: confetti.Options = {
