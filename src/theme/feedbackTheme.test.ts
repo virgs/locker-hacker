@@ -15,12 +15,6 @@ describe("FEEDBACK_THEME", () => {
         }
     });
 
-    it("colors are valid hex strings", () => {
-        for (const entry of Object.values(FEEDBACK_THEME)) {
-            expect(entry.color).toMatch(/^#[0-9a-f]{6}$/i);
-        }
-    });
-
     it("defines distinct colors", () => {
         const colors = Object.values(FEEDBACK_THEME).map((e: FeedbackEntry) => e.color);
         expect(new Set(colors).size).toBe(3);

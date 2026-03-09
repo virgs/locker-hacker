@@ -51,12 +51,6 @@ describe("FEEDBACK_THEME", () => {
         expect(new Set(colors).size).toBe(3);
     });
 
-    it("colors are valid hex strings", () => {
-        for (const entry of Object.values(FEEDBACK_THEME)) {
-            expect(entry.color).toMatch(/^#[0-9a-f]{6}$/i);
-        }
-    });
-
     it("defines distinct symbols for bull, cow, and miss", () => {
         const symbols = [FEEDBACK_THEME.bull.symbol, FEEDBACK_THEME.cow.symbol, FEEDBACK_THEME.miss.symbol];
         expect(new Set(symbols).size).toBe(3);

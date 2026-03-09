@@ -1,4 +1,5 @@
 import { GuessQuality } from "./useInferenceEngine.ts";
+import {AI_COLOR_DANGER, AI_COLOR_SUCCESS, AI_COLOR_WARNING} from "../theme/colors.ts";
 
 export const formatTime = (totalSeconds: number): string => {
     const minutes = Math.floor(totalSeconds / 60);
@@ -10,10 +11,6 @@ export const formatPercentDelta = (delta: number): string => {
     const sign = delta >= 0 ? "+" : "";
     return `${sign}${delta.toFixed(1)}%`;
 };
-
-export const AI_COLOR_SUCCESS = "var(--bs-success)";
-export const AI_COLOR_WARNING = "var(--bs-warning)";
-export const AI_COLOR_DANGER  = "var(--bs-danger)";
 
 export const getAiIndicatorColor = (
     isSolved: boolean,

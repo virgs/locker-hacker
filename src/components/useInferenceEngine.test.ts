@@ -4,12 +4,10 @@ import type { GridConfig } from "../game/GameConfig.ts";
 import type { Observation } from "../ai/types.ts";
 import {
     getAiIndicatorColor,
-    formatPercentDelta,
-    AI_COLOR_SUCCESS,
-    AI_COLOR_DANGER,
-    AI_COLOR_WARNING,
+    formatPercentDelta
 } from "./Footer.utils.ts";
 import { GuessQuality, classifyGuessQuality } from "./useInferenceEngine.ts";
+import {AI_COLOR_DANGER, AI_COLOR_SUCCESS, AI_COLOR_WARNING} from "../theme/colors.ts";
 
 /**
  * Tests for the AI progress computation logic used by useInferenceEngine.
