@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { GamePhase } from "../game/GameConfig.ts";
 
 /**
@@ -7,14 +6,8 @@ import { GamePhase } from "../game/GameConfig.ts";
  * Lose → bootstrap danger (persistent until next game)
  */
 const useEndGameColor = (phase: GamePhase, winner: number | null): string | undefined => {
-    const [color, setColor] = useState<string | undefined>(undefined);
-
-    useEffect(() => {
-        if (phase !== GamePhase.Revealing) { setColor(undefined); return; }
-        setColor(winner !== null ? "var(--bs-success)" : "var(--bs-danger)");
-    }, [phase, winner]);
-
-    return color;
+    if (phase !== GamePhase.Revealing) return undefined;
+    return winner !== null ? "var(--bs-success)" : "var(--bs-danger)";
 };
 
 export default useEndGameColor;

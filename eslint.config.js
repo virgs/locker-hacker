@@ -8,6 +8,12 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 export default [
     { ignores: ['dist', 'docs', 'coverage', 'android'] },
     {
+        files: ['playwright.config.ts', 'e2e/**/*.ts'],
+        languageOptions: {
+            globals: globals.node,
+        },
+    },
+    {
         files: ['**/*.test.ts', '**/*.test.tsx'],
         languageOptions: {
             globals: globals.jest,
