@@ -3,6 +3,7 @@ import {Hash, BarChart2, Clock, User, Unlock, Gift, Lock} from "react-feather";
 import {
     FooterContainer,
     FooterStat,
+    CodeLengthStat,
     AiProgressStat,
     PlayerLabel,
     ConfidenceDelta,
@@ -34,7 +35,8 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
         pathHistory,
         phase,
         revealedHints,
-        onRevealHint
+        onRevealHint,
+        onRegisterInvalidGuessListener,
     } = useGameContext();
     const isMultiplayer = playerCount !== PlayerCount.One;
     const playerColor = getPlayerColor(currentPlayer);
@@ -44,6 +46,7 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
     const levelLabel = isMobile ? LEVEL_LABELS_SHORT[level] : LEVEL_LABELS[level];
     const [showDelta, setShowDelta] = React.useState(false);
     const [deltaKey, setDeltaKey] = React.useState(0);
+    const [flashCodeLength, setFlashCodeLength] = React.useState(false);
 
     const canHint = IS_CAPACITOR && phase === GamePhase.Playing && hasEliminationHintCandidates({
         totalDots: gridConfig.cols * gridConfig.rows,
@@ -70,6 +73,15 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
         const id = setTimeout(() => setShowDelta(false), DELTA_DISPLAY_MS);
         return () => clearTimeout(id);
     }, [pathHistory.length]);
+
+    const flashTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+    React.useEffect(() => {
+        onRegisterInvalidGuessListener(() => {
+            if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+            setFlashCodeLength(true);
+            flashTimerRef.current = setTimeout(() => setFlashCodeLength(false), 1200);
+        });
+    }, [onRegisterInvalidGuessListener]);
 
     const indicatorColor = getAiIndicatorColor(aiProgress.isSolved, flashQuality);
 
@@ -103,10 +115,10 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
                 </PlayerLabel>
             )}
             <Tip text="Code length" placement="top">
-                <FooterStat aria-label="Code length">
+                <CodeLengthStat $flash={flashCodeLength} aria-label="Code length">
                     <Hash size={20}/>
                     {gridConfig.length}
-                </FooterStat>
+                </CodeLengthStat>
             </Tip>
             <Tip text="Difficulty level" placement="top">
                 <FooterStat aria-label={`Level: ${LEVEL_LABELS[level]}`}>

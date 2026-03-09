@@ -41,7 +41,7 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
     }, [show]);
 
     return (
-        <Modal show={show} onHide={onClose} centered>
+        <Modal show={show} onHide={onClose} centered size="lg">
             <Modal.Header closeButton>
                 <Modal.Title>Games Stats</Modal.Title>
             </Modal.Header>

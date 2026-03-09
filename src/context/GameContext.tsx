@@ -36,8 +36,9 @@ export interface GameContextValue {
     onPathChange         : (path: number[]) => void;
     onGuessFinish        : () => void;
     onToggleStatsModal   : () => void;
-    onDismissTurnModal   : () => void;
-    onRevealHint         : () => void;
+    onDismissTurnModal              : () => void;
+    onRevealHint                    : () => void;
+    onRegisterInvalidGuessListener  : (cb: () => void) => void;
 }
 
 const GameContext = React.createContext<GameContextValue | undefined>(undefined);
@@ -73,6 +74,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const [playerHistory, setPlayerHistory]     = React.useState<number[]>([]);
     const [revealedHints, setRevealedHints]     = React.useState<number[]>([]);
     const sessionTrackerRef                      = React.useRef(new GameSessionStatsTracker());
+    const invalidGuessListenerRef                = React.useRef<(() => void) | null>(null);
     const gridConfig = LEVEL_CONFIGS[level];
     const isRunning  = pathHistory.length > 0;
 
@@ -164,8 +166,12 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
             return [...prev, next];
         });
     }, [code, gridConfig.cols, gridConfig.rows]);
+    const onRegisterInvalidGuessListener = React.useCallback((cb: () => void): void => {
+        invalidGuessListenerRef.current = cb;
+    }, []);
+
     const onGuessFinish = React.useCallback((): void => {
-        if (path.length !== gridConfig.length) { setPath([]); return; }
+        if (path.length !== gridConfig.length) { setPath([]); invalidGuessListenerRef.current?.(); return; }
         const validator = new GuessValidator(code);
         validator.validate(path);
         sessionTrackerRef.current.start();
@@ -190,6 +196,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         onLevelChange, onPlayerCountChange,
         onGiveUp, onToggleRevealModal, onFinishGame,
         onPathChange, onGuessFinish, onToggleStatsModal, onDismissTurnModal, onRevealHint,
+        onRegisterInvalidGuessListener,
     };
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 };
