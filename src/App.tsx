@@ -4,7 +4,6 @@ import PatternLock from "./components/PatternLock.tsx";
 import PatternHistory from "./components/PatternHistory.tsx";
 import Navbar from "./components/Navbar.tsx";
 import Footer from "./components/Footer.tsx";
-import CodeRevealOverlay from "./components/CodeRevealOverlay.tsx";
 import TurnAnnouncement from "./components/TurnAnnouncement.tsx";
 import ResizeHandle from "./components/ResizeHandle.tsx";
 import { AppLayout, ContentArea, MainArea, PatternLockSizer, Sidebar, SidebarInner, SidebarHeader, SidebarContent, ClickOutsideOverlay } from "./App.styled.tsx";
@@ -16,14 +15,20 @@ import useSidebarResize from "./components/useSidebarResize.ts";
 import useMediaQuery from "./components/useMediaQuery.ts";
 import { BREAKPOINT_QUERIES } from "./theme/breakpoints.ts";
 import useLockSize from "./components/useLockSize.ts";
+import useEndGameColor from "./components/useEndGameColor.ts";
+import useConfetti from "./components/useConfetti.ts";
 
 export const App = (): ReactElement => {
-    const { phase, path, gameKey, gridConfig, playerCount, currentPlayer, revealedHints, onPathChange, onGuessFinish } = useGameContext();
-    const pathColor = playerCount !== PlayerCount.One ? getPlayerColor(currentPlayer) : undefined;
+    const { phase, path, code, gameKey, gridConfig, playerCount, currentPlayer, winner, revealedHints, onPathChange, onGuessFinish } = useGameContext();
+    const isRevealing   = phase === GamePhase.Revealing;
+    const multiColor    = playerCount !== PlayerCount.One ? getPlayerColor(currentPlayer) : undefined;
+    const endGameColor  = useEndGameColor(phase, winner);
     const isMobile = useMediaQuery(BREAKPOINT_QUERIES.mobile);
     const { expanded, collapse, onPointerDown, onPointerMove, onPointerUp } = useSidebarResize(isMobile);
     const mainAreaRef = useRef<HTMLElement>(null);
     const lockSize = useLockSize(mainAreaRef);
+
+    useConfetti(isRevealing && winner !== null);
 
     return (
         <AppLayout>
@@ -39,13 +44,15 @@ export const App = (): ReactElement => {
                                 pointSize={20}
                                 cols={gridConfig.cols}
                                 rows={gridConfig.rows}
-                                path={path}
+                                path={isRevealing ? code : path}
                                 allowJumping={false}
                                 invisible={false}
-                                disabled={phase !== GamePhase.Playing}
+                                disabled={isRevealing}
+                                arrowHeads={isRevealing}
+                                dynamicLineStyle={isRevealing}
                                 targetLength={gridConfig.length}
-                                pathColor={pathColor}
-                                highlightedPoints={revealedHints}
+                                pathColor={isRevealing ? endGameColor : multiColor}
+                                highlightedPoints={isRevealing ? [] : revealedHints}
                                 onChange={onPathChange}
                                 onFinish={onGuessFinish}
                             />
@@ -71,7 +78,6 @@ export const App = (): ReactElement => {
                 </Sidebar>
             </ContentArea>
             <Footer />
-            <CodeRevealOverlay />
             <TurnAnnouncement />
         </AppLayout>
     );

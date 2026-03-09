@@ -97,7 +97,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                             pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
                             selected={path.indexOf(i) > -1}
                             highlighted={highlightedPoints.includes(i)}
-                            pathColor={disabled ? undefined : pathColor}
+                            pathColor={pathColor}
                         />
                     ))}
                 </div>
@@ -116,7 +116,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                     dynamicLineStyle={dynamicLineStyle}
                     minConnectorThickness={minConnectorThickness}
                     minConnectorOpacity={minConnectorOpacity}
-                    pathColor={disabled ? undefined : pathColor}
+                    pathColor={pathColor}
                 />
             )}
         </div>

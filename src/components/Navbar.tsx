@@ -1,5 +1,5 @@
 import * as React from "react";
-import {GitHub, HelpCircle, EyeOff, Users, User, BarChart2, Play, Coffee, Zap, Flag} from "react-feather";
+import {GitHub, HelpCircle, Users, User, BarChart2, Play, Coffee, Zap, Flag} from "react-feather";
 import Dropdown from "react-bootstrap/Dropdown";
 import Button from "react-bootstrap/Button";
 import {
@@ -40,7 +40,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
     const {
         phase, level, playerCount, isRunning, gridConfig, code, revealedHints,
         showStatsModal, onToggleStatsModal,
-        onLevelChange, onPlayerCountChange, onGiveUp, onRevealHint, onToggleRevealModal, onFinishGame,
+        onLevelChange, onPlayerCountChange, onGiveUp, onRevealHint, onFinishGame,
     } = useGameContext();
     const configDisabled = isRunning || phase === GamePhase.Revealing;
     const canEliminateDot = phase === GamePhase.Playing && hasEliminationHintCandidates({
@@ -68,19 +68,11 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
     const centerContent = (): React.ReactElement | null => {
         if (phase === GamePhase.Revealing) {
             return (
-                <>
-                    <Tip text="Show the secret code">
-                        <Button variant="outline-secondary" size="sm" onClick={onToggleRevealModal}
-                                aria-label="Toggle reveal">
-                            <EyeOff size={20}/><ButtonLabel className="ms-1">Reveal</ButtonLabel>
-                        </Button>
-                    </Tip>
-                    <Tip text="Start a new game">
-                        <Button variant="primary" size="sm" onClick={onFinishGame} aria-label="Finish game">
-                            <Play size={20}/><ButtonLabel className="ms-1">Play again</ButtonLabel>
-                        </Button>
-                    </Tip>
-                </>
+                <Tip text="Start a new game">
+                    <Button variant="primary" size="sm" onClick={onFinishGame} aria-label="Finish game">
+                        <Play size={20}/><ButtonLabel className="ms-1">Play again</ButtonLabel>
+                    </Button>
+                </Tip>
             );
         }
         if (isRunning) {

@@ -21,7 +21,6 @@ export interface GameContextValue {
     pathHistory     : number[][];
     playerHistory   : number[];
     isRunning       : boolean;
-    showRevealModal : boolean;
     showStatsModal  : boolean;
     showTurnModal   : boolean;
     elapsedSeconds  : number;
@@ -31,7 +30,6 @@ export interface GameContextValue {
     onLevelChange        : (level: Level) => void;
     onPlayerCountChange  : (count: PlayerCount) => void;
     onGiveUp             : () => void;
-    onToggleRevealModal  : () => void;
     onFinishGame         : () => void;
     onPathChange         : (path: number[]) => void;
     onGuessFinish        : () => void;
@@ -65,7 +63,6 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const [path, setPath]               = React.useState<number[]>([]);
     const [pathHistory, setPathHistory] = React.useState<number[][]>([]);
     const [gameKey, setGameKey]         = React.useState(0);
-    const [showRevealModal, setShowRevealModal] = React.useState(false);
     const [showStatsModal, setShowStatsModal]   = React.useState(false);
     const [showTurnModal, setShowTurnModal]     = React.useState(false);
     const [elapsedSeconds, setElapsedSeconds]   = React.useState<number>(0);
@@ -121,12 +118,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const onGiveUp = React.useCallback((): void => {
         persistCurrentGameRecord(false);
         setPhase(GamePhase.Revealing);
-        setShowRevealModal(true);
     }, [persistCurrentGameRecord]);
-
-    const onToggleRevealModal = React.useCallback((): void => {
-        setShowRevealModal(prev => !prev);
-    }, []);
 
     const onToggleStatsModal = React.useCallback((): void => {
         setShowStatsModal(prev => !prev);
@@ -140,7 +132,6 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         setCode(generateCode(gridConfig));
         setPath([]); setPathHistory([]); setPlayerHistory([]);
         setPhase(GamePhase.Playing);
-        setShowRevealModal(false);
         setElapsedSeconds(0);
         setCurrentPlayer(1); setWinner(null); setRevealedHints([]);
         sessionTrackerRef.current.reset();
@@ -182,7 +173,6 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
             persistCurrentGameRecord(true, pathHistory.length + 1);
             setWinner(currentPlayer);
             setPhase(GamePhase.Revealing);
-            setShowRevealModal(true);
         } else {
             setCurrentPlayer(prev => (prev % playerCount) + 1);
             if (playerCount > PlayerCount.One) setShowTurnModal(true);
@@ -191,10 +181,10 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const value: GameContextValue = {
         level, playerCount, gridConfig, code, gameKey,
         phase, path, pathHistory, playerHistory, isRunning,
-        showRevealModal, showStatsModal, showTurnModal, elapsedSeconds,
+        showStatsModal, showTurnModal, elapsedSeconds,
         winner, currentPlayer, revealedHints,
         onLevelChange, onPlayerCountChange,
-        onGiveUp, onToggleRevealModal, onFinishGame,
+        onGiveUp, onFinishGame,
         onPathChange, onGuessFinish, onToggleStatsModal, onDismissTurnModal, onRevealHint,
         onRegisterInvalidGuessListener,
     };

@@ -58,6 +58,40 @@
 
 ---
 
+### Sidebar Layout: Always Absolute, PatternLock Centered in Non-Sidebar Zone
+
+**Decision:** The guess-history sidebar is always `position: absolute` (never in flow), always visible at its base size (220px desktop, 160px mobile), animating only its own `width` (desktop) or `height` (mobile) on expand/collapse.
+
+**Rationale:** Previously the sidebar was a flex sibling of `MainArea`, causing the PatternLock to squeeze/jump during animation. Making it always absolute decouples the two entirely.
+
+**PatternLock centering:** `MainArea` has `padding-right: calc(220px + 24px)` on desktop (440px on xl) and `padding-bottom: calc(160px + 16px)` on mobile, so the PatternLock centers in the visible non-sidebar area. When the sidebar expands it overlays the PatternLock — intentional per design.
+
+**`PatternLockSizer`** uses `width: 100%; max-width: 500px; max-height: 100%; aspect-ratio: 1` — always square, naturally constrained by available height via CSS aspect-ratio constraint propagation.
+
+---
+
+### PatternLock Flash Prevention + Fade-In Animation
+
+**Decision:** The PatternLock (and its dots) are not rendered until measurements are available. A CSS fade-in/blur animation plays each time dots become visible.
+
+**Two-layer gate:**
+1. `useLockSize` initializes to `0` (not 500). `App.tsx` renders `PatternLockSizer` + `PatternLock` only when `lockSize > 0` — prevents the wrong-size flash on initial load.
+2. `PatternLock.tsx` renders the inner dots div only when `gridLayout.width > 0` — prevents dots appearing at position `(0,0)` before the internal ResizeObserver fires on level changes.
+
+**Animation:** `.react-pattern-lock__dots-wrapper` has `animation: patternLockFadeIn 250ms ease forwards` — opacity `0→1` + `filter: blur(6px)→blur(0)`. Since `PatternLock` remounts on `key={gameKey}` change, the animation replays on every level change.
+
+---
+
+### Equal Dot Spacing in `getPoints`
+
+**Decision:** `getPoints` now uses `cellSize = min(containerWidth/cols, containerHeight/rows)` with centering offsets (`offsetX`, `offsetY`) instead of separate `cellWidth`/`cellHeight`.
+
+**Rationale:** With the old approach, non-square grids (e.g., Easy 3×2) in a square container had unequal horizontal vs. vertical dot spacing. The new approach always produces equal spacing and centers the dot grid within the container. The square container + equal spacing gives a visually balanced lock for all grid shapes.
+
+**Applies to all PatternLock instances** (main and history), since they all go through the same `getPoints` function.
+
+---
+
 ### Per-Connector Thickness and Opacity (`dynamicLineStyle` redesign)
 
 **Decision:** Both thickness and opacity are now **per-connector**, not global. The `Connector` type carries its own `thickness` and `opacity`. `buildConnector` computes them at construction time using `connectorIndex/totalConnectors` as the ratio, so `getConnectorPoint` receives the correct centering offset for each individual line.
@@ -1174,5 +1208,47 @@ Sidebar (flex-col)
 **Files changed:**
 - `src/context/GameSessionStatsTracker.test.ts`
 - `src/game/HintService.test.ts`
+
+---
+
+### Invalid-Length Guess Flash Feedback (Footer)
+
+**Date:** 2026-03-08
+
+**Feature:** When a user submits a path whose length differs from the secret code length, the footer's code-length indicator (Hash icon + number) briefly flashes Bootstrap danger red.
+
+**Decision:** Added `invalidGuessKey: number` to `GameContextValue`. It increments in `onGuessFinish` whenever `path.length !== gridConfig.length`. The Footer listens via `useEffect` and sets a `flashCodeLength` boolean for 1.2 seconds, driving a CSS keyframe animation on `CodeLengthStat`.
+
+**Files changed:**
+- `src/context/GameContext.tsx` — added `invalidGuessKey` state; increments on invalid guess length
+- `src/components/Footer.tsx` — consumes `invalidGuessKey`, manages `flashCodeLength` state
+- `src/components/Footer.styled.tsx` — added `flashRed` keyframe + `CodeLengthStat` styled component
+
+---
+
+### End-Game Visual Feedback on PatternLock (No Modal)
+
+**Date:** 2026-03-08
+
+**Feature:** Game-over outcome is shown directly on the PatternLock — no modal popup. Win → green (bootstrap success), lose/give-up → red flash (bootstrap danger) then neutral. The "Reveal" button and `CodeRevealOverlay` were removed entirely.
+
+**Decision:**
+- `showRevealModal` / `onToggleRevealModal` removed from `GameContext` — no more modal state.
+- `onGiveUp` now just sets `phase = GamePhase.Revealing` (no modal).
+- `CodeRevealOverlay.tsx` and `CodeRevealOverlay.styled.tsx` deleted.
+- `PatternLock.tsx`: removed `disabled ? undefined : pathColor` guard — parent fully controls pathColor, including while disabled.
+- `useEndGameColor.ts` (new): returns `var(--bs-success)` on win (persistent) or `var(--bs-danger)` for 1.5s on loss then `undefined`.
+- `App.tsx`: when `isRevealing`, shows `path={code}`, `arrowHeads`, `dynamicLineStyle`, `pathColor={endGameColor}`. Fires confetti on win via `useConfetti`.
+- `Navbar.tsx`: Revealing state now shows only "Play again" (removed "Reveal" button).
+
+**Files changed:**
+- `src/context/GameContext.tsx`
+- `src/components/PatternLock.tsx`
+- `src/components/useEndGameColor.ts` (new)
+- `src/components/useEndGameColor.test.ts` (new)
+- `src/App.tsx`
+- `src/components/Navbar.tsx`
+- `src/components/CodeRevealOverlay.tsx` (deleted)
+- `src/components/CodeRevealOverlay.styled.tsx` (deleted)
 
 ---
