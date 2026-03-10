@@ -9,4 +9,5 @@ export const toOrdinal = (n: number): string => {
 };
 
 export const formatGuessLabel = (guessNumber: number): string =>
-    `${toOrdinal(guessNumber)} guess`;
+    // `${toOrdinal(guessNumber)} attempt`;
+    `${guessNumber} guess${guessNumber > 1 ? 'es' : ''}`;

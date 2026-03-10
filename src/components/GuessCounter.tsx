@@ -1,5 +1,4 @@
 import * as React from "react";
-import { GamePhase } from "../game/GameConfig.ts";
 import { useGameContext } from "../context/GameContext.tsx";
 import {
     GuessCounterWrapper,
@@ -10,15 +9,14 @@ import {
 } from "./GuessCounter.styled.tsx";
 import { formatGuessLabel } from "./GuessCounter.utils.ts";
 
-const MAX_VISIBLE_DOTS = 3;
+const MAX_VISIBLE_DOTS = 10;
 
 const GuessCounter: React.FunctionComponent = (): React.ReactElement | null => {
-    const { phase, pathHistory } = useGameContext();
+    const { pathHistory } = useGameContext();
 
-    if (phase !== GamePhase.Playing || pathHistory.length === 0) return null;
+    if (pathHistory.length === 0) return null;
 
-    const made        = pathHistory.length;
-    const totalDots   = made + 1;
+    const totalDots = pathHistory.length;
     const visibleDots = Math.min(totalDots, MAX_VISIBLE_DOTS);
     const overflow    = totalDots > MAX_VISIBLE_DOTS;
 
@@ -30,7 +28,7 @@ const GuessCounter: React.FunctionComponent = (): React.ReactElement | null => {
                 ))}
                 {overflow && <OverflowBadge>+</OverflowBadge>}
             </AttemptDots>
-            <AttemptLabel className="fs-6 my-1 text-muted"><small>{formatGuessLabel(made + 1)}</small></AttemptLabel>
+            <AttemptLabel className="fs-6 my-1 text-muted"><small>{formatGuessLabel(totalDots)}</small></AttemptLabel>
         </GuessCounterWrapper>
     );
 };

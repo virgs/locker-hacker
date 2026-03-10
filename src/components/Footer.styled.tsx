@@ -1,4 +1,4 @@
-import styled, { keyframes, css } from "styled-components";
+import styled, {keyframes} from "styled-components";
 import { BREAKPOINTS } from "../theme/breakpoints.ts";
 
 const moveUpAndFadeOut = keyframes`
@@ -70,13 +70,6 @@ export const PlayerLabel = styled.span<{ $color: string }>`
     pointer-events: none;
 `;
 
-const flashRed = keyframes`
-    0%   { color: inherit; }
-    20%  { color: var(--bs-danger); }
-    80%  { color: var(--bs-danger); }
-    100% { color: inherit; }
-`;
-
 export const FooterStat = styled.span`
     display: flex;
     align-items: center;
@@ -85,8 +78,9 @@ export const FooterStat = styled.span`
     white-space: nowrap;
 `;
 
-export const CodeLengthStat = styled(FooterStat)<{ $flash: boolean }>`
-    ${({ $flash }) => $flash && css`animation: ${flashRed} 1.2s ease-out forwards;`}
+export const CodeLengthStat = styled(FooterStat)<{ $color: string }>`
+    color: ${({ $color }) => $color};
+    transition: color 0.3s ease;
 `;
 
 export const HintButton = styled.button`

@@ -51,6 +51,7 @@ export const App = (): ReactElement => {
                                 invisible={false}
                                 disabled={isRevealing}
                                 arrowHeads={isRevealing}
+                                arrowHeadSize={16}
                                 dynamicLineStyle={isRevealing}
                                 targetLength={gridConfig.length}
                                 pathColor={isRevealing ? endGameColor : multiColor}

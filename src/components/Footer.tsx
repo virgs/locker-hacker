@@ -20,6 +20,7 @@ import {BREAKPOINT_QUERIES} from "../theme/breakpoints.ts";
 import {IS_CAPACITOR} from "../platform.ts";
 import {showRewardedAd} from "../ads/AdService.ts";
 import {hasEliminationHintCandidates} from "../game/HintService.ts";
+import {useCodeLengthState} from "./useCodeLengthState.ts";
 
 const QUALITY_FLASH_MS = 2500;
 const DELTA_DISPLAY_MS = 2000;
@@ -32,6 +33,7 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
         playerCount,
         currentPlayer,
         code,
+        path,
         pathHistory,
         phase,
         revealedHints,
@@ -46,7 +48,9 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
     const levelLabel = isMobile ? LEVEL_LABELS_SHORT[level] : LEVEL_LABELS[level];
     const [showDelta, setShowDelta] = React.useState(false);
     const [deltaKey, setDeltaKey] = React.useState(0);
-    const [flashCodeLength, setFlashCodeLength] = React.useState(false);
+    const pathLengthRef = React.useRef(path.length);
+    pathLengthRef.current = path.length;
+    const { selectedCount, color: codeLengthColor, triggerInvalidGuess } = useCodeLengthState(path.length, pathHistory.length, gridConfig.length);
 
     const canHint = IS_CAPACITOR && phase === GamePhase.Playing && hasEliminationHintCandidates({
         totalDots: gridConfig.cols * gridConfig.rows,
@@ -74,14 +78,9 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
         return () => clearTimeout(id);
     }, [pathHistory.length]);
 
-    const flashTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     React.useEffect(() => {
-        onRegisterInvalidGuessListener(() => {
-            if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
-            setFlashCodeLength(true);
-            flashTimerRef.current = setTimeout(() => setFlashCodeLength(false), 1200);
-        });
-    }, [onRegisterInvalidGuessListener]);
+        onRegisterInvalidGuessListener(() => triggerInvalidGuess(pathLengthRef.current));
+    }, [onRegisterInvalidGuessListener, triggerInvalidGuess]);
 
     const indicatorColor = getAiIndicatorColor(aiProgress.isSolved, flashQuality);
 
@@ -121,9 +120,9 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
                 </FooterStat>
             </Tip>
             <Tip text="Code length" placement="top">
-                <CodeLengthStat $flash={flashCodeLength} aria-label="Code length">
+                <CodeLengthStat $color={codeLengthColor} aria-label="Code length">
                     <Hash size={20}/>
-                    {gridConfig.length}
+                    {selectedCount}/{gridConfig.length}
                 </CodeLengthStat>
             </Tip>
             <Tip text="Elapsed time" placement="top">
