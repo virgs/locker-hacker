@@ -49,7 +49,7 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
     const [showDelta, setShowDelta] = React.useState(false);
     const [deltaKey, setDeltaKey] = React.useState(0);
     const pathLengthRef = React.useRef(path.length);
-    pathLengthRef.current = path.length;
+    React.useEffect(() => { pathLengthRef.current = path.length; });
     const { selectedCount, color: codeLengthColor, triggerInvalidGuess } = useCodeLengthState(path.length, pathHistory.length, gridConfig.length);
 
     const canHint = IS_CAPACITOR && phase === GamePhase.Playing && hasEliminationHintCandidates({

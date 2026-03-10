@@ -16,10 +16,14 @@ describe("toOrdinal", () => {
 });
 
 describe("formatGuessLabel", () => {
-    it("formats 1 as '1st guess'", () => expect(formatGuessLabel(1)).toBe("1st guess"));
-    it("formats 2 as '2nd guess'", () => expect(formatGuessLabel(2)).toBe("2nd guess"));
-    it("formats 3 as '3rd guess'", () => expect(formatGuessLabel(3)).toBe("3rd guess"));
-    it("formats 11 as '11th guess'", () => expect(formatGuessLabel(11)).toBe("11th guess"));
+    it("formats 1 as '1 guess'", () => expect(formatGuessLabel(1)).toBe("1 guess"));
+    it("formats 2 as '2 guesses'", () => expect(formatGuessLabel(2)).toBe("2 guesses"));
+    it("formats 3 as '3 guesses'", () => expect(formatGuessLabel(3)).toBe("3 guesses"));
+    it("formats 11 as '11 guesses'", () => expect(formatGuessLabel(11)).toBe("11 guesses"));
+    it("uses singular for 1 only", () => {
+        expect(formatGuessLabel(1)).toBe("1 guess");
+        expect(formatGuessLabel(2)).toBe("2 guesses");
+    });
     it("always includes 'guess'", () => {
         for (let n = 1; n <= 20; n++) {
             expect(formatGuessLabel(n)).toContain("guess");
