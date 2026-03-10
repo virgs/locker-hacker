@@ -27,9 +27,11 @@ export const AttemptDots = styled.div`
     display: flex;
     align-items: center;
     gap: 5px;
+    height: 12px;
 
     ${BREAKPOINTS.mobile} {
         gap: 4px;
+        height: 11px;
     }
 `;
 
