@@ -70,7 +70,7 @@ export const GuessNumber = styled.span`
     pointer-events: none;
 
     ${BREAKPOINTS.mobile} {
-        font-size: 8px;
+        font-size: 12px;
         left: 2px;
     }
 `;

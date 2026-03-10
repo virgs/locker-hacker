@@ -114,17 +114,17 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
                     {isMobile ? currentPlayer : `Player ${currentPlayer}`}
                 </PlayerLabel>
             )}
-            <Tip text="Code length" placement="top">
-                <CodeLengthStat $flash={flashCodeLength} aria-label="Code length">
-                    <Hash size={20}/>
-                    {gridConfig.length}
-                </CodeLengthStat>
-            </Tip>
             <Tip text="Difficulty level" placement="top">
                 <FooterStat aria-label={`Level: ${LEVEL_LABELS[level]}`}>
                     <BarChart2 size={20}/>
                     {levelLabel}
                 </FooterStat>
+            </Tip>
+            <Tip text="Code length" placement="top">
+                <CodeLengthStat $flash={flashCodeLength} aria-label="Code length">
+                    <Hash size={20}/>
+                    {gridConfig.length}
+                </CodeLengthStat>
             </Tip>
             <Tip text="Elapsed time" placement="top">
                 <FooterStat aria-label="Elapsed time">

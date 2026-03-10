@@ -2,6 +2,20 @@
 
 ## Architectural Decisions
 
+### GuessCounter — Current Attempt Indicator
+
+**Decision:** Added a `GuessCounter` component absolutely positioned in the top-left of `MainArea` (required adding `position: relative` to `MainArea` in `App.styled.tsx`).
+
+**Rationale:** Shows the current attempt as an ordinal label ("1st guess", "2nd guess", …). Displays `pathHistory.length + 1` so users see which attempt they're working on before submission. Hidden during the `Revealing` phase (game over). The ordinal logic is extracted to `GuessCounter.utils.ts` for testability.
+
+**Files:**
+- `src/components/GuessCounter.tsx` — reads `pathHistory` + `phase` from context
+- `src/components/GuessCounter.styled.tsx` — absolute-positioned overlay, top-left
+- `src/components/GuessCounter.utils.ts` — `toOrdinal()` and `formatGuessLabel()`
+- `src/components/GuessCounter.test.ts` — unit tests for utils
+
+---
+
 ### PatternLock Component Architecture
 
 **Decision:** Split PatternLock into a presentational component + `usePatternLock` hook.

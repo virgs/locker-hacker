@@ -17,6 +17,7 @@ import { BREAKPOINT_QUERIES } from "./theme/breakpoints.ts";
 import useLockSize from "./components/useLockSize.ts";
 import useEndGameColor from "./components/useEndGameColor.ts";
 import useConfetti from "./components/useConfetti.ts";
+import GuessCounter from "./components/GuessCounter.tsx";
 
 export const App = (): ReactElement => {
     const { phase, path, code, gameKey, gridConfig, playerCount, currentPlayer, winner, revealedHints, onPathChange, onGuessFinish } = useGameContext();
@@ -35,6 +36,7 @@ export const App = (): ReactElement => {
             <Navbar />
             <ContentArea>
                 <MainArea ref={mainAreaRef}>
+                    <GuessCounter />
                     {lockSize > 0 && (
                         <PatternLockSizer $size={lockSize}>
                             <PatternLock

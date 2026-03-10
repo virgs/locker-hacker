@@ -26,6 +26,7 @@ export const MainArea = styled.main`
     justify-content: center;
     overflow: hidden;
     box-sizing: border-box;
+    position: relative;
     padding: 24px;
     padding-right: calc(220px + 24px);
 
