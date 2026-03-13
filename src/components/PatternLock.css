@@ -41,6 +41,10 @@
     transform-origin: center left;
 }
 
+.react-pattern-lock__connector.latest {
+    box-shadow: 0 0 0.45rem rgba(255, 255, 255, 0.45);
+}
+
 .react-pattern-lock__point-wrapper {
     display: flex;
     justify-content: center;
@@ -57,6 +61,18 @@
     position: relative;
 }
 
+.react-pattern-lock__point::after {
+    content: "";
+    position: absolute;
+    inset: 50%;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.8);
+    transition: opacity 160ms ease, transform 160ms ease, border-color 160ms ease;
+}
+
 .react-pattern-lock__point-inner {
     background: white;
     border-radius: 50%;
@@ -66,6 +82,17 @@
 
 .react-pattern-lock__point-inner.active {
     animation: pop 300ms ease;
+}
+
+.react-pattern-lock__point-wrapper.selected .react-pattern-lock__point::after {
+    border-color: rgba(255, 255, 255, 0.5);
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+.react-pattern-lock__point-wrapper.latest .react-pattern-lock__point::after {
+    border-color: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 0.9rem rgba(255, 255, 255, 0.55);
 }
 
 .react-pattern-lock__pattern-wrapper.disabled,
@@ -106,6 +133,44 @@
     }
     to {
         transform: scale(1);
+    }
+}
+
+@keyframes mobilePop {
+    0% {
+        transform: scale(1);
+    }
+    45% {
+        transform: scale(2.7);
+    }
+    100% {
+        transform: scale(1.15);
+    }
+}
+
+@keyframes mobilePulseRing {
+    0% {
+        opacity: 0.95;
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+    100% {
+        opacity: 0.35;
+        transform: translate(-50%, -50%) scale(1.6);
+    }
+}
+
+@keyframes mobileConnectorPulse {
+    0% {
+        filter: brightness(1);
+        transform: scaleY(1);
+    }
+    50% {
+        filter: brightness(1.35);
+        transform: scaleY(1.45);
+    }
+    100% {
+        filter: brightness(1.05);
+        transform: scaleY(1.15);
     }
 }
 
@@ -160,4 +225,25 @@
 
 .react-pattern-lock__point-eliminated::after {
     transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+    .react-pattern-lock__point-inner.active {
+        animation: mobilePop 240ms ease-out forwards;
+    }
+
+    .react-pattern-lock__point-wrapper.selected .react-pattern-lock__point::after {
+        border-width: 3px;
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1.4);
+    }
+
+    .react-pattern-lock__point-wrapper.latest .react-pattern-lock__point::after {
+        animation: mobilePulseRing 220ms ease-out;
+    }
+
+    .react-pattern-lock__connector.latest {
+        box-shadow: 0 0 0.8rem rgba(255, 255, 255, 0.8);
+        animation: mobileConnectorPulse 180ms ease-out;
+    }
 }

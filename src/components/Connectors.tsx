@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { getAngle, getDistance, getConnectorPoint, getDynamicConnectorThickness, getConnectorOpacity } from "../math/math.ts";
 import { Point } from "../math/point.ts";
+import { getConnectorClassName } from "./patternLockFeedback.ts";
 
 type Connector = {
     from      : Point;
@@ -93,7 +94,7 @@ const Connectors: React.FunctionComponent<ConnectorsProps> = ({
             {
                 connectors.map(({ from, to, thickness, opacity }, i) => (
                     <div
-                        className="react-pattern-lock__connector"
+                        className={getConnectorClassName(i === connectors.length - 1)}
                         key={ i }
                         style={{
                             transform    : `rotate(${getAngle(from, to)}rad)`,

@@ -2,6 +2,20 @@
 
 ## Architectural Decisions
 
+### Mobile PatternLock Selection Feedback
+
+**Decision:** Added mobile-biased visual feedback for selection confirmation in `PatternLock`: a stronger selected-dot pop, a persistent halo around selected dots, a brighter halo for the newest dot, and a pulse/glow on the newest connector.
+
+**Rationale:** On phones, the finger can cover the center of the dot at the exact moment it is selected. Reinforcing feedback only at the dot center was not enough. The new treatment pushes confirmation outward with a ring and along the newest line segment, making it visible even when the finger blocks the dot itself. The stronger motion is scoped to `@media (max-width: 768px), (pointer: coarse)` so desktop keeps the calmer look.
+
+**Files:**
+- `src/components/PatternLock.css` — mobile-only animations and selected/latest halo styles
+- `src/components/PatternLock.tsx` — passes `latest` state to points
+- `src/components/Point.tsx` — applies wrapper classes for selected/latest point state
+- `src/components/Connectors.tsx` — marks the newest connector for pulse styling
+- `src/components/patternLockFeedback.ts` — small helper for class-name generation
+- `src/components/patternLockFeedback.test.ts` — tests for selected/latest class mapping
+
 ### GuessCounter — Current Attempt Indicator
 
 **Decision:** Added a `GuessCounter` component absolutely positioned in the top-left of `MainArea` (required adding `position: relative` to `MainArea` in `App.styled.tsx`).
