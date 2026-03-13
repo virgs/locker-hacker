@@ -20,13 +20,15 @@ const getCompileTimeValue = (value: string | undefined, fallback: string): strin
     return value && value.trim() ? value : fallback;
 };
 
+const metaEnv = import.meta.env ?? {};
+
 const appVersion = getCompileTimeValue(
-    typeof __APP_VERSION__ === "undefined" ? undefined : __APP_VERSION__,
+    metaEnv.VITE_APP_VERSION,
     "0.0.0",
 );
 
 const appBuildNumber = getCompileTimeValue(
-    typeof __APP_BUILD_NUMBER__ === "undefined" ? undefined : __APP_BUILD_NUMBER__,
+    metaEnv.VITE_APP_BUILD_NUMBER,
     "",
 );
 

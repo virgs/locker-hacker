@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 
 interface PackageJson {
@@ -13,18 +13,21 @@ const readPackageVersion = (): string => {
   return packageJson.version ?? "0.0.0";
 };
 
-const appVersion = process.env.APP_VERSION ?? readPackageVersion();
-const appBuildNumber = process.env.APP_BUILD_NUMBER ?? "";
-
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  plugins: [react()],
-  base: mode === 'production' ? '/locker-hacker/' : '/',
-  define: {
-    __APP_VERSION__: JSON.stringify(appVersion),
-    __APP_BUILD_NUMBER__: JSON.stringify(appBuildNumber),
-  },
-  build: {
-    outDir: 'docs',
-  },
-}))
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, ".", "");
+  const appVersion = env.APP_VERSION || readPackageVersion();
+  const appBuildNumber = env.APP_BUILD_NUMBER || "";
+
+  return {
+    plugins: [react()],
+    base: mode === "production" ? "/locker-hacker/" : "/",
+    define: {
+      "import.meta.env.VITE_APP_VERSION": JSON.stringify(appVersion),
+      "import.meta.env.VITE_APP_BUILD_NUMBER": JSON.stringify(appBuildNumber),
+    },
+    build: {
+      outDir: "docs",
+    },
+  };
+});
