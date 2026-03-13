@@ -2,6 +2,21 @@
 
 ## Architectural Decisions
 
+### Open Graph Metadata in `index.html`
+
+**Decision:** Added static social-sharing metadata directly to `index.html`: `description`, `og:type`, `og:title`, `og:description`, `og:url`, `og:image`, and `og:image:alt`.
+
+**Rationale:** GitHub Pages serves the app as a static site, so social crawlers need metadata in the initial HTML response. Using absolute URLs ensures previews resolve correctly outside the app's runtime and without relying on Vite's client-side routing or base-path behavior.
+
+**Details:**
+- `og:url` uses the production GitHub Pages URL: `https://virgs.github.io/locker-hacker/`
+- `og:image` uses the README screenshot: `https://virgs.github.io/locker-hacker/screenshot.png`
+- Added a regression test that reads `index.html` and asserts the key metadata values remain present
+
+**Files:**
+- `index.html`
+- `src/meta/indexHtmlMeta.test.ts`
+
 ### Mobile PatternLock Selection Feedback
 
 **Decision:** Added mobile-biased visual feedback for selection confirmation in `PatternLock`: a stronger selected-dot pop, a persistent halo around selected dots, a brighter halo for the newest dot, and a pulse/glow on the newest connector.
