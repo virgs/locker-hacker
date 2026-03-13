@@ -2,6 +2,16 @@
 
 ## Architectural Decisions
 
+### Build Typechecking for Node-Based Metadata Test
+
+**Decision:** Added `@types/node` as a direct dev dependency so the `src/meta/indexHtmlMeta.test.ts` regression test can import `node:fs` during the `tsc` build step.
+
+**Rationale:** The CI build runs `tsc && vite build`, and `tsc` typechecks files under `src`, including test files. The metadata regression test intentionally reads `index.html` from disk in a Node/Jest context, so the project needs explicit Node type declarations available in CI.
+
+**Files:**
+- `package.json`
+- `pnpm-lock.yaml`
+
 ### Immediate Single-Player Stats Persistence With Hidden Active Session
 
 **Decision:** Single-player stats now persist an in-progress record as soon as the first valid guess is submitted. That record is updated throughout play and finalized on win, give up, level change, game restart, or `pagehide`.
