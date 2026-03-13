@@ -2,6 +2,27 @@
 
 ## Architectural Decisions
 
+### Immediate Single-Player Stats Persistence With Hidden Active Session
+
+**Decision:** Single-player stats now persist an in-progress record as soon as the first valid guess is submitted. That record is updated throughout play and finalized on win, give up, level change, game restart, or `pagehide`.
+
+**Rationale:** This closes the gap where a user could avoid a recorded loss by closing the tab before the previous end-of-game persistence path ran. Persisting early keeps `gamesPlayed` accurate across abandoned sessions, while hiding only the current active unfinished record from the stats modal preserves the previous "midgame table stays stable" UX.
+
+**Implementation details:**
+- `GameRecord` now includes `id` and `completed`
+- legacy stored records are normalized on load with `completed: true`
+- `useSinglePlayerStatsPersistence` owns the lifecycle of the active single-player stats record
+- the stats modal filters out the current unfinished record only; abandoned unfinished records from older sessions still count as losses
+
+**Files:**
+- `src/game/StatsService.ts`
+- `src/game/StatsService.test.ts`
+- `src/context/GameSessionStatsTracker.ts`
+- `src/context/GameSessionStatsTracker.test.ts`
+- `src/context/useSinglePlayerStatsPersistence.ts`
+- `src/context/GameContext.tsx`
+- `src/components/StatsModal.tsx`
+
 ### Open Graph Metadata in `index.html`
 
 **Decision:** Added static social-sharing metadata directly to `index.html`: `description`, `og:type`, `og:title`, `og:description`, `og:url`, `og:image`, and `og:image:alt`.

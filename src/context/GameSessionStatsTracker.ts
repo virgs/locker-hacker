@@ -2,21 +2,20 @@ import { PlayerCount } from "../game/GameConfig.ts";
 
 export class GameSessionStatsTracker {
     private started = false;
-    private persisted = false;
+    private activeRecordId: string | null = null;
 
-    public start = (): void => {
+    public start = (recordId: string): void => {
         this.started = true;
+        this.activeRecordId = recordId;
     };
 
     public reset = (): void => {
         this.started = false;
-        this.persisted = false;
+        this.activeRecordId = null;
     };
 
-    public markPersisted = (): void => {
-        this.persisted = true;
-    };
+    public hasStarted = (): boolean => this.started;
 
-    public canPersist = (playerCount: PlayerCount): boolean =>
-        playerCount === PlayerCount.One && this.started && !this.persisted;
+    public getActiveRecordId = (playerCount: PlayerCount): string | null =>
+        playerCount === PlayerCount.One && this.started ? this.activeRecordId : null;
 }

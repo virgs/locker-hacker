@@ -2,38 +2,34 @@ import { GameSessionStatsTracker } from "./GameSessionStatsTracker.ts";
 import { PlayerCount } from "../game/GameConfig.ts";
 
 describe("GameSessionStatsTracker", () => {
-    it("does not persist before a game starts", () => {
+    it("does not expose an active record before a game starts", () => {
         const tracker = new GameSessionStatsTracker();
-        expect(tracker.canPersist(PlayerCount.One)).toBe(false);
+        expect(tracker.hasStarted()).toBe(false);
+        expect(tracker.getActiveRecordId(PlayerCount.One)).toBeNull();
     });
 
-    it("allows single-player persistence after start", () => {
+    it("stores the active record id after start", () => {
         const tracker = new GameSessionStatsTracker();
-        tracker.start();
-        expect(tracker.canPersist(PlayerCount.One)).toBe(true);
+        tracker.start("record-1");
+        expect(tracker.hasStarted()).toBe(true);
+        expect(tracker.getActiveRecordId(PlayerCount.One)).toBe("record-1");
     });
 
-    it("prevents persistence after marking persisted", () => {
+    it("hides the active record in multiplayer", () => {
         const tracker = new GameSessionStatsTracker();
-        tracker.start();
-        tracker.markPersisted();
-        expect(tracker.canPersist(PlayerCount.One)).toBe(false);
-    });
-
-    it("prevents persistence in multiplayer", () => {
-        const tracker = new GameSessionStatsTracker();
-        tracker.start();
-        expect(tracker.canPersist(PlayerCount.Two)).toBe(false);
+        tracker.start("record-1");
+        expect(tracker.getActiveRecordId(PlayerCount.Two)).toBeNull();
     });
 
     it("resets state between games", () => {
         const tracker = new GameSessionStatsTracker();
-        tracker.start();
-        tracker.markPersisted();
+        tracker.start("record-1");
         tracker.reset();
 
-        expect(tracker.canPersist(PlayerCount.One)).toBe(false);
-        tracker.start();
-        expect(tracker.canPersist(PlayerCount.One)).toBe(true);
+        expect(tracker.hasStarted()).toBe(false);
+        expect(tracker.getActiveRecordId(PlayerCount.One)).toBeNull();
+
+        tracker.start("record-2");
+        expect(tracker.getActiveRecordId(PlayerCount.One)).toBe("record-2");
     });
 });

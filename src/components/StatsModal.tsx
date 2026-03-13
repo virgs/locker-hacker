@@ -6,6 +6,7 @@ import {EmptyState} from "./StatsModal.styled.tsx";
 import {LEVEL_LABELS, LEVEL_LABELS_SHORT, ALL_LEVELS} from "../game/GameConfig.ts";
 import {
     loadRecords,
+    filterVisibleStatsRecords,
     computeLevelStats,
     computeTotalStats,
     avgTimeSeconds,
@@ -17,6 +18,7 @@ import useMediaQuery from "./useMediaQuery.ts";
 import {BREAKPOINT_QUERIES} from "../theme/breakpoints.ts";
 import {IS_CAPACITOR} from "../platform.ts";
 import {showBannerAd, hideBannerAd} from "../ads/AdService.ts";
+import { useGameContext } from "../context/GameContext.tsx";
 
 interface StatsModalProps {
     show: boolean;
@@ -27,7 +29,8 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
                                                                   show,
                                                                   onClose,
                                                               }): React.ReactElement => {
-    const records = show ? loadRecords() : [];
+    const { activeStatsRecordId } = useGameContext();
+    const records = show ? filterVisibleStatsRecords(loadRecords(), activeStatsRecordId) : [];
     const levelStats = computeLevelStats(records);
     const totalStats = computeTotalStats(records);
     const hasData = records.length > 0;

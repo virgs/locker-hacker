@@ -1,6 +1,10 @@
 import { Level } from "./GameConfig.ts";
 import {
     type GameRecord,
+    loadRecords,
+    saveRecord,
+    updateRecord,
+    filterVisibleStatsRecords,
     computeLevelStats,
     computeTotalStats,
     winPercent,
@@ -10,11 +14,94 @@ import {
     formatStatsTime,
 } from "./StatsService.ts";
 
+const STORAGE_KEY = "locker-hacker-stats";
+
+const createStorageMock = (): Storage => {
+    const store = new Map<string, string>();
+    return {
+        getItem: (key: string): string | null => store.get(key) ?? null,
+        setItem: (key: string, value: string): void => {
+            store.set(key, value);
+        },
+        removeItem: (key: string): void => {
+            store.delete(key);
+        },
+        clear: (): void => {
+            store.clear();
+        },
+        key: (index: number): string | null => Array.from(store.keys())[index] ?? null,
+        get length(): number {
+            return store.size;
+        },
+    };
+};
+
 const record = (level: Level, won: boolean, dur: number, moves = 5, hintsUsed = 0): GameRecord => ({
-    level, won, durationSeconds: dur, moves, hintsUsed, date: "2025-01-01",
+    id: `${level}-${won}-${dur}-${moves}-${hintsUsed}`,
+    level,
+    won,
+    completed: true,
+    durationSeconds: dur,
+    moves,
+    hintsUsed,
+    date: "2025-01-01",
 });
 
 describe("StatsService", () => {
+    beforeEach(() => {
+        Object.defineProperty(globalThis, "localStorage", {
+            value: createStorageMock(),
+            configurable: true,
+            writable: true,
+        });
+    });
+
+    describe("record storage", () => {
+        it("normalizes legacy records without id/completed fields", () => {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify([
+                { level: Level.Easy, won: true, durationSeconds: 12, moves: 3, hintsUsed: 0, date: "2025-01-01" },
+            ]));
+
+            expect(loadRecords()).toEqual([
+                {
+                    id: "legacy-0-2025-01-01",
+                    level: Level.Easy,
+                    won: true,
+                    completed: true,
+                    durationSeconds: 12,
+                    moves: 3,
+                    hintsUsed: 0,
+                    date: "2025-01-01",
+                },
+            ]);
+        });
+
+        it("updates an existing record in place", () => {
+            saveRecord(record(Level.Medium, false, 10));
+
+            updateRecord("medium-false-10-5-0", { won: true, completed: false, moves: 7 });
+
+            expect(loadRecords()[0]).toMatchObject({
+                id: "medium-false-10-5-0",
+                won: true,
+                completed: false,
+                moves: 7,
+            });
+        });
+    });
+
+    describe("filterVisibleStatsRecords", () => {
+        it("hides only the current unfinished active record", () => {
+            const records = [
+                { ...record(Level.Easy, false, 10), id: "active", completed: false },
+                { ...record(Level.Easy, false, 20), id: "finished", completed: true },
+                { ...record(Level.Hard, false, 30), id: "abandoned", completed: false },
+            ];
+
+            expect(filterVisibleStatsRecords(records, "active").map(entry => entry.id)).toEqual(["finished", "abandoned"]);
+        });
+    });
+
     describe("computeLevelStats", () => {
         it("returns zero stats for empty records", () => {
             const stats = computeLevelStats([]);

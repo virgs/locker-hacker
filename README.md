@@ -29,7 +29,7 @@ The game ends when Bulls == code length.
 
 * **Level selection** — Easy (3×2, length 3), Medium (3×3, length 4), Hard (4×4, length 5)
 * **Hint dropdown during play** — the center action is a Hint menu with `Get a hint` (eliminates one random non-code dot with a red `X` marker) and `Give up` (reveals the code)
-* **Reliable stats persistence** — single-player wins are saved immediately on solve, and started games that are abandoned are counted as losses
+* **Reliable stats persistence** — single-player games are persisted from the first valid guess, wins are finalized immediately on solve, and abandoned runs still count as losses after reload or restart
 * **Player count** — Select 1–4 players (future multiplayer support)
 * **Help modal** — In-app game rules with a "Play Now" button
 * **Shareable previews** — Open Graph metadata now uses the gameplay screenshot and a tailored description for richer social link previews
