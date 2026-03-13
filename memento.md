@@ -2,6 +2,27 @@
 
 ## Architectural Decisions
 
+### Build Label in Stats Modal
+
+**Decision:** Added a small build label to the bottom-right of the stats modal, sourced from compile-time metadata.
+
+**Rationale:** The version/build identifier needs to be visible in production for support and debugging, but it should stay unobtrusive. Using Vite compile-time constants keeps runtime logic simple and lets CI inject a fresh build number automatically on every deployment.
+
+**Implementation details:**
+- `vite.config.ts` reads `package.json` for the app version and exposes `__APP_VERSION__`
+- CircleCI sets `APP_BUILD_NUMBER=$CIRCLE_BUILD_NUM` for web and Android builds
+- `src/meta/buildInfo.ts` formats the user-facing label with a package-version fallback for local builds
+- `StatsModal` renders the label in small muted text aligned to the bottom-right
+
+**Files:**
+- `.circleci/config.yml`
+- `vite.config.ts`
+- `src/meta/buildInfo.ts`
+- `src/meta/buildInfo.test.ts`
+- `src/components/StatsModal.tsx`
+- `src/components/StatsModal.styled.tsx`
+- `README.md`
+
 ### Build Typechecking for Node-Based Metadata Test
 
 **Decision:** Added `@types/node` as a direct dev dependency so the `src/meta/indexHtmlMeta.test.ts` regression test can import `node:fs` during the `tsc` build step.

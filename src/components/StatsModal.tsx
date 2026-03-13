@@ -2,7 +2,7 @@ import * as React from "react";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 import {Award, Clock, Info, BarChart2, Hash, GitCommit, Zap} from "react-feather";
-import {EmptyState} from "./StatsModal.styled.tsx";
+import {BuildLabel, EmptyState} from "./StatsModal.styled.tsx";
 import {LEVEL_LABELS, LEVEL_LABELS_SHORT, ALL_LEVELS} from "../game/GameConfig.ts";
 import {
     loadRecords,
@@ -19,6 +19,7 @@ import {BREAKPOINT_QUERIES} from "../theme/breakpoints.ts";
 import {IS_CAPACITOR} from "../platform.ts";
 import {showBannerAd, hideBannerAd} from "../ads/AdService.ts";
 import { useGameContext } from "../context/GameContext.tsx";
+import { BUILD_LABEL } from "../meta/buildInfo.ts";
 
 interface StatsModalProps {
     show: boolean;
@@ -50,43 +51,49 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
             </Modal.Header>
             <Modal.Body>
                 {!hasData ? (
-                    <EmptyState>
-                        <Info size={32}/>
-                        <p>No stats available.<br/>Play some games to see stats here!</p>
-                    </EmptyState>
+                    <>
+                        <EmptyState>
+                            <Info size={32}/>
+                            <p>No stats available.<br/>Play some games to see stats here!</p>
+                        </EmptyState>
+                        <BuildLabel>{BUILD_LABEL}</BuildLabel>
+                    </>
                 ) : (
-                    <Table hover>
-                        <thead>
-                        <tr>
-                            <th className="text-end"><BarChart2 size={14} className="me-1"/>{!isMobile && "Level"}</th>
-                            <th className="text-end"><Hash size={14} className="me-1"/>{!isMobile && "Games"}</th>
-                            <th className="text-end"><Award size={14} className="me-1"/>{!isMobile && "Wins"}</th>
-                            <th className="text-end"><Clock size={14} className="me-1"/>{!isMobile && "Time avg"}</th>
-                            <th className="text-end"><GitCommit size={14} className="me-1"/>{!isMobile && "Moves avg"}</th>
-                            <th className="text-end"><Zap size={14} className="me-1"/>{!isMobile && "Hints avg"}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {ALL_LEVELS.map(l => (
-                            <tr key={l}>
-                                <td className="fw-bolder">{labels[l]}</td>
-                                <td className="text-end">{levelStats[l].gamesPlayed}</td>
-                                <td className="text-end">{levelStats[l].wins}</td>
-                                <td className="text-end">{formatStatsTime(avgTimeSeconds(levelStats[l]))}</td>
-                                <td className="text-end">{avgMoves(levelStats[l]).toFixed(1)}</td>
-                                <td className="text-end">{avgHints(levelStats[l]).toFixed(1)}</td>
+                    <>
+                        <Table hover>
+                            <thead>
+                            <tr>
+                                <th className="text-end"><BarChart2 size={14} className="me-1"/>{!isMobile && "Level"}</th>
+                                <th className="text-end"><Hash size={14} className="me-1"/>{!isMobile && "Games"}</th>
+                                <th className="text-end"><Award size={14} className="me-1"/>{!isMobile && "Wins"}</th>
+                                <th className="text-end"><Clock size={14} className="me-1"/>{!isMobile && "Time avg"}</th>
+                                <th className="text-end"><GitCommit size={14} className="me-1"/>{!isMobile && "Moves avg"}</th>
+                                <th className="text-end"><Zap size={14} className="me-1"/>{!isMobile && "Hints avg"}</th>
                             </tr>
-                        ))}
-                        <tr className="fw-bold">
-                            <td className="text-start fw-bolder">Total</td>
-                            <td className="text-end">{totalStats.gamesPlayed}</td>
-                            <td className="text-end">{totalStats.wins}</td>
-                            <td className="text-end">{formatStatsTime(totalStats.totalSeconds)}</td>
-                            <td className="text-end">-</td>
-                            <td className="text-end">-</td>
-                        </tr>
-                        </tbody>
-                    </Table>
+                            </thead>
+                            <tbody>
+                            {ALL_LEVELS.map(l => (
+                                <tr key={l}>
+                                    <td className="fw-bolder">{labels[l]}</td>
+                                    <td className="text-end">{levelStats[l].gamesPlayed}</td>
+                                    <td className="text-end">{levelStats[l].wins}</td>
+                                    <td className="text-end">{formatStatsTime(avgTimeSeconds(levelStats[l]))}</td>
+                                    <td className="text-end">{avgMoves(levelStats[l]).toFixed(1)}</td>
+                                    <td className="text-end">{avgHints(levelStats[l]).toFixed(1)}</td>
+                                </tr>
+                            ))}
+                            <tr className="fw-bold">
+                                <td className="text-start fw-bolder">Total</td>
+                                <td className="text-end">{totalStats.gamesPlayed}</td>
+                                <td className="text-end">{totalStats.wins}</td>
+                                <td className="text-end">{formatStatsTime(totalStats.totalSeconds)}</td>
+                                <td className="text-end">-</td>
+                                <td className="text-end">-</td>
+                            </tr>
+                            </tbody>
+                        </Table>
+                        <BuildLabel>{BUILD_LABEL}</BuildLabel>
+                    </>
                 )}
             </Modal.Body>
         </Modal>

@@ -82,7 +82,7 @@ jobs:
           command: corepack enable && corepack prepare pnpm@latest --activate
       - run:
           name: Build
-          command: pnpm run build
+          command: APP_BUILD_NUMBER=$CIRCLE_BUILD_NUM pnpm run build
       - persist_to_workspace:
           root: ~/project
           paths:
@@ -115,7 +115,7 @@ jobs:
           command: corepack enable && corepack prepare pnpm@latest --activate
       - run:
           name: Build Android
-          command: pnpm run build:android
+          command: APP_BUILD_NUMBER=$CIRCLE_BUILD_NUM pnpm run build:android
       - persist_to_workspace:
           root: ~/project
           paths:
