@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Locker Hacker</string>
-    <string name="title_activity_main">Locker Hacker</string>
-    <string name="package_name">com.virgs.lockerhacker</string>
-    <string name="custom_url_scheme">com.virgs.lockerhacker</string>
-</resources>

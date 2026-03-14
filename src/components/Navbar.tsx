@@ -17,7 +17,6 @@ import StatsModal from "./StatsModal.tsx";
 import {getPlayerColor} from "../game/playerColors.ts";
 import {useGameContext} from "../context/GameContext.tsx";
 import Tip from "./Tip.tsx";
-import {IS_WEB} from "../platform.ts";
 import {hasEliminationHintCandidates} from "../game/HintService.ts";
 
 const LONG_PRESS_MS = 10_000;
@@ -167,22 +166,18 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                                 <HelpCircle size={20}/>
                             </HelpButton>
                         </Tip>
-                        {IS_WEB && (
-                            <Tip text="Buy me a coffee">
-                                <CoffeeLink href={BUY_ME_A_COFFEE_URL} target="_blank" rel="noopener noreferrer" className="ms-2"
-                                            aria-label="Buy me a coffee">
-                                    <Coffee size={20}/>
-                                </CoffeeLink>
-                            </Tip>
-                        )}
-                        {IS_WEB && (
-                            <Tip text="View source on GitHub">
-                                <GitHubLink className="ms-2" href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
-                                            aria-label="View project on GitHub">
-                                    <GitHub size={20}/>
-                                </GitHubLink>
-                            </Tip>
-                        )}
+                        <Tip text="Buy me a coffee">
+                            <CoffeeLink href={BUY_ME_A_COFFEE_URL} target="_blank" rel="noopener noreferrer" className="ms-2"
+                                        aria-label="Buy me a coffee">
+                                <Coffee size={20}/>
+                            </CoffeeLink>
+                        </Tip>
+                        <Tip text="View source on GitHub">
+                            <GitHubLink className="ms-2" href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
+                                        aria-label="View project on GitHub">
+                                <GitHub size={20}/>
+                            </GitHubLink>
+                        </Tip>
                     </NavbarRight>
                 </NavbarRow>
             </NavbarContainer>

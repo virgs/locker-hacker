@@ -33,6 +33,7 @@ The game ends when Bulls == code length.
 * **Build-aware stats modal** — the stats view shows the running app version and, in CircleCI deployments, the deployment build number for quicker debugging
 * **Gesture-driven guess history** — the desktop history rail can be dragged from anywhere in the visible panel, while the mobile bottom sheet still supports direct title-bar dragging and now keeps collapsing/expanding naturally when scroll gestures run out at the top or bottom edge
 * **Dot annotations while solving** — press and release a dot without dragging to cycle your own current-game notes between clear, eliminated (`X`), and confirmed (green ring), and the first-dot pop animation now waits for a slight drag so stationary note gestures stay calmer
+* **Web-only deployment** — Android/Capacitor support and AdMob integration have been removed for now, so the app targets the GitHub Pages web build only
 * **Player count** — Select 1–4 players (future multiplayer support)
 * **Help modal** — In-app game rules with a "Play Now" button
 * **Shareable previews** — Open Graph metadata now uses the gameplay screenshot and a tailored description for richer social link previews

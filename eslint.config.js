@@ -6,7 +6,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default [
-    { ignores: ['dist', 'docs', 'coverage', 'android'] },
+    { ignores: ['dist', 'docs', 'coverage'] },
     {
         files: ['playwright.config.ts', 'e2e/**/*.ts'],
         languageOptions: {

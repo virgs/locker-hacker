@@ -1,15 +1,14 @@
 import * as React from "react";
-import {Hash, BarChart2, Clock, User, Unlock, Gift, Lock} from "react-feather";
+import {Hash, BarChart2, Clock, User, Unlock, Lock} from "react-feather";
 import {
     FooterContainer,
     FooterStat,
     CodeLengthStat,
     AiProgressStat,
     PlayerLabel,
-    ConfidenceDelta,
-    HintButton
+    ConfidenceDelta
 } from "./Footer.styled.tsx";
-import {PlayerCount, GamePhase, LEVEL_LABELS, LEVEL_LABELS_SHORT} from "../game/GameConfig.ts";
+import {PlayerCount, LEVEL_LABELS, LEVEL_LABELS_SHORT} from "../game/GameConfig.ts";
 import {getPlayerColor} from "../game/playerColors.ts";
 import {useGameContext} from "../context/GameContext.tsx";
 import {formatTime, formatPercentDelta, getAiIndicatorColor} from "./Footer.utils.ts";
@@ -17,9 +16,6 @@ import useInferenceEngine, {GuessQuality} from "./useInferenceEngine.ts";
 import Tip from "./Tip.tsx";
 import useMediaQuery from "./useMediaQuery.ts";
 import {BREAKPOINT_QUERIES} from "../theme/breakpoints.ts";
-import {IS_CAPACITOR} from "../platform.ts";
-import {showRewardedAd} from "../ads/AdService.ts";
-import {hasEliminationHintCandidates} from "../game/HintService.ts";
 import {useCodeLengthState} from "./useCodeLengthState.ts";
 
 const QUALITY_FLASH_MS = 2500;
@@ -35,9 +31,6 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
         code,
         path,
         pathHistory,
-        phase,
-        revealedHints,
-        onRevealHint,
         onRegisterInvalidGuessListener,
     } = useGameContext();
     const isMultiplayer = playerCount !== PlayerCount.One;
@@ -51,17 +44,6 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
     const pathLengthRef = React.useRef(path.length);
     React.useEffect(() => { pathLengthRef.current = path.length; });
     const { selectedCount, color: codeLengthColor, triggerInvalidGuess } = useCodeLengthState(path.length, pathHistory.length, gridConfig.length);
-
-    const canHint = IS_CAPACITOR && phase === GamePhase.Playing && hasEliminationHintCandidates({
-        totalDots: gridConfig.cols * gridConfig.rows,
-        code,
-        alreadyEliminated: revealedHints,
-    });
-
-    const handleHint = async (): Promise<void> => {
-        const rewarded = await showRewardedAd();
-        if (rewarded) onRevealHint();
-    };
 
     React.useEffect(() => {
         if (aiProgress.lastGuessQuality === GuessQuality.Neutral || pathHistory.length === 0) return;
@@ -100,13 +82,6 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
                     )}
                 </AiProgressStat>
             </Tip>
-            {canHint && (
-                <Tip text="Watch an ad to eliminate one wrong dot" placement="top">
-                    <HintButton onClick={handleHint} aria-label="Get a hint">
-                        <Gift size={18}/>
-                    </HintButton>
-                </Tip>
-            )}
             {isMultiplayer && (
                 <PlayerLabel $color={playerColor} aria-label={`Current player: Player ${currentPlayer}`}>
                     <User size={20}/>

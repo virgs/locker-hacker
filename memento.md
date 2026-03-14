@@ -103,6 +103,28 @@
 - `src/App.tsx`
 - `README.md`
 
+### Web-Only Follow-Up After Dropping Android/Capacitor
+
+**Decision:** Removed the Android/Capacitor target and returned the project to a web-only deployment model.
+
+**Rationale:** The Android path was not worth the maintenance cost right now. It added separate build tooling, ad-specific runtime branches, and the Capacitor CLI dependency chain that was generating most of the current GitHub security alerts. Keeping the app web-only simplifies the codebase and leaves the dependency surface much smaller.
+
+**Implementation details:**
+- removed Capacitor and AdMob packages plus the Android build/open scripts from `package.json`
+- deleted the deprecated mobile-target project/config files and ad service module
+- `main.tsx`, `Navbar`, `Footer`, and `StatsModal` no longer branch on Capacitor-specific behavior
+- bumped `eslint` / `@eslint/js` to `10.0.3` so the remaining dev-tooling advisory path through `flatted` can be refreshed
+
+**Files:**
+- `package.json`
+- `pnpm-lock.yaml`
+- `src/main.tsx`
+- `src/components/Navbar.tsx`
+- `src/components/Footer.tsx`
+- `src/components/StatsModal.tsx`
+- `src/vite-env.d.ts`
+- `README.md`
+
 ### Build Label in Stats Modal
 
 **Decision:** Added a small build label to the bottom-right of the stats modal, sourced from compile-time metadata.
@@ -1112,77 +1134,26 @@ Sidebar (flex-col)
 
 ---
 
-### Dual-Platform Support (Web + Android/Capacitor)
+### "Buy Me a Coffee" Button
 
-**Decision:** Added support for two build targets from a single codebase: **web** (existing GitHub Pages deployment) and **Android** (via Capacitor). Platform-specific features are conditionally rendered based on a `VITE_PLATFORM` environment variable.
-
-**Platform detection (`src/platform.ts`):** Exports `IS_CAPACITOR` and `IS_WEB` booleans derived from `import.meta.env.VITE_PLATFORM === "capacitor"`. All conditional rendering in components imports from this single module.
-
-**Capacitor setup:**
-- `@capacitor/core`, `@capacitor/android`, `@capacitor/cli` installed
-- `capacitor.config.ts` — appId `com.virgs.lockerhacker`, webDir `docs`
-- `android/` directory generated via `npx cap add android`
-- Build scripts: `build:android` (sets `VITE_PLATFORM=capacitor`, builds, syncs), `open:android`
-
-**Vite env types:** Extended `src/vite-env.d.ts` with `ImportMetaEnv` interface for `VITE_PLATFORM`, `VITE_ADMOB_BANNER_ID`, `VITE_ADMOB_REWARDED_ID`.
-
-**Files:**
-- `src/platform.ts` — `IS_CAPACITOR`, `IS_WEB` exports
-- `src/platform.test.ts` — tests for detection logic
-- `capacitor.config.ts` — Capacitor configuration
-- `package.json` — `build:android`, `open:android` scripts
-- `src/vite-env.d.ts` — custom env variable types
-- `eslint.config.js` — added `android` to ignores
-
----
-
-### "Buy Me a Coffee" Button (Web Only)
-
-**Decision:** Added a Coffee icon button (react-feather `Coffee`) between the Help and GitHub icons in `NavbarRight`, linking to a PayPal donate URL. Only visible on web builds (`IS_WEB`).
+**Decision:** Added a Coffee icon button (react-feather `Coffee`) between the Help and GitHub icons in `NavbarRight`, linking to a PayPal donate URL.
 
 **Styling:** `CoffeeLink` styled component — identical structure to `GitHubLink` but hover/focus color is `#ffc107` (Bootstrap warning/gold) for a warm coffee-like feel.
 
-**Both the Coffee and GitHub links** are conditionally rendered with `{IS_WEB && ...}` — on Capacitor builds, neither appears (GitHub link removed per requirement, Coffee link not relevant on mobile).
-
 **Files:**
-- `src/components/Navbar.tsx` — conditional rendering of Coffee + GitHub links
+- `src/components/Navbar.tsx` — Coffee + GitHub links
 - `src/components/Navbar.styled.tsx` — `CoffeeLink` styled component
 - `src/components/Navbar.constants.ts` — `PAYPAL_URL` constant
 - `src/components/Navbar.test.ts` — tests for `PAYPAL_URL`
 
 ---
 
-### AdMob Integration (Capacitor Only)
-
-**Decision:** Added `@capacitor-community/admob` for mobile ad monetization with two ad formats:
-
-1. **Banner ad in StatsModal** — shown/hidden via `useEffect` tied to modal `show` prop. Native overlay renders at bottom of screen.
-2. **Rewarded ad for hints** — user watches an ad to reveal one dot of the secret code (see Hint System below).
-
-**AdService module (`src/ads/AdService.ts`):** Wraps AdMob with safe no-op behavior on web. Uses dynamic `import()` so `@capacitor-community/admob` is never bundled in web builds. Exports `initializeAds()`, `showBannerAd()`, `hideBannerAd()`, `showRewardedAd(): Promise<boolean>`.
-
-**Test ad IDs:** Uses Google's official test ad unit IDs by default. Real IDs injected via `VITE_ADMOB_BANNER_ID` and `VITE_ADMOB_REWARDED_ID` env variables.
-
-**Initialization:** `initializeAds()` called in `main.tsx` when `IS_CAPACITOR` is true.
-
-**Files:**
-- `src/ads/AdService.ts` — AdMob wrapper with lazy dynamic import
-- `src/components/StatsModal.tsx` — banner ad show/hide on modal open/close
-- `src/components/Footer.tsx` — rewarded ad hint button
-- `src/components/Navbar.tsx` — imports and calls `initializeAds`
-
----
-
-### Hint System (Rewarded Ad → Reveal One Dot)
-
-**Decision:** Added a hint feature that reveals one dot of the secret code on the game grid after the player watches a rewarded ad (Capacitor only).
+### Hint System
 
 **Game state (`GameContext`):**
 - `revealedHints: number[]` — array of dot indices that have been revealed as hints
 - `onRevealHint()` — picks a random unrevealed dot from `code` and appends it to `revealedHints`. Cannot reveal the last dot (always leaves at least one unknown).
 - Reset to `[]` on level change and finish game.
-
-**Footer hint button:** A `Gift` icon (react-feather) rendered next to the AI confidence stat, only on Capacitor builds when the game is playing and hints are available. Clicking it calls `showRewardedAd()` → on reward, calls `onRevealHint()`.
 
 **Visual indication on grid:** `PatternLock` accepts new `highlightedPoints?: number[]` prop. `Point` component receives `highlighted: boolean` — when true and not already selected, applies `highlighted` CSS class with a pulsing yellow animation (`hint-pulse` keyframe, `var(--bs-warning)` color, scale 1→1.6→1).
 
@@ -1190,8 +1161,6 @@ Sidebar (flex-col)
 
 **Files:**
 - `src/context/GameContext.tsx` — `revealedHints`, `onRevealHint` state + callback
-- `src/components/Footer.tsx` — hint button with rewarded ad trigger
-- `src/components/Footer.styled.tsx` — `HintButton` styled component
 - `src/components/PatternLock.tsx` — `highlightedPoints` prop
 - `src/components/Point.tsx` — `highlighted` prop + CSS class
 - `src/components/PatternLock.css` — `.highlighted` class + `hint-pulse` keyframe

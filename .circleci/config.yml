@@ -106,21 +106,6 @@ jobs:
           path: playwright-report
           destination: playwright-report
 
-  build-android:
-    executor: node
-    steps:
-      - attach_and_install
-      - run:
-          name: Enable pnpm
-          command: corepack enable && corepack prepare pnpm@latest --activate
-      - run:
-          name: Build Android
-          command: APP_BUILD_NUMBER=$CIRCLE_BUILD_NUM pnpm run build:android
-      - persist_to_workspace:
-          root: ~/project
-          paths:
-            - docs
-
   deploy-web:
     executor: node
     steps:
@@ -165,10 +150,6 @@ workflows:
           requires:
             - install
       - build:
-          requires:
-            - lint
-            - test
-      - build-android:
           requires:
             - lint
             - test
