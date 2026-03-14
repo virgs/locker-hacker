@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useDeferredValue, useMemo } from "react";
 import { InferenceEngine } from "../ai/InferenceEngine.ts";
 import { GuessValidator } from "../game/GuessValidator.ts";
 import type { GridConfig } from "../game/GameConfig.ts";
@@ -49,6 +49,38 @@ export const classifyGuessQuality = (
     return GuessQuality.Mediocre;
 };
 
+export const computeAiProgress = (
+    engine: InferenceEngine,
+    observations: Observation[],
+): AiProgress => {
+    if (observations.length === 0) return INITIAL_PROGRESS;
+
+    let previousSummary = engine.initialSummary();
+    let currentSummary = previousSummary;
+    for (const observation of observations) {
+        previousSummary = currentSummary;
+        currentSummary = engine.applyObservation(currentSummary, observation);
+    }
+
+    const currentCandidates = currentSummary.progress.candidateCount;
+    const isSolved = currentCandidates <= 1;
+    const percent = isSolved ? 100 : currentSummary.progress.reducedPercent;
+    const previousCandidates = observations.length === 1
+        ? currentSummary.progress.initialCandidateCount
+        : previousSummary.progress.candidateCount;
+    const previousPercent = observations.length === 1
+        ? 0
+        : previousSummary.progress.reducedPercent;
+
+    return {
+        percent,
+        percentDelta: percent - previousPercent,
+        candidates: currentCandidates,
+        isSolved,
+        lastGuessQuality: classifyGuessQuality(previousCandidates, currentCandidates),
+    };
+};
+
 const useInferenceEngine = (
     gridConfig: GridConfig,
     code: number[],
@@ -58,40 +90,25 @@ const useInferenceEngine = (
         () => new InferenceEngine(gridConfig),
         [gridConfig],
     );
+    const deferredPathHistory = useDeferredValue(pathHistory);
 
     return useMemo((): AiProgress => {
-        if (pathHistory.length === 0) return INITIAL_PROGRESS;
+        if (deferredPathHistory.length === 0) return INITIAL_PROGRESS;
 
-        const observations = buildObservations(code, pathHistory);
-        const summary = engine.applyAll(observations);
-        const currentCandidates = summary.progress.candidateCount;
-        const isSolved = currentCandidates <= 1;
-        const percent = isSolved ? 100 : summary.progress.reducedPercent;
+        const observations = buildObservations(code, deferredPathHistory);
+        const progress = computeAiProgress(engine, observations);
 
-        if (isSolved && summary.candidates.length === 1) {
-            console.log(
-                `🔓 AI is 100% confident. Predicted code: [${summary.candidates[0]!.join(", ")}]`,
-            );
+        if (progress.isSolved) {
+            const solvedSummary = engine.applyAll(observations);
+            if (solvedSummary.candidates.length === 1) {
+                console.log(
+                    `🔓 AI is 100% confident. Predicted code: [${solvedSummary.candidates[0]!.join(", ")}]`,
+                );
+            }
         }
 
-        let prevCandidates: number;
-        let prevPercent: number;
-        if (pathHistory.length >= 2) {
-            const prevObservations = observations.slice(0, -1);
-            const prevSummary = engine.applyAll(prevObservations);
-            prevCandidates = prevSummary.progress.candidateCount;
-            prevPercent = prevSummary.progress.reducedPercent;
-        } else {
-            prevCandidates = summary.progress.initialCandidateCount;
-            prevPercent = 0;
-        }
-
-        const lastGuessQuality = classifyGuessQuality(prevCandidates, currentCandidates);
-        const percentDelta = percent - prevPercent;
-
-        return { percent, percentDelta, candidates: currentCandidates, isSolved, lastGuessQuality };
-    }, [engine, code, pathHistory]);
+        return progress;
+    }, [engine, code, deferredPathHistory]);
 };
 
 export default useInferenceEngine;
-

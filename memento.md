@@ -195,6 +195,23 @@
 - `src/components/StatsModal.utils.test.ts`
 - `README.md`
 
+### Post-Guess Responsiveness Improved for Hard Mode
+
+**Decision:** Made the immediate lock reset after a guess higher priority and reduced the AI progress recomputation from two full inference passes to one.
+
+**Rationale:** On hard mode, the combination of history updates plus AI candidate analysis could monopolize the main thread long enough that the board appeared frozen after submitting a guess. The player should see the lock clear first, with heavier history/analysis work allowed to catch up just after.
+
+**Implementation details:**
+- `GameContext` now wraps the non-urgent post-guess history/player updates in `React.startTransition`, while `setPath([])` stays urgent
+- `useInferenceEngine` now uses `useDeferredValue(pathHistory)` so the AI footer can lag slightly behind urgent board updates
+- AI progress calculation now walks the observation list once and keeps the previous summary instead of calling `engine.applyAll()` twice per render
+
+**Files:**
+- `src/context/GameContext.tsx`
+- `src/components/useInferenceEngine.ts`
+- `src/components/useInferenceEngine.test.ts`
+- `README.md`
+
 ### Build Label in Stats Modal
 
 **Decision:** Added a small build label to the bottom-right of the stats modal, sourced from compile-time metadata.

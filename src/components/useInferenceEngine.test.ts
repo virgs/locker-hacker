@@ -6,7 +6,7 @@ import {
     getAiIndicatorColor,
     formatPercentDelta
 } from "./Footer.utils.ts";
-import { GuessQuality, classifyGuessQuality } from "./useInferenceEngine.ts";
+import { GuessQuality, classifyGuessQuality, computeAiProgress as computeAiProgressFromObservations } from "./useInferenceEngine.ts";
 import {AI_COLOR_DANGER, AI_COLOR_SUCCESS, AI_COLOR_WARNING} from "../theme/colors.ts";
 
 /**
@@ -22,7 +22,7 @@ const buildObservations = (code: number[], history: number[][]): Observation[] =
     }));
 };
 
-const computeAiProgress = (
+const computeAiProgressForHistory = (
     gridConfig: GridConfig,
     code: number[],
     pathHistory: number[][],
@@ -33,34 +33,14 @@ const computeAiProgress = (
 
     const engine = new InferenceEngine(gridConfig);
     const observations = buildObservations(code, pathHistory);
-    const summary = engine.applyAll(observations);
-    const currentCandidates = summary.progress.candidateCount;
-    const isSolved = currentCandidates <= 1;
-    const percent = isSolved ? 100 : summary.progress.reducedPercent;
-
-    let prevCandidates: number;
-    let prevPercent: number;
-    if (pathHistory.length >= 2) {
-        const prevObservations = observations.slice(0, -1);
-        const prevSummary = engine.applyAll(prevObservations);
-        prevCandidates = prevSummary.progress.candidateCount;
-        prevPercent = prevSummary.progress.reducedPercent;
-    } else {
-        prevCandidates = summary.progress.initialCandidateCount;
-        prevPercent = 0;
-    }
-
-    const lastGuessQuality = classifyGuessQuality(prevCandidates, currentCandidates);
-    const percentDelta = percent - prevPercent;
-
-    return { percent, percentDelta, candidates: currentCandidates, isSolved, lastGuessQuality };
+    return computeAiProgressFromObservations(engine, observations);
 };
 
 describe("AI progress computation", () => {
     const config: GridConfig = { cols: 2, rows: 2, length: 2 };
 
     it("returns 0% with 0 candidates when no guesses made", () => {
-        const result = computeAiProgress(config, [0, 1], []);
+        const result = computeAiProgressForHistory(config, [0, 1], []);
         expect(result.percent).toBe(0);
         expect(result.percentDelta).toBe(0);
         expect(result.candidates).toBe(0);
@@ -70,14 +50,14 @@ describe("AI progress computation", () => {
 
     it("reduces candidates after a guess", () => {
         const code = [0, 3];
-        const result = computeAiProgress(config, code, [[0, 1]]);
+        const result = computeAiProgressForHistory(config, code, [[0, 1]]);
         expect(result.candidates).toBeLessThan(12);
         expect(result.percent).toBeGreaterThan(0);
     });
 
     it("reaches exactly 100% and isSolved when the exact code is guessed", () => {
         const code = [0, 3];
-        const result = computeAiProgress(config, code, [[0, 3]]);
+        const result = computeAiProgressForHistory(config, code, [[0, 3]]);
         expect(result.candidates).toBe(1);
         expect(result.percent).toBe(100);
         expect(result.isSolved).toBe(true);
@@ -85,18 +65,18 @@ describe("AI progress computation", () => {
 
     it("accumulates progress across multiple guesses", () => {
         const code = [0, 3];
-        const after1 = computeAiProgress(config, code, [[1, 2]]);
-        const after2 = computeAiProgress(config, code, [[1, 2], [0, 1]]);
+        const after1 = computeAiProgressForHistory(config, code, [[1, 2]]);
+        const after2 = computeAiProgressForHistory(config, code, [[1, 2], [0, 1]]);
         expect(after2.candidates).toBeLessThanOrEqual(after1.candidates);
         expect(after2.percent).toBeGreaterThanOrEqual(after1.percent);
     });
 
     it("resets to 0% for a fresh game (empty history)", () => {
         const code = [0, 3];
-        const withGuesses = computeAiProgress(config, code, [[0, 1]]);
+        const withGuesses = computeAiProgressForHistory(config, code, [[0, 1]]);
         expect(withGuesses.percent).toBeGreaterThan(0);
 
-        const fresh = computeAiProgress(config, code, []);
+        const fresh = computeAiProgressForHistory(config, code, []);
         expect(fresh.percent).toBe(0);
         expect(fresh.candidates).toBe(0);
         expect(fresh.isSolved).toBe(false);
@@ -105,20 +85,20 @@ describe("AI progress computation", () => {
     it("works with medium grid (3x3, length 4)", () => {
         const medConfig: GridConfig = { cols: 3, rows: 3, length: 4 };
         const code = [0, 1, 4, 3];
-        const result = computeAiProgress(medConfig, code, [[0, 1, 2, 5]]);
+        const result = computeAiProgressForHistory(medConfig, code, [[0, 1, 2, 5]]);
         expect(result.candidates).toBeGreaterThan(0);
         expect(result.percent).toBeGreaterThan(0);
     });
 
     it("classifies duplicate guess as Bad quality", () => {
         const code = [0, 3];
-        const result = computeAiProgress(config, code, [[0, 1], [0, 1]]);
+        const result = computeAiProgressForHistory(config, code, [[0, 1], [0, 1]]);
         expect(result.lastGuessQuality).toBe(GuessQuality.Bad);
     });
 
     it("classifies first guess quality based on initial candidate reduction", () => {
         const code = [0, 3];
-        const result = computeAiProgress(config, code, [[0, 1]]);
+        const result = computeAiProgressForHistory(config, code, [[0, 1]]);
         // First guess always eliminates a significant portion of candidates
         expect(result.lastGuessQuality).not.toBe(GuessQuality.Neutral);
         expect(result.lastGuessQuality).not.toBe(GuessQuality.Bad);
@@ -126,20 +106,20 @@ describe("AI progress computation", () => {
 
     it("percentDelta equals percent on first guess (baseline is 0)", () => {
         const code = [0, 3];
-        const result = computeAiProgress(config, code, [[0, 1]]);
+        const result = computeAiProgressForHistory(config, code, [[0, 1]]);
         expect(result.percentDelta).toBe(result.percent);
     });
 
     it("percentDelta reflects increase across successive guesses", () => {
         const code = [0, 3];
-        const after1 = computeAiProgress(config, code, [[1, 2]]);
-        const after2 = computeAiProgress(config, code, [[1, 2], [0, 1]]);
+        const after1 = computeAiProgressForHistory(config, code, [[1, 2]]);
+        const after2 = computeAiProgressForHistory(config, code, [[1, 2], [0, 1]]);
         expect(after2.percentDelta).toBeCloseTo(after2.percent - after1.percent, 5);
     });
 
     it("percentDelta is 0 when duplicate guess adds no info", () => {
         const code = [0, 3];
-        const result = computeAiProgress(config, code, [[0, 1], [0, 1]]);
+        const result = computeAiProgressForHistory(config, code, [[0, 1], [0, 1]]);
         expect(result.percentDelta).toBe(0);
     });
 });
@@ -247,4 +227,3 @@ describe("formatPercentDelta", () => {
         expect(formatPercentDelta(99.9)).toBe("+99.9%");
     });
 });
-

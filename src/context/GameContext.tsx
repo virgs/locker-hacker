@@ -172,17 +172,19 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         const validator = new GuessValidator(code);
         validator.validate(path);
         markStarted(pathHistory.length + 1);
-        setPathHistory(prev => [...prev, path]);
-        setPlayerHistory(prev => [...prev, currentPlayer]);
         setPath([]);
-        if (validator.isSolved(path)) {
-            finalizeActive({ won: true, movesOverride: pathHistory.length + 1 });
-            setWinner(currentPlayer);
-            setPhase(GamePhase.Revealing);
-        } else {
-            setCurrentPlayer(prev => (prev % playerCount) + 1);
-            if (playerCount > PlayerCount.One) setShowTurnModal(true);
-        }
+        React.startTransition(() => {
+            setPathHistory(prev => [...prev, path]);
+            setPlayerHistory(prev => [...prev, currentPlayer]);
+            if (validator.isSolved(path)) {
+                finalizeActive({ won: true, movesOverride: pathHistory.length + 1 });
+                setWinner(currentPlayer);
+                setPhase(GamePhase.Revealing);
+            } else {
+                setCurrentPlayer(prev => (prev % playerCount) + 1);
+                if (playerCount > PlayerCount.One) setShowTurnModal(true);
+            }
+        });
     }, [code, currentPlayer, finalizeActive, gridConfig.length, markStarted, path, pathHistory.length, playerCount]);
     const value: GameContextValue = {
         level, playerCount, gridConfig, code, gameKey,
