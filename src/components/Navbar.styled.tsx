@@ -2,6 +2,8 @@ import styled from "styled-components";
 import { BREAKPOINTS } from "../theme/breakpoints.ts";
 
 export const NavbarContainer = styled.nav`
+    position: relative;
+    z-index: 20;
     flex-shrink: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-sizing: border-box;
@@ -9,6 +11,7 @@ export const NavbarContainer = styled.nav`
 
     .dropdown-menu {
         padding: 8px 0;
+        z-index: 2000;
     }
 
     .dropdown-item {
@@ -63,7 +66,7 @@ export const NavbarCenter = styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
-    z-index: 1;
+    z-index: 21;
 `;
 
 export const NavbarRight = styled.div`

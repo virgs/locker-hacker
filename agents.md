@@ -180,5 +180,4 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [ ] Increase even more the navbar dropdown menu items height. Also, "give up" button doesn’t work on my phone. It does work when I test in my laptop browser.
-2. [ ] When collapsing the guess history, it should scroll to the bottom so the user sees the most recent guesses 
+1. [ ] When collapsing the guess history, it should scroll to the bottom so the user sees the most recent guesses 

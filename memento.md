@@ -144,6 +144,38 @@
 - `src/components/Navbar.utils.test.ts`
 - `README.md`
 
+### Guess History Collapse Resets to Latest Guess
+
+**Decision:** Collapsing the guess-history panel now forces the history scroll container back to the bottom.
+
+**Rationale:** When users collapse the history panel after browsing older guesses, the compact view should immediately show the most recent guesses instead of leaving the scroll position stranded on older entries.
+
+**Implementation details:**
+- `App` now keeps a ref to the sidebar scroll container and detects only the `expanded -> collapsed` transition
+- the scroll reset runs on the next animation frame so it applies after the collapse state change has been committed
+- `App.utils.ts` isolates the collapse-condition rule, with a matching regression test in `App.utils.test.ts`
+
+**Files:**
+- `src/App.tsx`
+- `src/App.utils.ts`
+- `src/App.utils.test.ts`
+- `README.md`
+
+### Navbar Dropdown Above Pattern Lock Layers
+
+**Decision:** Raised the navbar and dropdown menu stacking context so navbar menus render above the pattern-lock board and receive touch events reliably on mobile.
+
+**Rationale:** The hint dropdown could visually and interactively fall behind the lock layers, which made menu items look clipped by the board and caused touches to miss the intended action. The practical symptom was that `Give up` appeared broken on phones because the dropdown was not fully winning the stacking order.
+
+**Implementation details:**
+- `NavbarContainer` now establishes a higher local stacking context
+- `.dropdown-menu` gets an explicit high `z-index`
+- `NavbarCenter` sits above the rest of the navbar content so the center hint menu is not trapped under board layers
+
+**Files:**
+- `src/components/Navbar.styled.tsx`
+- `memento.md`
+
 ### Build Label in Stats Modal
 
 **Decision:** Added a small build label to the bottom-right of the stats modal, sourced from compile-time metadata.

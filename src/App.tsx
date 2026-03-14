@@ -1,4 +1,4 @@
-import { useRef, type ReactElement } from 'react'
+import { useEffect, useRef, type ReactElement } from 'react'
 import './App.scss'
 import PatternLock from "./components/PatternLock.tsx";
 import PatternHistory from "./components/PatternHistory.tsx";
@@ -18,6 +18,7 @@ import useLockSize from "./components/useLockSize.ts";
 import useEndGameColor from "./components/useEndGameColor.ts";
 import useConfetti from "./components/useConfetti.ts";
 import GuessCounter from "./components/GuessCounter.tsx";
+import { shouldScrollHistoryToBottom } from "./App.utils.ts";
 
 export const App = (): ReactElement => {
     const {
@@ -39,10 +40,23 @@ export const App = (): ReactElement => {
         onContentTouchEnd,
     } = useSidebarResize(isMobile);
     const mainAreaRef = useRef<HTMLElement>(null);
+    const sidebarContentRef = useRef<HTMLDivElement>(null);
+    const wasExpandedRef = useRef(expanded);
     const lockSize = useLockSize(mainAreaRef);
     const dragHandlers = { onPointerDown, onPointerMove, onPointerUp };
 
     useConfetti(isRevealing && winner !== null);
+
+    useEffect(() => {
+        if (shouldScrollHistoryToBottom(wasExpandedRef.current, expanded)) {
+            window.requestAnimationFrame(() => {
+                const content = sidebarContentRef.current;
+                if (!content) return;
+                content.scrollTop = content.scrollHeight;
+            });
+        }
+        wasExpandedRef.current = expanded;
+    }, [expanded]);
 
     return (
         <AppLayout>
@@ -91,6 +105,7 @@ export const App = (): ReactElement => {
                             <HistoryTitle />
                         </SidebarHeader>
                         <SidebarContent
+                            ref={sidebarContentRef}
                             onTouchStart={onContentTouchStart}
                             onTouchMove={onContentTouchMove}
                             onTouchEnd={onContentTouchEnd}

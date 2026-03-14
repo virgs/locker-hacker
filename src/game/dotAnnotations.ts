@@ -5,9 +5,9 @@ export type DotAnnotations = Record<number, DotAnnotation | undefined>;
 export const cycleDotAnnotation = (
     current?: DotAnnotation,
 ): DotAnnotation | undefined => {
-    if (current === "eliminated") return "confirmed";
-    if (current === "confirmed") return undefined;
-    return "eliminated";
+    if (current === "confirmed") return "eliminated";
+    if (current === "eliminated") return undefined;
+    return "confirmed";
 };
 
 export const toggleDotAnnotation = (

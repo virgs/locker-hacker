@@ -37,8 +37,10 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
         </Modal.Header>
         <Modal.Body>
             <p>
-                A <strong>hidden code</strong> is a sequence of <em>distinct dots</em> drawn on a grid.
-                Submit guesses and receive feedback:
+                Connect the dots and <strong>crack the code!</strong>
+            </p>
+                Submit guesses and receive <strong>feedback</strong>:
+            <p>
             </p>
             <HelpList>
                 <li><strong style={{ color: bull.color }}>{bull.symbol}</strong> — correct dot in the <em>correct position</em>.</li>
@@ -68,21 +70,21 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
             </ExampleTable>
 
             <p className="mt-3 mb-0">
-                The game ends when <strong>all dots are in the correct position</strong>.<br/>
+                The game ends when the guess has <strong>all dots are in the correct position</strong>.<br/>
                 Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
             </p>
             <p className="mt-3 mb-0">
                 <strong>Click a dot</strong> to mark it as
-                <strong> clear</strong>, <strong>eliminated</strong>, or <strong>confirmed</strong>.
+                <strong> clear</strong>, <strong>confirmed</strong>, or <strong>eliminated</strong>.
             </p>
             <NotesHelpRow>
                 <NotePreview>
-                    <NotePreviewDot $tone="danger" aria-hidden={true} />
-                    Eliminated
-                </NotePreview>
-                <NotePreview>
                     <NotePreviewDot $tone="success" aria-hidden={true} />
                     Confirmed
+                </NotePreview>
+                <NotePreview>
+                    <NotePreviewDot $tone="danger" aria-hidden={true} />
+                    Eliminated
                 </NotePreview>
             </NotesHelpRow>
         </Modal.Body>
