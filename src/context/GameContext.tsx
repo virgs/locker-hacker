@@ -5,6 +5,7 @@ import { loadConfig, saveConfig } from "../game/ConfigService.ts";
 import { GameSessionStatsTracker } from "./GameSessionStatsTracker.ts";
 import { useSinglePlayerStatsPersistence } from "./useSinglePlayerStatsPersistence.ts";
 import { pickEliminationHint } from "../game/HintService.ts";
+import { getAnnotatedDotIndices, toggleDotAnnotation, type DotAnnotations } from "../game/dotAnnotations.ts";
 import {
     Level, PlayerCount, GamePhase, GridConfig,
     LEVEL_CONFIGS, DEFAULT_LEVEL, DEFAULT_PLAYER_COUNT,
@@ -27,6 +28,8 @@ export interface GameContextValue {
     winner          : number | null;
     currentPlayer   : number;
     revealedHints   : number[];
+    annotatedEliminations : number[];
+    annotatedConfirmed    : number[];
     activeStatsRecordId     : string | null;
     onLevelChange        : (level: Level) => void;
     onPlayerCountChange  : (count: PlayerCount) => void;
@@ -37,6 +40,7 @@ export interface GameContextValue {
     onToggleStatsModal   : () => void;
     onDismissTurnModal              : () => void;
     onRevealHint                    : () => void;
+    onCycleDotAnnotation            : (index: number) => void;
     onRegisterInvalidGuessListener  : (cb: () => void) => void;
 }
 
@@ -71,6 +75,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const [currentPlayer, setCurrentPlayer]     = React.useState(1);
     const [playerHistory, setPlayerHistory]     = React.useState<number[]>([]);
     const [revealedHints, setRevealedHints]     = React.useState<number[]>([]);
+    const [dotAnnotations, setDotAnnotations]   = React.useState<DotAnnotations>({});
     const sessionTrackerRef                      = React.useRef(new GameSessionStatsTracker());
     const invalidGuessListenerRef                = React.useRef<(() => void) | null>(null);
     const gridConfig = LEVEL_CONFIGS[level];
@@ -103,7 +108,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         setLevel(newLevel);
         setCode(generateCode(LEVEL_CONFIGS[newLevel]));
         setPath([]); setPathHistory([]); setElapsedSeconds(0);
-        setCurrentPlayer(1); setWinner(null); setPlayerHistory([]); setRevealedHints([]);
+        setCurrentPlayer(1); setWinner(null); setPlayerHistory([]); setRevealedHints([]); setDotAnnotations({});
         resetActive();
         setGameKey(prev => prev + 1);
         if (playerCount > PlayerCount.One) setShowTurnModal(true);
@@ -130,7 +135,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         setPath([]); setPathHistory([]); setPlayerHistory([]);
         setPhase(GamePhase.Playing);
         setElapsedSeconds(0);
-        setCurrentPlayer(1); setWinner(null); setRevealedHints([]);
+        setCurrentPlayer(1); setWinner(null); setRevealedHints([]); setDotAnnotations({});
         resetActive();
         setGameKey(prev => prev + 1);
         if (playerCount > PlayerCount.One) setShowTurnModal(true);
@@ -154,6 +159,10 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
             return [...prev, next];
         });
     }, [code, gridConfig.cols, gridConfig.rows]);
+    const onCycleDotAnnotation = React.useCallback((index: number): void => {
+        if (phase === GamePhase.Revealing) return;
+        setDotAnnotations(prev => toggleDotAnnotation(prev, index));
+    }, [phase]);
     const onRegisterInvalidGuessListener = React.useCallback((cb: () => void): void => {
         invalidGuessListenerRef.current = cb;
     }, []);
@@ -179,10 +188,13 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         level, playerCount, gridConfig, code, gameKey,
         phase, path, pathHistory, playerHistory, isRunning,
         showStatsModal, showTurnModal, elapsedSeconds,
-        winner, currentPlayer, revealedHints, activeStatsRecordId: activeRecordId,
+        winner, currentPlayer, revealedHints,
+        annotatedEliminations: getAnnotatedDotIndices(dotAnnotations, "eliminated"),
+        annotatedConfirmed: getAnnotatedDotIndices(dotAnnotations, "confirmed"),
+        activeStatsRecordId: activeRecordId,
         onLevelChange, onPlayerCountChange,
         onGiveUp, onFinishGame,
-        onPathChange, onGuessFinish, onToggleStatsModal, onDismissTurnModal, onRevealHint,
+        onPathChange, onGuessFinish, onToggleStatsModal, onDismissTurnModal, onRevealHint, onCycleDotAnnotation,
         onRegisterInvalidGuessListener,
     };
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

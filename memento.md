@@ -2,6 +2,30 @@
 
 ## Architectural Decisions
 
+### Manual Dot Annotations During Play
+
+**Decision:** Added two player-controlled annotations directly on the main lock during normal play: eliminated dots reuse the existing red `X`, and confirmed dots render a green success ring behind the dot. The gesture cycles `none -> eliminated -> confirmed -> none` via long-press or double-press.
+
+**Rationale:** The game benefits from deduction notes, but the board should stay lightweight and visually native to the pattern-lock interface. Limiting notes to two states keeps the UI readable, avoids solver-like automation, and matches the existing hint language. Keeping annotations current-game-only prevents stale notes from leaking into the next puzzle.
+
+**Implementation details:**
+- note state lives in `GameContext` and is cleared on new game / level change
+- hint eliminations and manual eliminations share the same visual `X`
+- `usePatternLock` now distinguishes stationary presses from actual path drawing so long-press/double-press notes can coexist with normal input
+- stationary single taps no longer submit a one-dot guess; only dragged paths are finished
+
+**Files:**
+- `src/game/dotAnnotations.ts`
+- `src/game/dotAnnotations.test.ts`
+- `src/context/GameContext.tsx`
+- `src/components/usePatternLock.ts`
+- `src/components/usePatternLock.test.ts`
+- `src/components/PatternLock.tsx`
+- `src/components/Point.tsx`
+- `src/components/PatternLock.css`
+- `src/components/HelpModal.tsx`
+- `src/App.tsx`
+
 ### Guess History Panel Drag Surface + Mobile Scroll Edge Resize
 
 **Decision:** Expanded the guess-history resize interaction beyond the thin handle. The header/title area now shares the same drag-to-expand/collapse behavior, and the mobile bottom sheet also reacts to overscroll at the history list boundaries.

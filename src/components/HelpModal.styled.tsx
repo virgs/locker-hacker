@@ -56,3 +56,65 @@ export const ExampleTable = styled.table`
     }
 `;
 
+export const NotesHelpRow = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 12px;
+    justify-content: center;
+`;
+
+export const NotePreview = styled.span`
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.9rem;
+`;
+
+export const NotePreviewDot = styled.span<{ $tone: "danger" | "success" }>`
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    //background: white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.22);
+
+    ${({ $tone }) => $tone === "success" ? `
+        &::before {
+            content: "";
+            position: absolute;
+            inset: -7px;
+            border-radius: 50%;
+            border: 3px solid var(--bs-success, #198754);
+            box-shadow:
+                0 0 0 4px rgba(25, 135, 84, 0.12),
+                0 0 14px rgba(25, 135, 84, 0.3);
+        }
+    ` : `
+        &::before,
+        &::after {
+            content: "";
+            position: absolute;
+            width: 28px;
+            height: 4px;
+            border-radius: 999px;
+            background: var(--bs-danger, #dc3545);
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.35);
+        }
+
+        &::before {
+            transform: rotate(45deg);
+        }
+
+        &::after {
+            transform: rotate(-45deg);
+        }
+    `}
+`;

@@ -32,6 +32,7 @@ The game ends when Bulls == code length.
 * **Reliable stats persistence** — single-player games are persisted from the first valid guess, wins are finalized immediately on solve, and abandoned runs still count as losses after reload or restart
 * **Build-aware stats modal** — the stats view shows the running app version and, in CircleCI deployments, the deployment build number for quicker debugging
 * **Gesture-driven guess history** — the history panel can now be dragged from its title area, and on mobile the bottom sheet collapses or expands when you keep scrolling past the top or bottom edge
+* **Dot annotations while solving** — long-press or double-press any dot to cycle your own current-game notes between clear, eliminated (`X`), and confirmed (green ring)
 * **Player count** — Select 1–4 players (future multiplayer support)
 * **Help modal** — In-app game rules with a "Play Now" button
 * **Shareable previews** — Open Graph metadata now uses the gameplay screenshot and a tailored description for richer social link previews

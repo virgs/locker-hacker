@@ -1,6 +1,13 @@
 import * as React from "react";
 import Modal from "react-bootstrap/Modal";
-import { HelpList, ExampleTable, ExampleCaption } from "./HelpModal.styled.tsx";
+import {
+    HelpList,
+    ExampleTable,
+    ExampleCaption,
+    NotesHelpRow,
+    NotePreview,
+    NotePreviewDot,
+} from "./HelpModal.styled.tsx";
 import { FEEDBACK_THEME } from "./FeedbackIndicator.utils.ts";
 
 interface HelpModalProps {
@@ -64,9 +71,22 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                 The game ends when <strong>all dots are in the correct position</strong>.<br/>
                 Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
             </p>
+            <p className="mt-3 mb-0">
+                For your own notes, <strong>long-press or double-press a dot</strong> to cycle it through
+                clear, <strong>eliminated</strong>, and <strong>confirmed</strong>.
+            </p>
+            <NotesHelpRow>
+                <NotePreview>
+                    <NotePreviewDot $tone="danger" aria-hidden={true} />
+                    Eliminated
+                </NotePreview>
+                <NotePreview>
+                    <NotePreviewDot $tone="success" aria-hidden={true} />
+                    Confirmed
+                </NotePreview>
+            </NotesHelpRow>
         </Modal.Body>
     </Modal>
 );
 
 export default HelpModal;
-

@@ -20,7 +20,10 @@ import useConfetti from "./components/useConfetti.ts";
 import GuessCounter from "./components/GuessCounter.tsx";
 
 export const App = (): ReactElement => {
-    const { phase, path, code, gameKey, gridConfig, playerCount, currentPlayer, winner, revealedHints, onPathChange, onGuessFinish } = useGameContext();
+    const {
+        phase, path, code, gameKey, gridConfig, playerCount, currentPlayer, winner, revealedHints,
+        annotatedEliminations, annotatedConfirmed, onPathChange, onGuessFinish, onCycleDotAnnotation,
+    } = useGameContext();
     const isRevealing   = phase === GamePhase.Revealing;
     const multiColor    = playerCount !== PlayerCount.One ? getPlayerColor(currentPlayer) : undefined;
     const endGameColor  = useEndGameColor(phase, winner);
@@ -65,7 +68,9 @@ export const App = (): ReactElement => {
                                 dynamicLineStyle={isRevealing}
                                 targetLength={gridConfig.length}
                                 pathColor={isRevealing ? endGameColor : multiColor}
-                                highlightedPoints={isRevealing ? [] : revealedHints}
+                                highlightedPoints={isRevealing ? [] : [...revealedHints, ...annotatedEliminations]}
+                                confirmedPoints={isRevealing ? [] : annotatedConfirmed}
+                                onTogglePointAnnotation={isRevealing ? undefined : onCycleDotAnnotation}
                                 onChange={onPathChange}
                                 onFinish={onGuessFinish}
                             />

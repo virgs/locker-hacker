@@ -30,6 +30,8 @@ interface PatternLockProps {
     targetLength?: number;
     pathColor?: string;
     highlightedPoints?: number[];
+    confirmedPoints?: number[];
+    onTogglePointAnnotation?: (index: number) => void;
     onChange?: (path: number[]) => void;
     onFinish?: () => void;
 }
@@ -57,12 +59,26 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     targetLength,
     pathColor,
     highlightedPoints = [],
+    confirmedPoints = [],
+    onTogglePointAnnotation,
     onChange,
     onFinish,
     path,
 }): React.ReactElement => {
     const { wrapperRef, points, gridLayout, wrapperPosition, isMouseDown, initialMousePosition, flashingPoints, completionFlash, onHold, onTouch } =
-        usePatternLock({ path, cols, rows, pointActiveSize, disabled, allowOverlapping, allowJumping, targetLength, onChange, onFinish });
+        usePatternLock({
+            path,
+            cols,
+            rows,
+            pointActiveSize,
+            disabled,
+            allowOverlapping,
+            allowJumping,
+            targetLength,
+            onTogglePointAnnotation,
+            onChange,
+            onFinish,
+        });
 
     return (
         <div
@@ -97,6 +113,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                             pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
                             selected={path.indexOf(i) > -1}
                             highlighted={highlightedPoints.includes(i)}
+                            confirmed={confirmedPoints.includes(i)}
                             pathColor={pathColor}
                         />
                     ))}
