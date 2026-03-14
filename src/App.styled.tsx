@@ -85,6 +85,8 @@ export const SidebarHeader = styled.div`
     flex-shrink: 0;
     padding: 12px 8px 0;
     box-sizing: border-box;
+    user-select: none;
+    touch-action: none;
 
     ${BREAKPOINTS.mobile} {
         padding: 8px 16px 0;
@@ -135,4 +137,3 @@ export const ClickOutsideOverlay = styled.div`
     background: rgba(0, 0, 0, 0.3);
     cursor: pointer;
 `;
-

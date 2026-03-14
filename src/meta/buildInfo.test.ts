@@ -9,8 +9,8 @@ describe("formatBuildLabel", () => {
         expect(formatBuildLabel("v2.0.0")).toBe("v2.0.0");
     });
 
-    it("appends the deployment build number when available", () => {
-        expect(formatBuildLabel("1.2.3", "4567")).toBe("v1.2.3 (build 4567)");
+    it("prefers the deployment build number when available", () => {
+        expect(formatBuildLabel("1.2.3", "4567")).toBe("v. 4567");
     });
 
     it("ignores blank build numbers", () => {

@@ -180,4 +180,8 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [ ] Is it possible to add somewhere like in far right of the stats table footer a small version number? This way we can easily track which version of the code is running in production. It would also help with debugging and understanding the context of any issues that arise. Something like "v1.0.0" or "build 1234" would be ideal. I want to automate this to update with each deployment.
+1. [ ] So, you know the draggable side bar that sometimes can be on the bottom? I want to make the whole thing draggable to collapse or expand it. So, for example, if I click on the
+   "guess history" text and drag it, the area should also collapse and expand like if it was the original draggable area. As a matter of fact, I want to do that even when scrolling.
+   So, for example, if the thing is expanded and I'm see the last guesses, like the 20th, and then I start scrolling to see the older guesses and then I get to see the very first
+   one and there's nothing to scroll anymore, the area should collapse. The same thing when scrolling in the other direction, it should expand. Obviously, this scrolling thing
+   should only apply when the side bar is on the bottom. Does it make sense?

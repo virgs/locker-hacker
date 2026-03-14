@@ -14,7 +14,7 @@ export const HistoryTitleContainer = styled.h6`
     margin: 0;
     width: 100%;
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    //border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 `;
 
 export const HistoryList = styled.div<{ $expanded?: boolean }>`

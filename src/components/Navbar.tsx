@@ -31,7 +31,7 @@ const PlayerCountIcons: React.FunctionComponent<{ count: number }> = ({count}): 
 );
 
 const levelDetailLabel = (l: Level): string =>
-    `${LEVEL_LABELS[l]} (${LEVEL_CONFIGS[l].length})`;
+    `${LEVEL_LABELS[l]}`;
 
 const Navbar: React.FunctionComponent = (): React.ReactElement => {
     const [helpOpen, setHelpOpen] = React.useState(false);

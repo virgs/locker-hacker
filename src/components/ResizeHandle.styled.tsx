@@ -5,7 +5,6 @@ const BaseHandle = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.04);
     cursor: pointer;
     touch-action: none;
     user-select: none;
@@ -13,9 +12,6 @@ const BaseHandle = styled.div`
     z-index: 11;
     transition: background 0.2s ease;
 
-    &:hover {
-        background: rgba(255, 255, 255, 0.1);
-    }
 `;
 
 export const VerticalHandle = styled(BaseHandle)`

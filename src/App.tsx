@@ -25,9 +25,19 @@ export const App = (): ReactElement => {
     const multiColor    = playerCount !== PlayerCount.One ? getPlayerColor(currentPlayer) : undefined;
     const endGameColor  = useEndGameColor(phase, winner);
     const isMobile = useMediaQuery(BREAKPOINT_QUERIES.mobile);
-    const { expanded, collapse, onPointerDown, onPointerMove, onPointerUp } = useSidebarResize(isMobile);
+    const {
+        expanded,
+        collapse,
+        onPointerDown,
+        onPointerMove,
+        onPointerUp,
+        onContentTouchStart,
+        onContentTouchMove,
+        onContentTouchEnd,
+    } = useSidebarResize(isMobile);
     const mainAreaRef = useRef<HTMLElement>(null);
     const lockSize = useLockSize(mainAreaRef);
+    const dragHandlers = { onPointerDown, onPointerMove, onPointerUp };
 
     useConfetti(isRevealing && winner !== null);
 
@@ -71,10 +81,15 @@ export const App = (): ReactElement => {
                         onPointerUp={onPointerUp}
                     />
                     <SidebarInner>
-                        <SidebarHeader>
+                        <SidebarHeader {...dragHandlers}>
                             <HistoryTitle />
                         </SidebarHeader>
-                        <SidebarContent>
+                        <SidebarContent
+                            {...(isMobile ? {} : dragHandlers)}
+                            onTouchStart={onContentTouchStart}
+                            onTouchMove={onContentTouchMove}
+                            onTouchEnd={onContentTouchEnd}
+                        >
                             <PatternHistory expanded={expanded} />
                         </SidebarContent>
                     </SidebarInner>

@@ -13,7 +13,7 @@ export const formatBuildLabel = (version: string, buildNumber?: string): string 
     if (!normalizedBuildNumber) {
         return normalizedVersion;
     }
-    return `${normalizedVersion} (build ${normalizedBuildNumber})`;
+    return `v. ${normalizedBuildNumber}`;
 };
 
 const getCompileTimeValue = (value: string | undefined, fallback: string): string => {

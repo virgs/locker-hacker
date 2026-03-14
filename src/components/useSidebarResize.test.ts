@@ -1,4 +1,5 @@
 import { DRAG_THRESHOLD_PX } from "./ResizeHandle.constants.ts";
+import { getPointerResizeDelta, getScrollBoundaryAction } from "./useSidebarResize.ts";
 
 describe("useSidebarResize constants", () => {
     it("uses a drag threshold that requires intentional movement", () => {
@@ -10,39 +11,23 @@ describe("useSidebarResize constants", () => {
 describe("useSidebarResize drag logic", () => {
     describe("drag direction interpretation", () => {
         it("positive delta (drag left/up) means expand for desktop", () => {
-            // In desktop mode, delta = origin.x - current.x
-            // Dragging left: current.x < origin.x → delta > 0 → expand
-            const originX = 500;
-            const currentX = 400;
-            const delta = originX - currentX;
+            const delta = getPointerResizeDelta({ x: 500, y: 0 }, { x: 400, y: 0 }, false);
             expect(delta).toBeGreaterThan(0);
-            expect(delta > 0).toBe(true); // expand
         });
 
         it("negative delta (drag right/down) means collapse for desktop", () => {
-            const originX = 500;
-            const currentX = 600;
-            const delta = originX - currentX;
+            const delta = getPointerResizeDelta({ x: 500, y: 0 }, { x: 600, y: 0 }, false);
             expect(delta).toBeLessThan(0);
-            expect(delta > 0).toBe(false); // collapse
         });
 
         it("positive delta (drag up) means expand for mobile", () => {
-            // In mobile mode, delta = origin.y - current.y
-            // Dragging up: current.y < origin.y → delta > 0 → expand
-            const originY = 500;
-            const currentY = 400;
-            const delta = originY - currentY;
+            const delta = getPointerResizeDelta({ x: 0, y: 500 }, { x: 0, y: 400 }, true);
             expect(delta).toBeGreaterThan(0);
-            expect(delta > 0).toBe(true); // expand
         });
 
         it("negative delta (drag down) means collapse for mobile", () => {
-            const originY = 500;
-            const currentY = 600;
-            const delta = originY - currentY;
+            const delta = getPointerResizeDelta({ x: 0, y: 500 }, { x: 0, y: 600 }, true);
             expect(delta).toBeLessThan(0);
-            expect(delta > 0).toBe(false); // collapse
         });
 
         it("requires movement past threshold to trigger drag", () => {
@@ -53,5 +38,36 @@ describe("useSidebarResize drag logic", () => {
             expect(Math.abs(origin - justRight)).toBeGreaterThan(DRAG_THRESHOLD_PX);
         });
     });
-});
 
+    describe("mobile scroll boundary behavior", () => {
+        it("collapses when pulling down past the top edge", () => {
+            expect(getScrollBoundaryAction({
+                scrollTop: 0,
+                clientHeight: 200,
+                scrollHeight: 800,
+                touchDeltaY: DRAG_THRESHOLD_PX + 1,
+                thresholdPx: DRAG_THRESHOLD_PX,
+            })).toBe("collapse");
+        });
+
+        it("expands when pushing up past the bottom edge", () => {
+            expect(getScrollBoundaryAction({
+                scrollTop: 600,
+                clientHeight: 200,
+                scrollHeight: 800,
+                touchDeltaY: -DRAG_THRESHOLD_PX - 1,
+                thresholdPx: DRAG_THRESHOLD_PX,
+            })).toBe("expand");
+        });
+
+        it("ignores scroll gestures away from the boundaries", () => {
+            expect(getScrollBoundaryAction({
+                scrollTop: 300,
+                clientHeight: 200,
+                scrollHeight: 800,
+                touchDeltaY: DRAG_THRESHOLD_PX + 20,
+                thresholdPx: DRAG_THRESHOLD_PX,
+            })).toBeNull();
+        });
+    });
+});

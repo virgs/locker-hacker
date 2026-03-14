@@ -2,6 +2,24 @@
 
 ## Architectural Decisions
 
+### Guess History Panel Drag Surface + Mobile Scroll Edge Resize
+
+**Decision:** Expanded the guess-history resize interaction beyond the thin handle. The header/title area now shares the same drag-to-expand/collapse behavior, and the mobile bottom sheet also reacts to overscroll at the history list boundaries.
+
+**Rationale:** The original handle was too narrow for a frequently used gesture. Letting users drag from the visible "Guess History" header makes the control discoverable, while mobile overscroll-to-resize matches bottom-sheet behavior: pulling past the top collapses the sheet and pushing past the bottom expands it.
+
+**Implementation details:**
+- `useSidebarResize` now owns both pointer-drag math and mobile touch-boundary detection
+- `SidebarHeader` is marked as a draggable surface with `touch-action: none`
+- desktop keeps direct drag-resize on the scroll area, while mobile preserves normal scrolling and only resizes once the list hits a scroll boundary
+- `useSidebarResize.test.ts` covers both drag-direction math and the new top/bottom overscroll rules
+
+**Files:**
+- `src/components/useSidebarResize.ts`
+- `src/components/useSidebarResize.test.ts`
+- `src/App.tsx`
+- `src/App.styled.tsx`
+
 ### Build Label in Stats Modal
 
 **Decision:** Added a small build label to the bottom-right of the stats modal, sourced from compile-time metadata.
