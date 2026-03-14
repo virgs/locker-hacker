@@ -108,6 +108,7 @@ describe("StatsService", () => {
             expect(stats[Level.Easy].gamesPlayed).toBe(0);
             expect(stats[Level.Medium].gamesPlayed).toBe(0);
             expect(stats[Level.Hard].gamesPlayed).toBe(0);
+            expect(stats[Level.Expert].gamesPlayed).toBe(0);
         });
 
         it("groups records by level", () => {
@@ -115,6 +116,7 @@ describe("StatsService", () => {
                 record(Level.Easy, true, 10),
                 record(Level.Easy, false, 20),
                 record(Level.Hard, true, 30),
+                record(Level.Expert, false, 40),
             ];
             const stats = computeLevelStats(records);
             expect(stats[Level.Easy].gamesPlayed).toBe(2);
@@ -123,6 +125,7 @@ describe("StatsService", () => {
             expect(stats[Level.Easy].totalHints).toBe(0);
             expect(stats[Level.Hard].gamesPlayed).toBe(1);
             expect(stats[Level.Medium].gamesPlayed).toBe(0);
+            expect(stats[Level.Expert].gamesPlayed).toBe(1);
         });
     });
 

@@ -13,6 +13,8 @@ export enum GuessQuality {
 
 /** Thresholds for relative candidate reduction (0..1). */
 const GOOD_THRESHOLD = 0.5;
+const MAX_AI_TOTAL_DOTS = 16;
+const MAX_AI_CODE_LENGTH = 7;
 
 export interface AiProgress {
     percent: number;              // 0..100 — how much of the candidate space has been eliminated
@@ -48,6 +50,10 @@ export const classifyGuessQuality = (
     if (relativeReduction >= GOOD_THRESHOLD) return GuessQuality.Good;
     return GuessQuality.Mediocre;
 };
+
+export const supportsAiInference = (gridConfig: GridConfig): boolean =>
+    (gridConfig.cols * gridConfig.rows) <= MAX_AI_TOTAL_DOTS &&
+    gridConfig.length <= MAX_AI_CODE_LENGTH;
 
 export const computeAiProgress = (
     engine: InferenceEngine,
@@ -86,14 +92,15 @@ const useInferenceEngine = (
     code: number[],
     pathHistory: number[][],
 ): AiProgress => {
+    const aiSupported = supportsAiInference(gridConfig);
     const engine = useMemo(
-        () => new InferenceEngine(gridConfig),
-        [gridConfig],
+        () => aiSupported ? new InferenceEngine(gridConfig) : null,
+        [aiSupported, gridConfig],
     );
     const deferredPathHistory = useDeferredValue(pathHistory);
 
     return useMemo((): AiProgress => {
-        if (deferredPathHistory.length === 0) return INITIAL_PROGRESS;
+        if (!engine || deferredPathHistory.length === 0) return INITIAL_PROGRESS;
 
         const observations = buildObservations(code, deferredPathHistory);
         const progress = computeAiProgress(engine, observations);

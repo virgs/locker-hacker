@@ -6,7 +6,12 @@ import {
     getAiIndicatorColor,
     formatPercentDelta
 } from "./Footer.utils.ts";
-import { GuessQuality, classifyGuessQuality, computeAiProgress as computeAiProgressFromObservations } from "./useInferenceEngine.ts";
+import {
+    GuessQuality,
+    classifyGuessQuality,
+    computeAiProgress as computeAiProgressFromObservations,
+    supportsAiInference,
+} from "./useInferenceEngine.ts";
 import {AI_COLOR_DANGER, AI_COLOR_SUCCESS, AI_COLOR_WARNING} from "../theme/colors.ts";
 
 /**
@@ -121,6 +126,17 @@ describe("AI progress computation", () => {
         const code = [0, 3];
         const result = computeAiProgressForHistory(config, code, [[0, 1], [0, 1]]);
         expect(result.percentDelta).toBe(0);
+    });
+});
+
+describe("supportsAiInference", () => {
+    it("supports the hard configuration boundary", () => {
+        expect(supportsAiInference({ cols: 4, rows: 4, length: 7 })).toBe(true);
+    });
+
+    it("disables oversized expert-style configurations", () => {
+        expect(supportsAiInference({ cols: 5, rows: 5, length: 10 })).toBe(false);
+        expect(supportsAiInference({ cols: 4, rows: 4, length: 8 })).toBe(false);
     });
 });
 

@@ -29,8 +29,12 @@ describe("GameConfig", () => {
             expect(LEVEL_CONFIGS[Level.Medium]).toEqual({ cols: 3, rows: 3, length: 4 });
         });
 
-        it("hard has cols=4, rows=4, length=5", () => {
-            expect(LEVEL_CONFIGS[Level.Hard]).toEqual({ cols: 4, rows: 4, length: 5 });
+        it("hard has cols=3, rows=3, length=5", () => {
+            expect(LEVEL_CONFIGS[Level.Hard]).toEqual({ cols: 3, rows: 3, length: 5 });
+        });
+
+        it("expert has cols=4, rows=3, length=5", () => {
+            expect(LEVEL_CONFIGS[Level.Expert]).toEqual({ cols: 4, rows: 3, length: 5 });
         });
 
         it("code length never exceeds total dots", () => {
@@ -63,10 +67,11 @@ describe("GameConfig", () => {
             expect(new Set(labels).size).toBe(labels.length);
         });
 
-        it("maps easy=E, medium=M, hard=H", () => {
+        it("maps easy=E, medium=M, hard=H, expert=X", () => {
             expect(LEVEL_LABELS_SHORT[Level.Easy]).toBe("E");
             expect(LEVEL_LABELS_SHORT[Level.Medium]).toBe("M");
             expect(LEVEL_LABELS_SHORT[Level.Hard]).toBe("H");
+            expect(LEVEL_LABELS_SHORT[Level.Expert]).toBe("X");
         });
     });
 
@@ -85,8 +90,8 @@ describe("GameConfig", () => {
     });
 
     describe("ALL_LEVELS", () => {
-        it("contains exactly easy, medium, hard", () => {
-            expect(ALL_LEVELS).toEqual([Level.Easy, Level.Medium, Level.Hard]);
+        it("contains exactly easy, medium, hard, expert", () => {
+            expect(ALL_LEVELS).toEqual([Level.Easy, Level.Medium, Level.Hard, Level.Expert]);
         });
     });
 

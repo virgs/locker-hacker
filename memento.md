@@ -212,6 +212,43 @@
 - `src/components/useInferenceEngine.test.ts`
 - `README.md`
 
+### Four-Level Difficulty Progression
+
+**Decision:** Expanded the game progression from three levels to four with a performance-safe upper end: `Easy 3x2 / 3`, `Medium 3x3 / 4`, `Hard 3x3 / 5`, `Expert 4x3 / 5`.
+
+**Rationale:** The first attempt at stronger top tiers pushed the candidate space too far and created browser stability/performance issues. This revision keeps a clear step-up in difficulty while staying in a search-space range that remains responsive on-device. `Expert 4x3 / 5` is still meaningfully harder than `Hard 3x3 / 5` because it offers many more available dots for the same code length without the explosion caused by longer paths.
+
+**Implementation details:**
+- `Level.Expert` stays in the enum and remains part of `ALL_LEVELS`
+- `LEVEL_LABELS_SHORT` keeps `X` for `Expert` so all one-character labels remain distinct
+- the final top-tier configs were chosen after measuring candidate counts directly: `Hard 3x3 / 5` (`7,152` candidates) and `Expert 4x3 / 5` (`34,276` candidates)
+- config parsing and stats aggregation tests were updated so the new level participates in persistence and per-level summaries
+
+**Files:**
+- `src/game/GameConfig.ts`
+- `src/game/GameConfig.test.ts`
+- `src/game/ConfigService.test.ts`
+- `src/game/StatsService.test.ts`
+- `README.md`
+
+### AI Inference Disabled for Oversized Boards
+
+**Decision:** AI confidence analysis now has an explicit size guard and does not run for board configurations above `16` dots or code lengths above `7`.
+
+**Rationale:** The inference engine precomputes the full valid-path candidate set. That is acceptable for the existing Easy/Medium/Hard progression, but it becomes browser-freezing work for `Expert (5x5, length 10)`. The game itself remains playable without the AI footer, so the correct tradeoff is to disable that feature for oversized boards rather than crash the app.
+
+**Implementation details:**
+- `supportsAiInference()` in `useInferenceEngine.ts` defines the supported boundary
+- `useInferenceEngine` skips `InferenceEngine` construction entirely when the config is unsupported
+- `Footer` hides the AI confidence indicator when inference is disabled
+- tests cover the supported hard boundary and the unsupported expert configuration
+
+**Files:**
+- `src/components/useInferenceEngine.ts`
+- `src/components/useInferenceEngine.test.ts`
+- `src/components/Footer.tsx`
+- `README.md`
+
 ### Build Label in Stats Modal
 
 **Decision:** Added a small build label to the bottom-right of the stats modal, sourced from compile-time metadata.

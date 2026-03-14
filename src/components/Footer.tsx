@@ -12,7 +12,7 @@ import {PlayerCount, LEVEL_LABELS, LEVEL_LABELS_SHORT} from "../game/GameConfig.
 import {getPlayerColor} from "../game/playerColors.ts";
 import {useGameContext} from "../context/GameContext.tsx";
 import {formatTime, formatPercentDelta, getAiIndicatorColor} from "./Footer.utils.ts";
-import useInferenceEngine, {GuessQuality} from "./useInferenceEngine.ts";
+import useInferenceEngine, {GuessQuality, supportsAiInference} from "./useInferenceEngine.ts";
 import Tip from "./Tip.tsx";
 import useMediaQuery from "./useMediaQuery.ts";
 import {BREAKPOINT_QUERIES} from "../theme/breakpoints.ts";
@@ -35,6 +35,7 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
     } = useGameContext();
     const isMultiplayer = playerCount !== PlayerCount.One;
     const playerColor = getPlayerColor(currentPlayer);
+    const showAiProgress = supportsAiInference(gridConfig);
     const aiProgress = useInferenceEngine(gridConfig, code, pathHistory);
     const [flashQuality, setFlashQuality] = React.useState<GuessQuality>(GuessQuality.Neutral);
     const isMobile = useMediaQuery(BREAKPOINT_QUERIES.mobile);
@@ -68,20 +69,22 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
 
     return (
         <FooterContainer className="text-dark">
-            <Tip text="AI confidence" placement="top">
-                <AiProgressStat
-                    $color={indicatorColor}
-                    aria-label={`AI progress: ${aiProgress.percent.toFixed(1)}%`}
-                >
-                    {aiProgress.isSolved ? <Unlock size={20}/> : <Lock size={20}/>}
-                    {aiProgress.percent.toFixed(1)}%
-                    {showDelta && (
-                        <ConfidenceDelta key={deltaKey} $color={indicatorColor}>
-                            {formatPercentDelta(aiProgress.percentDelta)}
-                        </ConfidenceDelta>
-                    )}
-                </AiProgressStat>
-            </Tip>
+            {showAiProgress && (
+                <Tip text="AI confidence" placement="top">
+                    <AiProgressStat
+                        $color={indicatorColor}
+                        aria-label={`AI progress: ${aiProgress.percent.toFixed(1)}%`}
+                    >
+                        {aiProgress.isSolved ? <Unlock size={20}/> : <Lock size={20}/>}
+                        {aiProgress.percent.toFixed(1)}%
+                        {showDelta && (
+                            <ConfidenceDelta key={deltaKey} $color={indicatorColor}>
+                                {formatPercentDelta(aiProgress.percentDelta)}
+                            </ConfidenceDelta>
+                        )}
+                    </AiProgressStat>
+                </Tip>
+            )}
             {isMultiplayer && (
                 <PlayerLabel $color={playerColor} aria-label={`Current player: Player ${currentPlayer}`}>
                     <User size={20}/>

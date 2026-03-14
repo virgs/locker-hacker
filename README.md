@@ -27,12 +27,13 @@ The game ends when Bulls == code length.
 
 ## Features
 
-* **Level selection** — Easy (3×2, length 3), Medium (3×3, length 4), Hard (4×4, length 5)
+* **Level selection** — Easy (3×2, length 3), Medium (3×3, length 4), Hard (3×3, length 5), Expert (4×3, length 5)
 * **Hint dropdown during play** — the center action is a Hint menu with `Get a hint` (hides one random non-code dot while keeping the lock geometry intact) and `Give up` (reveals the code)
 * **Larger mobile dropdown targets** — navbar dropdown items now use taller touch targets, and the hint menu routes actions through dropdown selection so `Give up` works reliably on phones
 * **Reliable stats persistence** — single-player games are persisted from the first valid guess, wins are finalized immediately on solve, and abandoned runs still count as losses after reload or restart
 * **Smoother hard-mode guess flow** — post-guess UI resets now render at higher priority, while the heavier AI/history work is deferred so the lock becomes playable again faster
 * **Build-aware stats modal** — the stats view shows the running app version and, in CircleCI deployments, the deployment build number for quicker debugging
+* **Expert stays playable** — AI confidence analysis is disabled automatically for oversized boards like Expert, preventing browser lockups from impossible candidate generation
 * **Hidden stats reset** — while the stats modal is open, tapping the build label 7 times within 5 seconds clears saved stats immediately
 * **Gesture-driven guess history** — the desktop history rail can be dragged from anywhere in the visible panel, while the mobile bottom sheet still supports direct title-bar dragging and now keeps collapsing/expanding naturally when scroll gestures run out at the top or bottom edge
 * **Latest guess preserved on collapse** — when the guess history panel collapses, its scroll position snaps back to the bottom so the newest guesses stay visible

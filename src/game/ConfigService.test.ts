@@ -20,7 +20,7 @@ describe("parseConfig", () => {
     });
 
     it("accepts all valid levels", () => {
-        for (const level of [Level.Easy, Level.Medium, Level.Hard]) {
+        for (const level of [Level.Easy, Level.Medium, Level.Hard, Level.Expert]) {
             const raw = JSON.stringify({ level, playerCount: PlayerCount.One });
             expect(parseConfig(raw).level).toBe(level);
         }

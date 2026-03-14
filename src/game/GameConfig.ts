@@ -7,6 +7,7 @@ export enum Level {
     Easy   = "easy",
     Medium = "medium",
     Hard   = "hard",
+    Expert = "expert",
 }
 
 export enum PlayerCount {
@@ -25,19 +26,22 @@ export interface GridConfig {
 export const LEVEL_CONFIGS: Record<Level, GridConfig> = {
     [Level.Easy]  : { cols: 3, rows: 2, length: 3 },
     [Level.Medium]: { cols: 3, rows: 3, length: 4 },
-    [Level.Hard]  : { cols: 4, rows: 4, length: 5 },
+    [Level.Hard]  : { cols: 3, rows: 3, length: 5 },
+    [Level.Expert]: { cols: 4, rows: 3, length: 5 },
 };
 
 export const LEVEL_LABELS: Record<Level, string> = {
     [Level.Easy]  : "Easy",
     [Level.Medium]: "Medium",
     [Level.Hard]  : "Hard",
+    [Level.Expert]: "Expert",
 };
 
 export const LEVEL_LABELS_SHORT: Record<Level, string> = {
     [Level.Easy]  : "E",
     [Level.Medium]: "M",
     [Level.Hard]  : "H",
+    [Level.Expert]: "X",
 };
 
 export const PLAYER_LABELS: Record<PlayerCount, string> = {
@@ -47,7 +51,7 @@ export const PLAYER_LABELS: Record<PlayerCount, string> = {
     [PlayerCount.Four] : "4 players",
 };
 
-export const ALL_LEVELS: Level[] = [Level.Easy, Level.Medium, Level.Hard];
+export const ALL_LEVELS: Level[] = [Level.Easy, Level.Medium, Level.Hard, Level.Expert];
 
 export const ALL_PLAYER_COUNTS: PlayerCount[] = [
     PlayerCount.One,
