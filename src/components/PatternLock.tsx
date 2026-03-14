@@ -96,7 +96,6 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                             complete={completionFlash && path.indexOf(i) > -1 && path.indexOf(i) < (targetLength ?? Infinity)}
                             pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
                             selected={path.indexOf(i) > -1}
-                            latest={path[path.length - 1] === i}
                             highlighted={highlightedPoints.includes(i)}
                             pathColor={pathColor}
                         />

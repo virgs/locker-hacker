@@ -1,5 +1,4 @@
 import * as React from "react";
-import { getPointWrapperClassName } from "./patternLockFeedback.ts";
 
 interface PointProps {
     index           : number;
@@ -10,7 +9,6 @@ interface PointProps {
     pop             : boolean;
     complete        : boolean;
     selected        : boolean;
-    latest          : boolean;
     highlighted     : boolean;
     pathColor      ?: string;
 }
@@ -22,7 +20,6 @@ const Point: React.FunctionComponent<PointProps> = ({
     cols,
     rows,
     selected,
-    latest,
     pop,
     complete,
     highlighted,
@@ -39,7 +36,7 @@ const Point: React.FunctionComponent<PointProps> = ({
 
     return (
         <div
-            className={getPointWrapperClassName({ selected, latest })}
+            className={ `react-pattern-lock__point-wrapper${selected ? " selected" : ""}` }
             style={{
                 width  : `${colPercent}%`,
                 height : `${rowPercent}%`,

@@ -34,7 +34,6 @@ The game ends when Bulls == code length.
 * **Player count** — Select 1–4 players (future multiplayer support)
 * **Help modal** — In-app game rules with a "Play Now" button
 * **Shareable previews** — Open Graph metadata now uses the gameplay screenshot and a tailored description for richer social link previews
-* **Touch-friendly lock feedback** — on phones and other coarse pointers, the newest dot and line segment get a stronger pulse/halo so selections stay readable under your finger
 * **Responsive** — Works on desktop and mobile, navbar wraps to two rows on small screens
 
 ## Game Rules
