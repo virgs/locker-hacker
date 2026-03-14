@@ -180,4 +180,4 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [ ] When collapsing the guess history, it should scroll to the bottom so the user sees the most recent guesses 
+1. [ ]  

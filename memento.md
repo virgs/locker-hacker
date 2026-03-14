@@ -176,6 +176,25 @@
 - `src/components/Navbar.styled.tsx`
 - `memento.md`
 
+### Hidden Stats Reset Moved to Build Label
+
+**Decision:** Removed the navbar-icon long press for clearing stats. Stats are now cleared by tapping the build label in the stats modal 7 times within 5 seconds.
+
+**Rationale:** The long press was awkward on phones because the icon could shift visually under the finger and was too easy to lose. The build label is already a dev-oriented surface, so it is a better hidden trigger and does not interfere with normal player interactions.
+
+**Implementation details:**
+- `Navbar` now uses a normal click on the app icon to open stats; no hidden clear behavior remains there
+- `StatsModal` tracks a hidden multi-tap sequence on `BuildLabel`, clears records immediately when the tap threshold is reached, and forces the table to rerender so the empty state appears at once
+- `StatsModal.utils.ts` stores the tap threshold/window and exposes the tiny helper used by the tests
+
+**Files:**
+- `src/components/Navbar.tsx`
+- `src/components/StatsModal.tsx`
+- `src/components/StatsModal.styled.tsx`
+- `src/components/StatsModal.utils.ts`
+- `src/components/StatsModal.utils.test.ts`
+- `README.md`
+
 ### Build Label in Stats Modal
 
 **Decision:** Added a small build label to the bottom-right of the stats modal, sourced from compile-time metadata.

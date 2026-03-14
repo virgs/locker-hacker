@@ -126,7 +126,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                                 <AppIconImage src={`${import.meta.env.BASE_URL}icon.png`} alt={APP_TITLE}/>
                             </AppIconLink>
                         </Tip>
-                        <Dropdown>
+                        <Dropdown className="me-1">
                             <Tip text="Number of players">
                                 <Dropdown.Toggle variant="outline-secondary" size="sm" disabled={configDisabled}>
                                     <Users size={20}/><ButtonLabel

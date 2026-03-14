@@ -16,4 +16,6 @@ export const BuildLabel = styled.div`
     font-size: 0.75rem;
     letter-spacing: 0.03em;
     color: rgba(255, 255, 255, 0.45);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 `;

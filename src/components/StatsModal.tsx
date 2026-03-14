@@ -5,6 +5,7 @@ import {Award, Clock, Info, BarChart2, Hash, GitCommit, Zap} from "react-feather
 import {BuildLabel, EmptyState} from "./StatsModal.styled.tsx";
 import {LEVEL_LABELS, LEVEL_LABELS_SHORT, ALL_LEVELS} from "../game/GameConfig.ts";
 import {
+    clearRecords,
     loadRecords,
     filterVisibleStatsRecords,
     computeLevelStats,
@@ -18,6 +19,11 @@ import useMediaQuery from "./useMediaQuery.ts";
 import {BREAKPOINT_QUERIES} from "../theme/breakpoints.ts";
 import { useGameContext } from "../context/GameContext.tsx";
 import { BUILD_LABEL } from "../meta/buildInfo.ts";
+import {
+    BUILD_LABEL_RESET_TAP_TARGET,
+    BUILD_LABEL_RESET_WINDOW_MS,
+    shouldClearStatsFromBuildTaps,
+} from "./StatsModal.utils.ts";
 
 interface StatsModalProps {
     show: boolean;
@@ -29,12 +35,41 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
                                                                   onClose,
                                                               }): React.ReactElement => {
     const { activeStatsRecordId } = useGameContext();
+    const [, rerender] = React.useReducer((value: number) => value + 1, 0);
+    const resetTapCountRef = React.useRef(0);
+    const resetTapTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const records = show ? filterVisibleStatsRecords(loadRecords(), activeStatsRecordId) : [];
     const levelStats = computeLevelStats(records);
     const totalStats = computeTotalStats(records);
     const hasData = records.length > 0;
     const isMobile = useMediaQuery(BREAKPOINT_QUERIES.mobile);
     const labels = isMobile ? LEVEL_LABELS_SHORT : LEVEL_LABELS;
+
+    const resetBuildTapSequence = React.useCallback((): void => {
+        resetTapCountRef.current = 0;
+        if (resetTapTimerRef.current !== null) {
+            clearTimeout(resetTapTimerRef.current);
+            resetTapTimerRef.current = null;
+        }
+    }, []);
+
+    const onBuildLabelClick = React.useCallback((): void => {
+        resetTapCountRef.current += 1;
+        if (resetTapTimerRef.current !== null) clearTimeout(resetTapTimerRef.current);
+        resetTapTimerRef.current = setTimeout(resetBuildTapSequence, BUILD_LABEL_RESET_WINDOW_MS);
+
+        if (!shouldClearStatsFromBuildTaps(resetTapCountRef.current, BUILD_LABEL_RESET_TAP_TARGET)) return;
+        clearRecords();
+        resetBuildTapSequence();
+        rerender();
+    }, [resetBuildTapSequence]);
+
+    React.useEffect(() => {
+        if (show) return;
+        resetBuildTapSequence();
+    }, [resetBuildTapSequence, show]);
+
+    React.useEffect(() => () => resetBuildTapSequence(), [resetBuildTapSequence]);
 
     return (
         <Modal show={show} onHide={onClose} centered size="lg">
@@ -48,7 +83,7 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
                             <Info size={32}/>
                             <p>No stats available.<br/>Play some games to see stats here!</p>
                         </EmptyState>
-                        <BuildLabel>{BUILD_LABEL}</BuildLabel>
+                        <BuildLabel onClick={onBuildLabelClick}>{BUILD_LABEL}</BuildLabel>
                     </>
                 ) : (
                     <>
@@ -84,7 +119,7 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
                             </tr>
                             </tbody>
                         </Table>
-                        <BuildLabel>{BUILD_LABEL}</BuildLabel>
+                        <BuildLabel onClick={onBuildLabelClick}>{BUILD_LABEL}</BuildLabel>
                     </>
                 )}
             </Modal.Body>
