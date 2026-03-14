@@ -31,20 +31,16 @@ export interface UsePatternLockResult {
     wrapperPosition: PointType;
     isMouseDown: boolean;
     initialMousePosition: PointType | null;
+    firstDotPopActive: boolean;
     flashingPoints: Set<number>;
     completionFlash: boolean;
     onHold: (e: React.MouseEvent) => void;
     onTouch: (e: React.TouchEvent) => void;
 }
 
-const LONG_PRESS_MS = 450;
-const DOUBLE_PRESS_MS = 300;
 const TAP_MOVE_TOLERANCE_PX = 10;
-
-interface PressSnapshot {
-    index: number;
-    time: number;
-}
+const TOUCH_MOUSE_GUARD_MS = 750;
+export const FIRST_DOT_POP_MOVE_PX = 4;
 
 export const isStationaryGesture = (
     start: PointType | null,
@@ -54,14 +50,18 @@ export const isStationaryGesture = (
     return Math.hypot(current.x - start.x, current.y - start.y) <= TAP_MOVE_TOLERANCE_PX;
 };
 
-export const isDoublePressCandidate = (
-    lastPress: PressSnapshot | null,
-    index: number,
-    time: number,
-): boolean =>
-    !!lastPress &&
-    lastPress.index === index &&
-    time - lastPress.time <= DOUBLE_PRESS_MS;
+export const shouldActivateFirstDotPop = (
+    start: PointType | null,
+    current: PointType,
+): boolean => {
+    if (!start) return false;
+    return Math.hypot(current.x - start.x, current.y - start.y) >= FIRST_DOT_POP_MOVE_PX;
+};
+
+export const shouldIgnoreEmulatedMouseEvent = (
+    lastTouchTime: number,
+    now: number,
+): boolean => now - lastTouchTime <= TOUCH_MOUSE_GUARD_MS;
 
 export const usePatternLock = ({
     path,
@@ -84,14 +84,13 @@ export const usePatternLock = ({
     const [gridLayout, setGridLayout]           = React.useState<GridLayout>({ offsetX: 0, offsetY: 0, width: 0, height: 0 });
     const [isMouseDown, setIsMouseDown]         = React.useState<boolean>(false);
     const [initialMousePosition, setInitialMousePosition] = React.useState<PointType | null>(null);
+    const [firstDotPopActive, setFirstDotPopActive] = React.useState<boolean>(false);
     const [flashingPoints, setFlashingPoints]     = React.useState<Set<number>>(new Set());
     const flashTimerRef      = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-    const longPressTimerRef  = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const gestureMovedRef    = React.useRef(false);
-    const annotationHandledRef = React.useRef(false);
     const pressStartRef      = React.useRef<PointType | null>(null);
     const pressedPointRef    = React.useRef<number | null>(null);
-    const lastPressRef       = React.useRef<PressSnapshot | null>(null);
+    const lastTouchTimeRef   = React.useRef(0);
 
     const onResize = (): [number, number] => {
         const el = wrapperRef.current;
@@ -101,13 +100,6 @@ export const usePatternLock = ({
         setContainerWidth(el.offsetWidth);
         setContainerHeight(el.offsetHeight);
         return [top, left];
-    };
-
-    const clearLongPressTimer = (): void => {
-        if (longPressTimerRef.current !== null) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-        }
     };
 
     const getPointIndexAtClientPosition = ({ x, y }: PointType): number => {
@@ -141,31 +133,22 @@ export const usePatternLock = ({
         const [top, left] = onResize();
         setInitialMousePosition({ x: clientPosition.x - left, y: clientPosition.y - top });
         setIsMouseDown(true);
+        setFirstDotPopActive(false);
         gestureMovedRef.current = false;
-        annotationHandledRef.current = false;
         pressStartRef.current = clientPosition;
         pressedPointRef.current = getPointIndexAtClientPosition(clientPosition);
         checkCollision(clientPosition);
-
-        clearLongPressTimer();
-        if (pressedPointRef.current === null || pressedPointRef.current < 0 || !onTogglePointAnnotation) return;
-        longPressTimerRef.current = setTimeout(() => {
-            if (gestureMovedRef.current || pressedPointRef.current === null) return;
-            annotationHandledRef.current = true;
-            onTogglePointAnnotation(pressedPointRef.current);
-            onChange?.([]);
-            setIsMouseDown(false);
-            setInitialMousePosition(null);
-        }, LONG_PRESS_MS);
     };
 
     const onHold = ({ clientX, clientY }: React.MouseEvent): void => {
         if (disabled) return;
+        if (shouldIgnoreEmulatedMouseEvent(lastTouchTimeRef.current, Date.now())) return;
         beginInteraction({ x: clientX, y: clientY });
     };
 
     const onTouch = ({ touches }: React.TouchEvent): void => {
         if (disabled) return;
+        lastTouchTimeRef.current = Date.now();
         beginInteraction({ x: touches[0].clientX, y: touches[0].clientY });
     };
 
@@ -173,16 +156,20 @@ export const usePatternLock = ({
         const ref = wrapperRef.current;
         if (!isMouseDown) return;
         const onMouseMove = ({ clientX, clientY }: MouseEvent): void => {
+            if (!firstDotPopActive && shouldActivateFirstDotPop(pressStartRef.current, { x: clientX, y: clientY })) {
+                setFirstDotPopActive(true);
+            }
             if (!isStationaryGesture(pressStartRef.current, { x: clientX, y: clientY })) {
                 gestureMovedRef.current = true;
-                clearLongPressTimer();
             }
             checkCollision({ x: clientX, y: clientY });
         };
         const onTouchMove = ({ touches }: TouchEvent): void => {
+            if (!firstDotPopActive && shouldActivateFirstDotPop(pressStartRef.current, { x: touches[0].clientX, y: touches[0].clientY })) {
+                setFirstDotPopActive(true);
+            }
             if (!isStationaryGesture(pressStartRef.current, { x: touches[0].clientX, y: touches[0].clientY })) {
                 gestureMovedRef.current = true;
-                clearLongPressTimer();
             }
             checkCollision({ x: touches[0].clientX, y: touches[0].clientY });
         };
@@ -224,45 +211,41 @@ export const usePatternLock = ({
     }, [containerWidth, containerHeight, pointActiveSize, cols, rows]);
 
     React.useEffect(() => {
-        const onRelease = (): void => {
-            clearLongPressTimer();
+        const finishInteraction = (): void => {
             setIsMouseDown(false);
             setInitialMousePosition(null);
+            setFirstDotPopActive(false);
             if (disabled) return;
-            if (annotationHandledRef.current) {
-                annotationHandledRef.current = false;
-                pressStartRef.current = null;
-                pressedPointRef.current = null;
-                return;
-            }
-
-            const now = Date.now();
             const tappedIndex = pressedPointRef.current;
             const tappedWithoutDrag = path.length <= 1 && !gestureMovedRef.current;
 
             if (tappedWithoutDrag && tappedIndex !== null && tappedIndex >= 0) {
                 onChange?.([]);
-                if (onTogglePointAnnotation && isDoublePressCandidate(lastPressRef.current, tappedIndex, now)) {
-                    onTogglePointAnnotation(tappedIndex);
-                    lastPressRef.current = null;
-                } else {
-                    lastPressRef.current = { index: tappedIndex, time: now };
-                }
+                onTogglePointAnnotation?.(tappedIndex);
                 pressStartRef.current = null;
                 pressedPointRef.current = null;
                 return;
             }
 
-            lastPressRef.current = null;
             pressStartRef.current = null;
             pressedPointRef.current = null;
             if (path.length) onFinish?.();
         };
-        window.addEventListener("mouseup", onRelease);
-        window.addEventListener("touchend", onRelease);
+
+        const onMouseRelease = (): void => {
+            if (shouldIgnoreEmulatedMouseEvent(lastTouchTimeRef.current, Date.now())) return;
+            finishInteraction();
+        };
+        const onTouchRelease = (): void => {
+            lastTouchTimeRef.current = Date.now();
+            finishInteraction();
+        };
+
+        window.addEventListener("mouseup", onMouseRelease);
+        window.addEventListener("touchend", onTouchRelease);
         return () => {
-            window.removeEventListener("mouseup", onRelease);
-            window.removeEventListener("touchend", onRelease);
+            window.removeEventListener("mouseup", onMouseRelease);
+            window.removeEventListener("touchend", onTouchRelease);
         };
     }, [disabled, onChange, onFinish, onTogglePointAnnotation, path]);
 
@@ -271,9 +254,20 @@ export const usePatternLock = ({
     React.useEffect(() => {
         return () => {
             if (flashTimerRef.current !== null) clearTimeout(flashTimerRef.current);
-            clearLongPressTimer();
         };
     }, []);
 
-    return { wrapperRef, points, gridLayout, wrapperPosition, isMouseDown, initialMousePosition, flashingPoints, completionFlash, onHold, onTouch };
+    return {
+        wrapperRef,
+        points,
+        gridLayout,
+        wrapperPosition,
+        isMouseDown,
+        initialMousePosition,
+        firstDotPopActive,
+        flashingPoints,
+        completionFlash,
+        onHold,
+        onTouch,
+    };
 };

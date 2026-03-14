@@ -65,7 +65,19 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     onFinish,
     path,
 }): React.ReactElement => {
-    const { wrapperRef, points, gridLayout, wrapperPosition, isMouseDown, initialMousePosition, flashingPoints, completionFlash, onHold, onTouch } =
+    const {
+        wrapperRef,
+        points,
+        gridLayout,
+        wrapperPosition,
+        isMouseDown,
+        initialMousePosition,
+        firstDotPopActive,
+        flashingPoints,
+        completionFlash,
+        onHold,
+        onTouch,
+    } =
         usePatternLock({
             path,
             cols,
@@ -110,7 +122,11 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                             pointSize={pointSize}
                             pointActiveSize={pointActiveSize}
                             complete={completionFlash && path.indexOf(i) > -1 && path.indexOf(i) < (targetLength ?? Infinity)}
-                            pop={!noPop && ((isMouseDown && path[path.length - 1] === i) || flashingPoints.has(i))}
+                            pop={!noPop && (flashingPoints.has(i) || (
+                                isMouseDown &&
+                                path[path.length - 1] === i &&
+                                (path.length > 1 || firstDotPopActive)
+                            ))}
                             selected={path.indexOf(i) > -1}
                             highlighted={highlightedPoints.includes(i)}
                             confirmed={confirmedPoints.includes(i)}

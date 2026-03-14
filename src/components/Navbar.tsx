@@ -9,7 +9,7 @@ import {
 import {GITHUB_URL, BUY_ME_A_COFFEE_URL, APP_TITLE} from "./Navbar.constants.ts";
 import {
     Level, PlayerCount, GamePhase,
-    LEVEL_LABELS, LEVEL_CONFIGS, PLAYER_LABELS, ALL_LEVELS, ALL_PLAYER_COUNTS,
+    LEVEL_LABELS, PLAYER_LABELS, ALL_LEVELS, ALL_PLAYER_COUNTS,
 } from "../game/GameConfig.ts";
 import {clearRecords} from "../game/StatsService.ts";
 import HelpModal from "./HelpModal.tsx";
@@ -155,7 +155,6 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                                     <Dropdown.Item key={l} active={l === level} onClick={() => onLevelChange(l)}>
                                         <BarChart2 size={20} className="me-1"/>
                                         {`${LEVEL_LABELS[l]}`}
-                                        <span className="float-end fst-italic"> {`${LEVEL_CONFIGS[l].length}`}</span>
                                     </Dropdown.Item>
                                 ))}
                             </Dropdown.Menu>

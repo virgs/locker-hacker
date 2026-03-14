@@ -2,16 +2,36 @@
 
 ## Architectural Decisions
 
+### First-Dot Pop Requires Pointer Movement
+
+**Decision:** The pop animation for the first selected dot now waits for a small pointer movement instead of firing on a stationary click/touch. With that in place, manual dot annotations now use a single stationary press instead of long-press/double-press. The pop activation distance is controlled by `FIRST_DOT_POP_MOVE_PX`.
+
+**Rationale:** The same first-dot press is also used for manual annotations. Triggering the pop effect immediately on click made note-taking feel noisy and visually misleading. Requiring a slight drag keeps the animation as a drawing cue without distracting users who are only trying to mark a dot, which in turn makes single-press annotations reliable enough to replace the heavier timing-based gesture.
+
+**Implementation details:**
+- `usePatternLock` tracks a separate first-dot pop threshold that is smaller than the drag tolerance used to cancel stationary annotation gestures
+- the first selected dot only pops once that threshold is crossed; later dots in a drawn path keep the existing pop behavior
+- releasing a stationary first-dot press now cycles the dot annotation immediately instead of waiting for long-press or double-press timing
+- touch input now ignores the browser's follow-up synthetic mouse events so a single tap cannot advance two annotation states
+- helper tests cover the threshold rule and preserve the stationary-gesture contract
+
+**Files:**
+- `src/components/usePatternLock.ts`
+- `src/components/usePatternLock.test.ts`
+- `src/components/PatternLock.tsx`
+- `src/components/HelpModal.tsx`
+- `README.md`
+
 ### Manual Dot Annotations During Play
 
-**Decision:** Added two player-controlled annotations directly on the main lock during normal play: eliminated dots reuse the existing red `X`, and confirmed dots render a green success ring behind the dot. The gesture cycles `none -> eliminated -> confirmed -> none` via long-press or double-press.
+**Decision:** Added two player-controlled annotations directly on the main lock during normal play: eliminated dots reuse the existing red `X`, and confirmed dots render a green success ring behind the dot. The gesture cycles `none -> eliminated -> confirmed -> none` via a stationary press on the first dot.
 
 **Rationale:** The game benefits from deduction notes, but the board should stay lightweight and visually native to the pattern-lock interface. Limiting notes to two states keeps the UI readable, avoids solver-like automation, and matches the existing hint language. Keeping annotations current-game-only prevents stale notes from leaking into the next puzzle.
 
 **Implementation details:**
 - note state lives in `GameContext` and is cleared on new game / level change
 - hint eliminations and manual eliminations share the same visual `X`
-- `usePatternLock` now distinguishes stationary presses from actual path drawing so long-press/double-press notes can coexist with normal input
+- `usePatternLock` now distinguishes stationary presses from actual path drawing so first-dot notes can coexist with normal input
 - stationary single taps no longer submit a one-dot guess; only dragged paths are finished
 
 **Files:**

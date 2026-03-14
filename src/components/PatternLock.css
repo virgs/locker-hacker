@@ -65,7 +65,7 @@
 }
 
 .react-pattern-lock__point-inner.active {
-    animation: pop 300ms ease;
+    animation: pop 750ms ease;
 }
 
 .react-pattern-lock__point-confirmed {
@@ -131,7 +131,7 @@
     }
     50% {
         transform: scale(1.75);
-        box-shadow: 0 0 10px 10px var(--bs-white);
+        box-shadow: 0 0 5px 5px var(--bs-white);
     }
     to {
         transform: scale(1);

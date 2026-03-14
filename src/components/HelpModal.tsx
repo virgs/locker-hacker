@@ -72,8 +72,8 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                 Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
             </p>
             <p className="mt-3 mb-0">
-                For your own notes, <strong>long-press or double-press a dot</strong> to cycle it through
-                clear, <strong>eliminated</strong>, and <strong>confirmed</strong>.
+                <strong>Click a dot</strong> to mark it as
+                <strong> clear</strong>, <strong>eliminated</strong>, or <strong>confirmed</strong>.
             </p>
             <NotesHelpRow>
                 <NotePreview>
