@@ -21,6 +21,8 @@ export interface UseSidebarResizeResult {
     onContentTouchEnd: () => void;
 }
 
+type ScrollBoundary = "top" | "bottom" | "both" | "middle";
+
 export const getPointerResizeDelta = (
     origin: DragOrigin,
     current: Pick<DragOrigin, "x" | "y">,
@@ -40,13 +42,39 @@ export const getScrollBoundaryAction = ({
     touchDeltaY: number;
     thresholdPx: number;
 }): "expand" | "collapse" | null => {
-    const maxScrollTop = Math.max(0, scrollHeight - clientHeight);
-    const atTop = scrollTop <= SCROLL_EDGE_EPSILON_PX;
-    const atBottom = scrollTop >= maxScrollTop - SCROLL_EDGE_EPSILON_PX;
+    const boundary = getScrollBoundary(scrollTop, clientHeight, scrollHeight);
+    const atTop = boundary === "top" || boundary === "both";
+    const atBottom = boundary === "bottom" || boundary === "both";
 
     if (atTop && touchDeltaY > thresholdPx) return "collapse";
     if (atBottom && touchDeltaY < -thresholdPx) return "expand";
     return null;
+};
+
+export const getScrollBoundary = (
+    scrollTop: number,
+    clientHeight: number,
+    scrollHeight: number,
+): ScrollBoundary => {
+    const maxScrollTop = Math.max(0, scrollHeight - clientHeight);
+    const atTop = scrollTop <= SCROLL_EDGE_EPSILON_PX;
+    const atBottom = scrollTop >= maxScrollTop - SCROLL_EDGE_EPSILON_PX;
+
+    if (atTop && atBottom) return "both";
+    if (atTop) return "top";
+    if (atBottom) return "bottom";
+    return "middle";
+};
+
+const getBoundaryScrollTop = (
+    boundary: ScrollBoundary,
+    scrollTop: number,
+    clientHeight: number,
+    scrollHeight: number,
+): number => {
+    if (boundary === "top" || boundary === "both") return 0;
+    if (boundary === "bottom") return Math.max(0, scrollHeight - clientHeight);
+    return scrollTop;
 };
 
 const useSidebarResize = (isMobile: boolean): UseSidebarResizeResult => {
@@ -55,6 +83,7 @@ const useSidebarResize = (isMobile: boolean): UseSidebarResizeResult => {
     const dragged = useRef(false);
     const lastExpandTime = useRef(0);
     const touchStartY = useRef<number | null>(null);
+    const touchBoundary = useRef<ScrollBoundary>("middle");
 
     const expand = useCallback((): void => {
         lastExpandTime.current = Date.now();
@@ -100,6 +129,11 @@ const useSidebarResize = (isMobile: boolean): UseSidebarResizeResult => {
 
     const onContentTouchStart = useCallback((e: TouchEvent<HTMLDivElement>): void => {
         touchStartY.current = e.touches[0]?.clientY ?? null;
+        touchBoundary.current = getScrollBoundary(
+            e.currentTarget.scrollTop,
+            e.currentTarget.clientHeight,
+            e.currentTarget.scrollHeight,
+        );
     }, []);
 
     const onContentTouchMove = useCallback((e: TouchEvent<HTMLDivElement>): void => {
@@ -107,8 +141,19 @@ const useSidebarResize = (isMobile: boolean): UseSidebarResizeResult => {
         const currentY = e.touches[0]?.clientY;
         if (currentY === undefined) return;
 
+        const currentBoundary = getScrollBoundary(
+            e.currentTarget.scrollTop,
+            e.currentTarget.clientHeight,
+            e.currentTarget.scrollHeight,
+        );
+        const activeBoundary = currentBoundary === "middle" ? touchBoundary.current : currentBoundary;
         const action = getScrollBoundaryAction({
-            scrollTop: e.currentTarget.scrollTop,
+            scrollTop: getBoundaryScrollTop(
+                activeBoundary,
+                e.currentTarget.scrollTop,
+                e.currentTarget.clientHeight,
+                e.currentTarget.scrollHeight,
+            ),
             clientHeight: e.currentTarget.clientHeight,
             scrollHeight: e.currentTarget.scrollHeight,
             touchDeltaY: currentY - touchStartY.current,
@@ -119,10 +164,12 @@ const useSidebarResize = (isMobile: boolean): UseSidebarResizeResult => {
         e.preventDefault();
         if (action === "expand") expand(); else collapse();
         touchStartY.current = currentY;
+        touchBoundary.current = currentBoundary;
     }, [collapse, expand, isMobile]);
 
     const onContentTouchEnd = useCallback((): void => {
         touchStartY.current = null;
+        touchBoundary.current = "middle";
     }, []);
 
     return {

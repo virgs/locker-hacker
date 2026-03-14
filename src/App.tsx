@@ -85,12 +85,11 @@ export const App = (): ReactElement => {
                         onPointerMove={onPointerMove}
                         onPointerUp={onPointerUp}
                     />
-                    <SidebarInner>
-                        <SidebarHeader {...dragHandlers}>
+                    <SidebarInner {...(isMobile ? {} : dragHandlers)}>
+                        <SidebarHeader {...(isMobile ? dragHandlers : {})}>
                             <HistoryTitle />
                         </SidebarHeader>
                         <SidebarContent
-                            {...(isMobile ? {} : dragHandlers)}
                             onTouchStart={onContentTouchStart}
                             onTouchMove={onContentTouchMove}
                             onTouchEnd={onContentTouchEnd}

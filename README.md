@@ -31,7 +31,7 @@ The game ends when Bulls == code length.
 * **Hint dropdown during play** — the center action is a Hint menu with `Get a hint` (eliminates one random non-code dot with a red `X` marker) and `Give up` (reveals the code)
 * **Reliable stats persistence** — single-player games are persisted from the first valid guess, wins are finalized immediately on solve, and abandoned runs still count as losses after reload or restart
 * **Build-aware stats modal** — the stats view shows the running app version and, in CircleCI deployments, the deployment build number for quicker debugging
-* **Gesture-driven guess history** — the history panel can now be dragged from its title area, and on mobile the bottom sheet collapses or expands when you keep scrolling past the top or bottom edge
+* **Gesture-driven guess history** — the desktop history rail can be dragged from anywhere in the visible panel, while the mobile bottom sheet still supports direct title-bar dragging and now keeps collapsing/expanding naturally when scroll gestures run out at the top or bottom edge
 * **Dot annotations while solving** — press and release a dot without dragging to cycle your own current-game notes between clear, eliminated (`X`), and confirmed (green ring), and the first-dot pop animation now waits for a slight drag so stationary note gestures stay calmer
 * **Player count** — Select 1–4 players (future multiplayer support)
 * **Help modal** — In-app game rules with a "Play Now" button

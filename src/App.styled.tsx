@@ -97,6 +97,7 @@ export const SidebarContent = styled.div`
     flex: 1;
     min-height: 0;
     overflow-y: scroll;
+    overscroll-behavior-y: contain;
     padding: 8px 8px 16px;
     box-sizing: border-box;
     display: flex;

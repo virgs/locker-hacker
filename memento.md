@@ -64,6 +64,25 @@
 - `src/App.tsx`
 - `src/App.styled.tsx`
 
+### Guess History Panel Full-Surface Drag Follow-Up
+
+**Decision:** The desktop guess-history rail now treats the full visible panel as a resize drag surface, while the mobile bottom sheet keeps direct drag on the header and uses content-edge scrolling as the resize handoff.
+
+**Rationale:** The earlier change made the gesture discoverable, but desktop still required dragging specific sub-areas and mobile edge-resize needed to stay reliable when the history list had little or no scrollable overflow. This follow-up makes the interaction feel like one surface instead of separate controls.
+
+**Implementation details:**
+- desktop pointer drag handlers moved to `SidebarInner`, so dragging over the list itself collapses/expands the rail just like the handle
+- mobile keeps pointer dragging on `SidebarHeader`, preserving normal scroll inside the list
+- `useSidebarResize` now classifies list position as `top` / `bottom` / `both` / `middle`, so short lists with no scroll range can still expand or collapse from the content area
+- `SidebarContent` now uses `overscroll-behavior-y: contain` to reduce browser bounce fighting the bottom-sheet gesture
+
+**Files:**
+- `src/components/useSidebarResize.ts`
+- `src/components/useSidebarResize.test.ts`
+- `src/App.tsx`
+- `src/App.styled.tsx`
+- `README.md`
+
 ### Build Label in Stats Modal
 
 **Decision:** Added a small build label to the bottom-right of the stats modal, sourced from compile-time metadata.

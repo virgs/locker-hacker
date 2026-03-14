@@ -1,5 +1,5 @@
 import { DRAG_THRESHOLD_PX } from "./ResizeHandle.constants.ts";
-import { getPointerResizeDelta, getScrollBoundaryAction } from "./useSidebarResize.ts";
+import { getPointerResizeDelta, getScrollBoundary, getScrollBoundaryAction } from "./useSidebarResize.ts";
 
 describe("useSidebarResize constants", () => {
     it("uses a drag threshold that requires intentional movement", () => {
@@ -40,6 +40,14 @@ describe("useSidebarResize drag logic", () => {
     });
 
     describe("mobile scroll boundary behavior", () => {
+        it("detects when the list can scroll in both directions", () => {
+            expect(getScrollBoundary(300, 200, 800)).toBe("middle");
+        });
+
+        it("treats short content as both top and bottom boundaries", () => {
+            expect(getScrollBoundary(0, 200, 180)).toBe("both");
+        });
+
         it("collapses when pulling down past the top edge", () => {
             expect(getScrollBoundaryAction({
                 scrollTop: 0,
@@ -55,6 +63,23 @@ describe("useSidebarResize drag logic", () => {
                 scrollTop: 600,
                 clientHeight: 200,
                 scrollHeight: 800,
+                touchDeltaY: -DRAG_THRESHOLD_PX - 1,
+                thresholdPx: DRAG_THRESHOLD_PX,
+            })).toBe("expand");
+        });
+
+        it("allows both collapse and expand when the content has no scroll range", () => {
+            expect(getScrollBoundaryAction({
+                scrollTop: 0,
+                clientHeight: 200,
+                scrollHeight: 180,
+                touchDeltaY: DRAG_THRESHOLD_PX + 1,
+                thresholdPx: DRAG_THRESHOLD_PX,
+            })).toBe("collapse");
+            expect(getScrollBoundaryAction({
+                scrollTop: 0,
+                clientHeight: 200,
+                scrollHeight: 180,
                 touchDeltaY: -DRAG_THRESHOLD_PX - 1,
                 thresholdPx: DRAG_THRESHOLD_PX,
             })).toBe("expand");
