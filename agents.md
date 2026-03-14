@@ -180,4 +180,4 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [ ] Increase the dropdown items height. Also the give up button seems not to be working anymore.
+1. [ ] When giving a hint, instead of marking a X on the pattern, remove the dot completly but keep the shape of the pattern. This way, the user can still see the shape of the pattern but will know that the dot is not part of the pattern anymore. The dot shouldn't be visible at all. This will make it easier for the user to understand which dots are part of the pattern and which are not, without cluttering the interface with X marks.

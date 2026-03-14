@@ -11,6 +11,7 @@ interface UsePatternLockOptions {
     disabled: boolean;
     allowOverlapping: boolean;
     allowJumping: boolean;
+    blockedPoints?: number[];
     targetLength?: number;
     onTogglePointAnnotation?: (index: number) => void;
     onChange?: (path: number[]) => void;
@@ -63,6 +64,21 @@ export const shouldIgnoreEmulatedMouseEvent = (
     now: number,
 ): boolean => now - lastTouchTime <= TOUCH_MOUSE_GUARD_MS;
 
+export const isBlockedPoint = (
+    index: number,
+    blockedPoints: number[],
+): boolean => index >= 0 && blockedPoints.includes(index);
+
+export const getAvailableImplicitDots = (
+    mid: number[],
+    path: number[],
+    allowOverlapping: boolean,
+    blockedPoints: number[],
+): number[] => mid.filter(point =>
+    !isBlockedPoint(point, blockedPoints) &&
+    (allowOverlapping || path.indexOf(point) === -1),
+);
+
 export const usePatternLock = ({
     path,
     cols,
@@ -71,6 +87,7 @@ export const usePatternLock = ({
     disabled,
     allowOverlapping,
     allowJumping,
+    blockedPoints = [],
     targetLength,
     onTogglePointAnnotation,
     onChange,
@@ -104,7 +121,8 @@ export const usePatternLock = ({
 
     const getPointIndexAtClientPosition = ({ x, y }: PointType): number => {
         const { top, left } = wrapperRef.current.getBoundingClientRect();
-        return getCollidedPointIndex({ x: x - left, y: y - top }, points, pointActiveSize);
+        const index = getCollidedPointIndex({ x: x - left, y: y - top }, points, pointActiveSize);
+        return isBlockedPoint(index, blockedPoints) ? -1 : index;
     };
 
     const checkCollision = ({ x, y }: PointType): void => {
@@ -115,9 +133,7 @@ export const usePatternLock = ({
                     onChange?.([...path, index]);
                 } else {
                     const mid = getPointsInTheMiddle(path[path.length - 1], index, cols);
-                    const implicitDots = allowOverlapping
-                        ? mid
-                        : mid.filter(p => path.indexOf(p) === -1);
+                    const implicitDots = getAvailableImplicitDots(mid, path, allowOverlapping, blockedPoints);
                     if (implicitDots.length > 0) {
                         if (flashTimerRef.current !== null) clearTimeout(flashTimerRef.current);
                         setFlashingPoints(new Set(implicitDots));

@@ -28,7 +28,7 @@ The game ends when Bulls == code length.
 ## Features
 
 * **Level selection** — Easy (3×2, length 3), Medium (3×3, length 4), Hard (4×4, length 5)
-* **Hint dropdown during play** — the center action is a Hint menu with `Get a hint` (eliminates one random non-code dot with a red `X` marker) and `Give up` (reveals the code)
+* **Hint dropdown during play** — the center action is a Hint menu with `Get a hint` (hides one random non-code dot while keeping the lock geometry intact) and `Give up` (reveals the code)
 * **Reliable stats persistence** — single-player games are persisted from the first valid guess, wins are finalized immediately on solve, and abandoned runs still count as losses after reload or restart
 * **Build-aware stats modal** — the stats view shows the running app version and, in CircleCI deployments, the deployment build number for quicker debugging
 * **Gesture-driven guess history** — the desktop history rail can be dragged from anywhere in the visible panel, while the mobile bottom sheet still supports direct title-bar dragging and now keeps collapsing/expanding naturally when scroll gestures run out at the top or bottom edge

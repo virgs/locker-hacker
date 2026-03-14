@@ -1,4 +1,5 @@
 import * as React from "react";
+import { getPointInnerClassName } from "./Point.utils.ts";
 
 const MARKER_EXIT_MS = 180;
 
@@ -35,6 +36,7 @@ interface PointProps {
     pop             : boolean;
     complete        : boolean;
     selected        : boolean;
+    hidden          : boolean;
     highlighted     : boolean;
     confirmed       : boolean;
     pathColor      ?: string;
@@ -50,6 +52,7 @@ const Point: React.FunctionComponent<PointProps> = ({
     pop,
     complete,
     highlighted,
+    hidden,
     confirmed,
     pathColor,
 }): React.ReactElement => {
@@ -57,12 +60,7 @@ const Point: React.FunctionComponent<PointProps> = ({
     const rowPercent = 100 / rows;
     const confirmedMarker = useAnimatedMarker(confirmed);
     const eliminatedMarker = useAnimatedMarker(highlighted);
-
-    const innerClass = [
-        "react-pattern-lock__point-inner",
-        complete ? "complete" : pop ? "active" : "",
-        highlighted && !selected ? "highlighted" : "",
-    ].filter(Boolean).join(" ");
+    const innerClass = getPointInnerClassName({ complete, pop, highlighted, hidden, selected });
 
     return (
         <div
@@ -81,13 +79,13 @@ const Point: React.FunctionComponent<PointProps> = ({
                         height : pointActiveSize
                     }}
                 >
-                    {confirmedMarker.visible && (
+                    {!hidden && confirmedMarker.visible && (
                         <div
                             className={`react-pattern-lock__point-confirmed${confirmedMarker.exiting ? " is-exiting" : ""}`}
                             aria-hidden={true}
                         />
                     )}
-                    {eliminatedMarker.visible && (
+                    {!hidden && eliminatedMarker.visible && (
                         <div
                             className={`react-pattern-lock__point-eliminated${eliminatedMarker.exiting ? " is-exiting" : ""}`}
                             aria-hidden={true}

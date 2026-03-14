@@ -29,6 +29,7 @@ interface PatternLockProps {
     invisible?: boolean;
     targetLength?: number;
     pathColor?: string;
+    hiddenPoints?: number[];
     highlightedPoints?: number[];
     confirmedPoints?: number[];
     onTogglePointAnnotation?: (index: number) => void;
@@ -58,6 +59,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     style = {},
     targetLength,
     pathColor,
+    hiddenPoints = [],
     highlightedPoints = [],
     confirmedPoints = [],
     onTogglePointAnnotation,
@@ -86,6 +88,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
             disabled,
             allowOverlapping,
             allowJumping,
+            blockedPoints: hiddenPoints,
             targetLength,
             onTogglePointAnnotation,
             onChange,
@@ -128,6 +131,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                                 (path.length > 1 || firstDotPopActive)
                             ))}
                             selected={path.indexOf(i) > -1}
+                            hidden={hiddenPoints.includes(i)}
                             highlighted={highlightedPoints.includes(i)}
                             confirmed={confirmedPoints.includes(i)}
                             pathColor={pathColor}

@@ -68,7 +68,8 @@ export const App = (): ReactElement => {
                                 dynamicLineStyle={isRevealing}
                                 targetLength={gridConfig.length}
                                 pathColor={isRevealing ? endGameColor : multiColor}
-                                highlightedPoints={isRevealing ? [] : [...revealedHints, ...annotatedEliminations]}
+                                hiddenPoints={isRevealing ? [] : revealedHints}
+                                highlightedPoints={isRevealing ? [] : annotatedEliminations}
                                 confirmedPoints={isRevealing ? [] : annotatedConfirmed}
                                 onTogglePointAnnotation={isRevealing ? undefined : onCycleDotAnnotation}
                                 onChange={onPathChange}

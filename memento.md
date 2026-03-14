@@ -83,6 +83,26 @@
 - `src/App.styled.tsx`
 - `README.md`
 
+### Hint Dots Hidden Instead of Crossed Out
+
+**Decision:** Hint eliminations now hide the hinted dot completely instead of reusing the red eliminated-marker `X`.
+
+**Rationale:** Hints are stronger, system-provided information than manual notes. Removing the dot entirely communicates "this can never be in the code" more clearly and keeps the board less cluttered, while preserving the grid layout and connector geometry so the lock shape stays readable.
+
+**Implementation details:**
+- `PatternLock` now accepts `hiddenPoints` separately from `highlightedPoints`
+- `App` passes `revealedHints` as hidden dots and reserves `highlightedPoints` for manual eliminated annotations only
+- `Point` suppresses confirmed/eliminated overlays when hidden and adds a dedicated `hidden` class that makes the dot body invisible without collapsing its grid cell
+- `Point.test.ts` covers the class-selection split between hidden hint dots and visible manual eliminations
+
+**Files:**
+- `src/components/PatternLock.tsx`
+- `src/components/Point.tsx`
+- `src/components/Point.test.ts`
+- `src/components/PatternLock.css`
+- `src/App.tsx`
+- `README.md`
+
 ### Build Label in Stats Modal
 
 **Decision:** Added a small build label to the bottom-right of the stats modal, sourced from compile-time metadata.
