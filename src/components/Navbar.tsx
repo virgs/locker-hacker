@@ -18,6 +18,7 @@ import {getPlayerColor} from "../game/playerColors.ts";
 import {useGameContext} from "../context/GameContext.tsx";
 import Tip from "./Tip.tsx";
 import {hasEliminationHintCandidates} from "../game/HintService.ts";
+import { HINT_ACTION_KEYS, runHintAction, type HintActionKey } from "./Navbar.utils.ts";
 
 const LONG_PRESS_MS = 10_000;
 
@@ -65,6 +66,10 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
         }
     };
 
+    const onHintMenuSelect = (eventKey: string | null): void => {
+        runHintAction(eventKey as HintActionKey | null, { onRevealHint, onGiveUp });
+    };
+
     const centerContent = (): React.ReactElement | null => {
         if (phase === GamePhase.Revealing) {
             return (
@@ -78,16 +83,16 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
         if (isRunning) {
             return (
                 <Tip text="Get an elimination hint or give up" placement="right-end">
-                    <Dropdown>
+                    <Dropdown onSelect={onHintMenuSelect}>
                         <Dropdown.Toggle variant="warning" size="sm" aria-label="Hint actions">
                             <Zap size={20}/><ButtonLabel className="ms-1">Hint</ButtonLabel>
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item onClick={onRevealHint} disabled={!canEliminateDot}>
+                            <Dropdown.Item eventKey={HINT_ACTION_KEYS.hint} disabled={!canEliminateDot}>
                                 <Zap size={16} className="me-2"/>
                                 Get a hint
                             </Dropdown.Item>
-                            <Dropdown.Item onClick={onGiveUp}>
+                            <Dropdown.Item eventKey={HINT_ACTION_KEYS.giveUp}>
                                 <Flag size={16} className="me-2"/>
                                 Give up
                             </Dropdown.Item>

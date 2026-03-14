@@ -7,8 +7,25 @@ export const NavbarContainer = styled.nav`
     box-sizing: border-box;
     padding: 0 16px;
 
+    .dropdown-menu {
+        padding: 8px 0;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        min-height: 52px;
+        padding: 14px 18px;
+    }
+
     ${BREAKPOINTS.mobile} {
         padding: 8px;
+
+        .dropdown-item {
+            min-height: 60px;
+            padding: 16px 18px;
+            font-size: 1rem;
+        }
     }
 `;
 

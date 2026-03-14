@@ -125,6 +125,25 @@
 - `src/vite-env.d.ts`
 - `README.md`
 
+### Navbar Dropdown Touch Targets + Mobile Give-Up Fix
+
+**Decision:** Increased navbar dropdown item height again and changed the hint menu to dispatch actions through `Dropdown` selection keys instead of per-item click handlers.
+
+**Rationale:** The dropdown items needed a larger touch target on phones, and the `Give up` action was unreliable on mobile even though it worked on desktop. Handling the hint menu at the dropdown selection layer is less sensitive to touch/click differences than wiring only the item `onClick` callbacks.
+
+**Implementation details:**
+- `Navbar.styled.tsx` now enforces taller `.dropdown-item` targets globally, with an even larger mobile minimum height
+- `Navbar` uses `Dropdown onSelect` plus stable `eventKey` values for the hint menu
+- `Navbar.utils.ts` centralizes the hint-menu action routing so it can be unit tested directly
+- `Navbar.utils.test.ts` covers hint, give-up, and unknown-action paths
+
+**Files:**
+- `src/components/Navbar.tsx`
+- `src/components/Navbar.styled.tsx`
+- `src/components/Navbar.utils.ts`
+- `src/components/Navbar.utils.test.ts`
+- `README.md`
+
 ### Build Label in Stats Modal
 
 **Decision:** Added a small build label to the bottom-right of the stats modal, sourced from compile-time metadata.
