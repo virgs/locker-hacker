@@ -180,4 +180,4 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [ ]  In smaller screen sizes, when the guess history is shown in the bottom, make it taller so it's possible to see at least 4 guesses without scrolling. This will make it easier for users to review their previous attempts and strategize their next move.
+1. [ ]  Adding the total row in the stats modal was not a good choice because the columns don't share the same meaning and some doesn't even make sense. We should remove the total row and instead add a text at the bottom of the modal with the total number of games played, winning and losses, the overall win rate and total hours played. This way we can provide useful information without confusing the user with meaningless totals.

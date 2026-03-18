@@ -2,7 +2,7 @@ import * as React from "react";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 import {Award, Clock, Info, BarChart2, Hash, GitCommit, Zap} from "react-feather";
-import {BuildLabel, EmptyState} from "./StatsModal.styled.tsx";
+import {BuildLabel, EmptyState, SummaryText} from "./StatsModal.styled.tsx";
 import {LEVEL_LABELS, LEVEL_LABELS_SHORT, ALL_LEVELS} from "../game/GameConfig.ts";
 import {
     clearRecords,
@@ -20,6 +20,7 @@ import {BREAKPOINT_QUERIES} from "../theme/breakpoints.ts";
 import { useGameContext } from "../context/GameContext.tsx";
 import { BUILD_LABEL } from "../meta/buildInfo.ts";
 import {
+    buildStatsSummaryParts,
     BUILD_LABEL_RESET_TAP_TARGET,
     BUILD_LABEL_RESET_WINDOW_MS,
     shouldClearStatsFromBuildTaps,
@@ -44,6 +45,7 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
     const hasData = records.length > 0;
     const isMobile = useMediaQuery(BREAKPOINT_QUERIES.mobile);
     const labels = isMobile ? LEVEL_LABELS_SHORT : LEVEL_LABELS;
+    const summary = buildStatsSummaryParts(totalStats);
 
     const resetBuildTapSequence = React.useCallback((): void => {
         resetTapCountRef.current = 0;
@@ -109,16 +111,11 @@ const StatsModal: React.FunctionComponent<StatsModalProps> = ({
                                     <td className="text-end">{avgHints(levelStats[l]).toFixed(1)}</td>
                                 </tr>
                             ))}
-                            <tr className="fw-bold">
-                                <td className="text-start fw-bolder">Total</td>
-                                <td className="text-end">{totalStats.gamesPlayed}</td>
-                                <td className="text-end">{totalStats.wins}</td>
-                                <td className="text-end">{formatStatsTime(totalStats.totalSeconds)}</td>
-                                <td className="text-end">-</td>
-                                <td className="text-end">-</td>
-                            </tr>
                             </tbody>
                         </Table>
+                        <SummaryText>
+                            Across <strong>{summary.games}</strong>, you won <strong>{summary.wins}</strong>, abandoned <strong>{summary.abandoned}</strong>, and spent <strong>{summary.playTime}</strong> playing.<br/> Your overall win rate is <strong>{summary.winRate}</strong>.
+                        </SummaryText>
                         <BuildLabel onClick={onBuildLabelClick}>{BUILD_LABEL}</BuildLabel>
                     </>
                 )}

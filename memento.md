@@ -2,6 +2,25 @@
 
 ## Architectural Decisions
 
+### Stats Modal Footer Summary Replaces Table Total Row
+
+**Decision:** Removed the `Total` row from the stats table and replaced it with a footer summary sentence below the table.
+
+**Rationale:** The stats columns mix different meanings. Aggregating `games` and `wins` in-row was fine, but a total row beside average-only columns like `moves avg` and `hints avg` was confusing and visually implied invalid totals. A dedicated footer sentence keeps the useful aggregate information without pretending every column can be summed.
+
+**Implementation details:**
+- the table now shows only per-level rows
+- a footer summary sentence reports total games played, wins, losses, overall win rate, and total hours played in more natural language
+- the summary now sits in a larger highlighted panel so it reads as a conclusion instead of another row of data
+- `formatStatsSummary()` centralizes the copy/formatting so the behavior is unit tested separately from the modal markup
+
+**Files:**
+- `src/components/StatsModal.tsx`
+- `src/components/StatsModal.styled.tsx`
+- `src/components/StatsModal.utils.ts`
+- `src/components/StatsModal.utils.test.ts`
+- `README.md`
+
 ### Taller Mobile Guess History Preview
 
 **Decision:** Increased the collapsed mobile guess-history sheet height and derived the main-area bottom padding from the same shared constant.

@@ -19,3 +19,15 @@ export const BuildLabel = styled.div`
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 `;
+
+export const SummaryText = styled.p`
+    margin: 20px 0 0;
+    font-size: 1.12rem;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.76);
+
+    strong {
+        color: rgba(255, 255, 255, 0.98);
+        font-weight: 600;
+    }
+`;

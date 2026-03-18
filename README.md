@@ -33,6 +33,7 @@ The game ends when Bulls == code length.
 * **Reliable stats persistence** — single-player games are persisted from the first valid guess, wins are finalized immediately on solve, and abandoned runs still count as losses after reload or restart
 * **Smoother hard-mode guess flow** — post-guess UI resets now render at higher priority, while the heavier AI/history work is deferred so the lock becomes playable again faster
 * **Build-aware stats modal** — the stats view shows the running app version and, in CircleCI deployments, the deployment build number for quicker debugging
+* **Clearer stats totals** — the stats modal no longer shows a misleading table total row; it now summarizes games played, wins, losses, overall win rate, and total hours played in a dedicated footer line
 * **Expert stays playable** — AI confidence analysis is disabled automatically for oversized boards like Expert, preventing browser lockups from impossible candidate generation
 * **Hidden stats reset** — while the stats modal is open, tapping the build label 7 times within 5 seconds clears saved stats immediately
 * **Gesture-driven guess history** — the desktop history rail can be dragged from anywhere in the visible panel, while the mobile bottom sheet still supports direct title-bar dragging and now keeps collapsing/expanding naturally when scroll gestures run out at the top or bottom edge
