@@ -33,6 +33,7 @@ interface PatternLockProps {
     hiddenPoints?: number[];
     annotations?: DotAnnotations;
     onSelectPointAnnotation?: (index: number, selection: DotAnnotationSelection) => void;
+    onAnnotationMenuVisibilityChange?: (visible: boolean) => void;
     onChange?: (path: number[]) => void;
     onFinish?: () => void;
 }
@@ -62,6 +63,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     hiddenPoints = [],
     annotations = {},
     onSelectPointAnnotation,
+    onAnnotationMenuVisibilityChange,
     onChange,
     onFinish,
     path,
@@ -92,13 +94,18 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
             targetLength,
             annotations,
             onSelectPointAnnotation,
+            onAnnotationMenuVisibilityChange,
             onChange,
             onFinish,
         });
 
     return (
         <div
-            className={classnames(["react-pattern-lock__pattern-wrapper", { disabled }, className])}
+            className={classnames([
+                "react-pattern-lock__pattern-wrapper",
+                { disabled, "annotation-menu-active": activeAnnotationMenu !== null },
+                className,
+            ])}
             style={{ ...style, width: containerSize, height: containerSize }}
             onMouseDown={onHold}
             onTouchStart={onTouch}

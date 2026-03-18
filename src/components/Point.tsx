@@ -75,7 +75,11 @@ const Point: React.FunctionComponent<PointProps> = ({
 
     return (
         <div
-            className={ `react-pattern-lock__point-wrapper${selected ? " selected" : ""}` }
+            className={[
+                "react-pattern-lock__point-wrapper",
+                selected ? "selected" : "",
+                annotationMenu ? "menu-open" : "",
+            ].filter(Boolean).join(" ")}
             style={{
                 width  : `${colPercent}%`,
                 height : `${rowPercent}%`,

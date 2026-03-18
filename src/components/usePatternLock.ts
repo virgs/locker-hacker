@@ -24,6 +24,7 @@ interface UsePatternLockOptions {
     targetLength?: number;
     annotations?: DotAnnotations;
     onSelectPointAnnotation?: (index: number, selection: DotAnnotationSelection) => void;
+    onAnnotationMenuVisibilityChange?: (visible: boolean) => void;
     onChange?: (path: number[]) => void;
     onFinish?: () => void;
 }
@@ -113,6 +114,7 @@ export const usePatternLock = ({
     targetLength,
     annotations = {},
     onSelectPointAnnotation,
+    onAnnotationMenuVisibilityChange,
     onChange,
     onFinish,
 }: UsePatternLockOptions): UsePatternLockResult => {
@@ -382,6 +384,10 @@ export const usePatternLock = ({
             if (flashTimerRef.current !== null) clearTimeout(flashTimerRef.current);
         };
     }, []);
+
+    React.useEffect(() => {
+        onAnnotationMenuVisibilityChange?.(activeAnnotationMenu !== null);
+    }, [activeAnnotationMenu, onAnnotationMenuVisibilityChange]);
 
     return {
         wrapperRef,

@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useEffect, useRef, type ReactElement } from 'react'
 import './App.scss'
 import PatternLock from "./components/PatternLock.tsx";
@@ -6,7 +7,7 @@ import Navbar from "./components/Navbar.tsx";
 import Footer from "./components/Footer.tsx";
 import TurnAnnouncement from "./components/TurnAnnouncement.tsx";
 import ResizeHandle from "./components/ResizeHandle.tsx";
-import { AppLayout, ContentArea, MainArea, PatternLockSizer, Sidebar, SidebarInner, SidebarHeader, SidebarContent, ClickOutsideOverlay } from "./App.styled.tsx";
+import { AppLayout, ContentArea, MainArea, PatternLockSizer, Sidebar, SidebarInner, SidebarHeader, SidebarContent, ClickOutsideOverlay, SidebarDimmer } from "./App.styled.tsx";
 import { GamePhase, PlayerCount } from "./game/GameConfig.ts";
 import { getPlayerColor } from "./game/playerColors.ts";
 import { useGameContext } from "./context/GameContext.tsx";
@@ -43,6 +44,7 @@ export const App = (): ReactElement => {
     const sidebarContentRef = useRef<HTMLDivElement>(null);
     const wasExpandedRef = useRef(expanded);
     const previousGuessCountRef = useRef(pathHistory.length);
+    const [annotationMenuOpen, setAnnotationMenuOpen] = React.useState(false);
     const lockSize = useLockSize(mainAreaRef);
     const dragHandlers = { onPointerDown, onPointerMove, onPointerUp };
 
@@ -69,10 +71,14 @@ export const App = (): ReactElement => {
         <AppLayout>
             <Navbar />
             <ContentArea>
-                <MainArea ref={mainAreaRef}>
+                <MainArea ref={mainAreaRef} $annotationMenuActive={annotationMenuOpen}>
                     <GuessCounter />
                     {lockSize > 0 && (
-                        <PatternLockSizer $size={lockSize}>
+                        <PatternLockSizer
+                            $size={lockSize}
+                            className="pattern-lock-focus-layer"
+                            style={annotationMenuOpen ? { zIndex: 20 } : undefined}
+                        >
                             <PatternLock
                                 key={gameKey}
                                 className="react-pattern-lock--animated"
@@ -92,6 +98,7 @@ export const App = (): ReactElement => {
                                 hiddenPoints={isRevealing ? [] : revealedHints}
                                 annotations={isRevealing || !isRunning ? {} : dotAnnotations}
                                 onSelectPointAnnotation={isRevealing || !isRunning ? undefined : onSelectDotAnnotation}
+                                onAnnotationMenuVisibilityChange={setAnnotationMenuOpen}
                                 onChange={onPathChange}
                                 onFinish={onGuessFinish}
                             />
@@ -107,17 +114,19 @@ export const App = (): ReactElement => {
                         onPointerUp={onPointerUp}
                     />
                     <SidebarInner {...(isMobile ? {} : dragHandlers)}>
-                        <SidebarHeader {...(isMobile ? dragHandlers : {})}>
-                            <HistoryTitle />
-                        </SidebarHeader>
-                        <SidebarContent
-                            ref={sidebarContentRef}
-                            onTouchStart={onContentTouchStart}
-                            onTouchMove={onContentTouchMove}
-                            onTouchEnd={onContentTouchEnd}
-                        >
-                            <PatternHistory expanded={expanded} />
-                        </SidebarContent>
+                        <SidebarDimmer $annotationMenuActive={annotationMenuOpen}>
+                            <SidebarHeader {...(isMobile ? dragHandlers : {})}>
+                                <HistoryTitle />
+                            </SidebarHeader>
+                            <SidebarContent
+                                ref={sidebarContentRef}
+                                onTouchStart={onContentTouchStart}
+                                onTouchMove={onContentTouchMove}
+                                onTouchEnd={onContentTouchEnd}
+                            >
+                                <PatternHistory expanded={expanded} />
+                            </SidebarContent>
+                        </SidebarDimmer>
                     </SidebarInner>
                 </Sidebar>
             </ContentArea>

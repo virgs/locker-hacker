@@ -18,7 +18,7 @@ export const ContentArea = styled.div`
     position: relative;
 `;
 
-export const MainArea = styled.main`
+export const MainArea = styled.main<{ $annotationMenuActive?: boolean }>`
     flex: 1;
     height: 100%;
     min-height: 0;
@@ -28,8 +28,18 @@ export const MainArea = styled.main`
     overflow: hidden;
     box-sizing: border-box;
     position: relative;
+    z-index: 1;
     padding: 24px;
     padding-right: calc(220px + 24px);
+
+    > * {
+        transition: opacity 140ms ease, filter 140ms ease;
+    }
+
+    > :not(.pattern-lock-focus-layer) {
+        opacity: ${({ $annotationMenuActive }) => $annotationMenuActive ? 0.28 : 1};
+        filter: ${({ $annotationMenuActive }) => $annotationMenuActive ? "blur(2px) saturate(0.72)" : "none"};
+    }
 
     ${BREAKPOINTS.xl} {
         padding-right: calc(440px + 24px);
@@ -82,6 +92,18 @@ export const SidebarInner = styled.div`
     overflow: hidden;
 `;
 
+export const SidebarDimmer = styled.div<{ $annotationMenuActive?: boolean }>`
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: opacity 140ms ease, filter 140ms ease;
+    opacity: ${({ $annotationMenuActive }) => $annotationMenuActive ? 0.28 : 1};
+    filter: ${({ $annotationMenuActive }) => $annotationMenuActive ? "blur(2px) saturate(0.72)" : "none"};
+`;
+
 export const SidebarHeader = styled.div`
     flex-shrink: 0;
     padding: 12px 8px 0;
@@ -128,6 +150,8 @@ export const SidebarContent = styled.div`
 /** Always a perfect square at the measured available size.
  *  Size is computed by useLockSize watching MainArea's content area. */
 export const PatternLockSizer = styled.div<{ $size: number }>`
+    position: relative;
+    z-index: 2;
     width: ${({ $size }) => $size}px;
     height: ${({ $size }) => $size}px;
 `;

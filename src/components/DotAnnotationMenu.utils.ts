@@ -14,7 +14,7 @@ export interface AnnotationPressRecord {
     timestamp: number;
 }
 
-export const DOT_ANNOTATION_DOUBLE_PRESS_MS = 320;
+export const DOT_ANNOTATION_DOUBLE_PRESS_MS = 350;
 export const DOT_ANNOTATION_MENU_RADIUS_PX = 58;
 export const DOT_ANNOTATION_MENU_HIT_RADIUS_PX = 24;
 
@@ -53,7 +53,7 @@ export const getDotAnnotationMenuOptions = (
     return [
         ...positionOptions,
         { selection: "clear", label: "Clear", tone: "neutral", ...toOffset(150, radiusPx) },
-        { selection: "eliminate", label: "Elim", tone: "danger", ...toOffset(90, radiusPx) },
+        { selection: "eliminate", label: "Off", tone: "danger", ...toOffset(90, radiusPx) },
         { selection: "all", label: "All", tone: "success", ...toOffset(30, radiusPx) },
     ];
 };
