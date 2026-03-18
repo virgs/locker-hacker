@@ -7,8 +7,11 @@ import {
     NotesHelpRow,
     NotePreview,
     NotePreviewDot,
+    NotePreviewConfirmedRing,
 } from "./HelpModal.styled.tsx";
 import { FEEDBACK_THEME } from "./FeedbackIndicator.utils.ts";
+import ConfirmedRing from "./ConfirmedRing.tsx";
+import { getConfirmedLabelStyle } from "./Point.utils.ts";
 
 interface HelpModalProps {
     show    : boolean;
@@ -84,7 +87,10 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                     All positions
                 </NotePreview>
                 <NotePreview>
-                    <NotePreviewDot $tone="success" data-label="2" aria-hidden={true} />
+                    <NotePreviewConfirmedRing aria-hidden={true}>
+                        <ConfirmedRing positions={[2]} targetLength={4} size={38} outerRadius={17.5} innerRadius={14} />
+                        <span style={getConfirmedLabelStyle(2, 4)}>2</span>
+                    </NotePreviewConfirmedRing>
                     Position #2
                 </NotePreview>
                 <NotePreview>

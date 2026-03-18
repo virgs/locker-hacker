@@ -1,5 +1,6 @@
 import * as React from "react";
-import { getConfirmedLabelStyle, getConfirmedRingStyle, getPointInnerClassName } from "./Point.utils.ts";
+import { getConfirmedLabelStyle, getPointInnerClassName } from "./Point.utils.ts";
+import ConfirmedRing from "./ConfirmedRing.tsx";
 import { getDotAnnotationMenuOptions } from "./DotAnnotationMenu.utils.ts";
 import { getAnnotationSelections, type DotAnnotationState } from "../game/dotAnnotations.ts";
 import type { ActiveAnnotationMenu } from "./usePatternLock.ts";
@@ -92,9 +93,11 @@ const Point: React.FunctionComponent<PointProps> = ({
                 {!hidden && confirmedMarker.visible && (
                     <div
                         className={`react-pattern-lock__point-confirmed${confirmedMarker.exiting ? " is-exiting" : ""}`}
-                        style={targetLength ? getConfirmedRingStyle(confirmedPositions, targetLength) : undefined}
                         aria-hidden={true}
                     >
+                        {targetLength !== undefined && (
+                            <ConfirmedRing positions={confirmedPositions} targetLength={targetLength} />
+                        )}
                         {targetLength !== undefined && confirmedPositions.map(position => (
                             <span
                                 key={position}

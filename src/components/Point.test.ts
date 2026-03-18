@@ -1,4 +1,4 @@
-import { getConfirmedLabelStyle, getConfirmedRingGradient, getPointInnerClassName } from "./Point.utils.ts";
+import { getConfirmedLabelStyle, getConfirmedRingSegments, getPointInnerClassName } from "./Point.utils.ts";
 
 describe("Point class selection", () => {
     it("marks hint-hidden dots as hidden without the eliminated highlight class", () => {
@@ -32,13 +32,14 @@ describe("Point class selection", () => {
     });
 
     it("positions confirmation numbers around the ring by code segment", () => {
-        expect(getConfirmedLabelStyle(1, 4)).toEqual({ transform: "translate(-50%, -50%) translate(0.00px, -24.00px)" });
-        expect(getConfirmedLabelStyle(2, 4)).toEqual({ transform: "translate(-50%, -50%) translate(24.00px, 0.00px)" });
-        expect(getConfirmedLabelStyle(3, 4)).toEqual({ transform: "translate(-50%, -50%) translate(0.00px, 24.00px)" });
+        expect(getConfirmedLabelStyle(1, 4)).toEqual({ transform: "translate(-50%, -50%) translate(-16.97px, -16.97px)" });
+        expect(getConfirmedLabelStyle(2, 4)).toEqual({ transform: "translate(-50%, -50%) translate(16.97px, -16.97px)" });
+        expect(getConfirmedLabelStyle(3, 4)).toEqual({ transform: "translate(-50%, -50%) translate(16.97px, 16.97px)" });
     });
 
-    it("cuts transparent gaps in the confirmed ring behind numbered labels", () => {
-        expect(getConfirmedRingGradient([2], 4)).toContain("transparent");
-        expect(getConfirmedRingGradient([2], 4)).toContain("var(--confirmed-ring-color)");
+    it("cuts only small gaps from the confirmed ring behind numbered labels", () => {
+        expect(getConfirmedRingSegments([2], 4)).toEqual([
+            { start: 90, end: 360 },
+        ]);
     });
 });

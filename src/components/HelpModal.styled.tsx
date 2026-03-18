@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { getConfirmedRingGradient } from "./Point.utils.ts";
 
 export const HelpList = styled.ul`
     list-style: none;
@@ -93,26 +92,9 @@ export const NotePreviewDot = styled.span<{ $tone: "danger" | "success" }>`
             position: absolute;
             inset: -7px;
             border-radius: 50%;
-            background: ${getConfirmedRingGradient([2], 4, "var(--bs-success, #198754)")};
-            -webkit-mask: radial-gradient(circle, transparent calc(100% - 3px), #000 calc(100% - 3px));
-            mask: radial-gradient(circle, transparent calc(100% - 3px), #000 calc(100% - 3px));
             box-shadow:
-                inset 0 0 0 3px rgba(25, 135, 84, 0.92),
                 0 0 0 4px rgba(25, 135, 84, 0.12),
                 0 0 14px rgba(25, 135, 84, 0.3);
-        }
-
-        &[data-label]::after {
-            content: attr(data-label);
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 11px;
-            font-weight: 800;
-            line-height: 1;
-            color: var(--bs-success, #198754);
-            text-shadow: 0 0 8px rgba(25, 135, 84, 0.35);
         }
     ` : `
         &::before,
@@ -134,4 +116,45 @@ export const NotePreviewDot = styled.span<{ $tone: "danger" | "success" }>`
             transform: rotate(-45deg);
         }
     `}
+`;
+
+export const NotePreviewConfirmedRing = styled.span`
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+
+    .react-pattern-lock__point-confirmed-svg {
+        position: absolute;
+        inset: 0;
+        overflow: visible;
+        filter: drop-shadow(0 0 8px rgba(25, 135, 84, 0.22));
+    }
+
+    .react-pattern-lock__point-confirmed-outer-arc {
+        stroke: rgba(25, 135, 84, 0.95);
+        stroke-width: 3;
+        fill: none;
+        stroke-linecap: round;
+    }
+
+    .react-pattern-lock__point-confirmed-inner-arc {
+        stroke: rgba(255, 255, 255, 0.2);
+        stroke-width: 1.5;
+        fill: none;
+        stroke-linecap: round;
+    }
+
+    span {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--bs-success, #198754);
+        text-shadow: 0 0 8px rgba(25, 135, 84, 0.35);
+    }
 `;
