@@ -1,12 +1,17 @@
 import { shouldScrollHistoryToBottom } from "./App.utils.ts";
 
 describe("App history collapse behavior", () => {
-    it("scrolls to the latest guesses when a new guess is added", () => {
+    it("scrolls to the latest guesses when a new guess is added while collapsed", () => {
         expect(shouldScrollHistoryToBottom(2, 3, false, false)).toBe(true);
     });
 
     it("scrolls to the latest guesses only when the sidebar collapses", () => {
         expect(shouldScrollHistoryToBottom(3, 3, true, false)).toBe(true);
+    });
+
+    it("does not force-scroll when expanded and only a new guess arrives", () => {
+        expect(shouldScrollHistoryToBottom(2, 3, true, true)).toBe(false);
+        expect(shouldScrollHistoryToBottom(2, 3, false, true)).toBe(false);
     });
 
     it("does not force-scroll when neither guesses nor collapse state demand it", () => {

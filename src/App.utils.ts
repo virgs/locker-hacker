@@ -3,4 +3,9 @@ export const shouldScrollHistoryToBottom = (
     currentGuessCount: number,
     wasExpanded: boolean,
     expanded: boolean,
-): boolean => previousGuessCount !== currentGuessCount || (wasExpanded && !expanded);
+): boolean => {
+    const guessCountChanged = previousGuessCount !== currentGuessCount;
+    const collapsed = !expanded;
+
+    return (guessCountChanged && collapsed) || (wasExpanded && collapsed);
+};
