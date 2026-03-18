@@ -174,10 +174,6 @@
     z-index: 1;
     pointer-events: none;
     background: radial-gradient(circle, rgba(25, 135, 84, 0.22) 0%, rgba(25, 135, 84, 0.08) 52%, rgba(25, 135, 84, 0.02) 68%, transparent 78%);
-    box-shadow:
-        0 0 0 5px rgba(25, 135, 84, 0.1),
-        0 0 16px rgba(25, 135, 84, 0.26),
-        0 0 28px rgba(25, 135, 84, 0.18);
     animation: pointConfirmedIn 180ms ease-out forwards;
 }
 

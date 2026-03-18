@@ -77,9 +77,8 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                 Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
             </p>
             <p className="mt-3 mb-0">
-                <strong>Double-click and hold a dot</strong> to open a radial note menu, then release on
-                <strong> clear</strong>, <strong>eliminate</strong>, <strong>all positions</strong>, or any
-                <strong> numbered position</strong>.
+                <strong>Double-click and hold a dot</strong> then release on <strong> clear</strong>, <strong>eliminate</strong>, <strong>all positions</strong>, or any
+                <strong> numbered position</strong> to make help annotations.
             </p>
             <NotesHelpRow>
                 <NotePreview>
@@ -88,7 +87,7 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                 </NotePreview>
                 <NotePreview>
                     <NotePreviewConfirmedRing aria-hidden={true}>
-                        <ConfirmedRing positions={[2]} targetLength={4} size={38} outerRadius={17.5} innerRadius={14} />
+                        <ConfirmedRing positions={[2]} targetLength={4} />
                         <span style={getConfirmedLabelStyle(2, 4)}>2</span>
                     </NotePreviewConfirmedRing>
                     Position #2

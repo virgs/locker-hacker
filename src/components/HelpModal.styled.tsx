@@ -70,8 +70,6 @@ export const NotePreview = styled.span`
     gap: 10px;
     padding: 8px 12px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 0.9rem;
 `;
 
@@ -123,8 +121,10 @@ export const NotePreviewConfirmedRing = styled.span`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(25, 135, 84, 0.22) 0%, rgba(25, 135, 84, 0.08) 52%, rgba(25, 135, 84, 0.02) 68%, transparent 78%);
 
     .react-pattern-lock__point-confirmed-svg {
         position: absolute;
@@ -151,10 +151,15 @@ export const NotePreviewConfirmedRing = styled.span`
         position: absolute;
         top: 50%;
         left: 50%;
-        font-size: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
         font-weight: 800;
         line-height: 1;
         color: var(--bs-success, #198754);
-        text-shadow: 0 0 8px rgba(25, 135, 84, 0.35);
+        text-shadow:
+            0 0 6px rgba(25, 135, 84, 0.35),
+            0 0 12px rgba(25, 135, 84, 0.2);
     }
 `;
