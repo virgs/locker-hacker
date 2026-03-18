@@ -14,6 +14,8 @@
 - `usePatternLock` now watches for a second press on the same dot within a short window and, on that second hold, switches from path drawing into radial-menu mode
 - radial option layout, double-press timing, and hover hit-testing live in `DotAnnotationMenu.utils.ts`
 - points now render multiple confirmation numbers on the same ring and show an animated radial menu that uses the lock’s success/danger color palette
+- annotation input is disabled until the current game has actually started, so the menu cannot be opened before the first valid guess
+- the help modal note previews now reuse the real `Point` renderer instead of separate approximation styles, keeping the examples visually synced with the live board
 
 **Files:**
 - `src/game/dotAnnotations.ts`

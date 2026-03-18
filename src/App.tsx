@@ -23,7 +23,7 @@ import { shouldScrollHistoryToBottom } from "./App.utils.ts";
 export const App = (): ReactElement => {
     const {
         phase, path, code, gameKey, gridConfig, pathHistory, playerCount, currentPlayer, winner, revealedHints,
-        dotAnnotations, onPathChange, onGuessFinish, onSelectDotAnnotation,
+        isRunning, dotAnnotations, onPathChange, onGuessFinish, onSelectDotAnnotation,
     } = useGameContext();
     const isRevealing   = phase === GamePhase.Revealing;
     const multiColor    = playerCount !== PlayerCount.One ? getPlayerColor(currentPlayer) : undefined;
@@ -90,8 +90,8 @@ export const App = (): ReactElement => {
                                 targetLength={gridConfig.length}
                                 pathColor={isRevealing ? endGameColor : multiColor}
                                 hiddenPoints={isRevealing ? [] : revealedHints}
-                                annotations={isRevealing ? {} : dotAnnotations}
-                                onSelectPointAnnotation={isRevealing ? undefined : onSelectDotAnnotation}
+                                annotations={isRevealing || !isRunning ? {} : dotAnnotations}
+                                onSelectPointAnnotation={isRevealing || !isRunning ? undefined : onSelectDotAnnotation}
                                 onChange={onPathChange}
                                 onFinish={onGuessFinish}
                             />

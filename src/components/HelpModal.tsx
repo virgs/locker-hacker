@@ -6,12 +6,10 @@ import {
     ExampleCaption,
     NotesHelpRow,
     NotePreview,
-    NotePreviewDot,
-    NotePreviewConfirmedRing,
+    NotePreviewMarker,
 } from "./HelpModal.styled.tsx";
 import { FEEDBACK_THEME } from "./FeedbackIndicator.utils.ts";
-import ConfirmedRing from "./ConfirmedRing.tsx";
-import { getConfirmedLabelStyle } from "./Point.utils.ts";
+import Point from "./Point.tsx";
 
 interface HelpModalProps {
     show    : boolean;
@@ -77,23 +75,62 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                 Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
             </p>
             <p className="mt-3 mb-0">
-                <strong>Double-click and hold a dot</strong> then release on <strong> clear</strong>, <strong>eliminate</strong>, <strong>all positions</strong>, or any
-                <strong> numbered position</strong> to make help annotations.
+                After your first valid guess starts the round, <strong>double-click and hold a dot</strong> then release on
+                <strong> clear</strong>, <strong>eliminate</strong>, <strong>all positions</strong>, or any
+                <strong> numbered position</strong> to place deduction notes.
             </p>
             <NotesHelpRow>
                 <NotePreview>
-                    <NotePreviewDot $tone="success" aria-hidden={true} />
+                    <NotePreviewMarker aria-hidden={true}>
+                        <Point
+                            index={0}
+                            pointSize={20}
+                            pointActiveSize={30}
+                            cols={1}
+                            rows={1}
+                            pop={false}
+                            complete={false}
+                            selected={false}
+                            hidden={false}
+                            annotation={{ eliminated: false, positions: [1, 2, 3, 4] }}
+                            targetLength={4}
+                        />
+                    </NotePreviewMarker>
                     All positions
                 </NotePreview>
                 <NotePreview>
-                    <NotePreviewConfirmedRing aria-hidden={true}>
-                        <ConfirmedRing positions={[2]} targetLength={4} />
-                        <span style={getConfirmedLabelStyle(2, 4)}>2</span>
-                    </NotePreviewConfirmedRing>
+                    <NotePreviewMarker aria-hidden={true}>
+                        <Point
+                            index={0}
+                            pointSize={20}
+                            pointActiveSize={30}
+                            cols={1}
+                            rows={1}
+                            pop={false}
+                            complete={false}
+                            selected={false}
+                            hidden={false}
+                            annotation={{ eliminated: false, positions: [2] }}
+                            targetLength={4}
+                        />
+                    </NotePreviewMarker>
                     Position #2
                 </NotePreview>
                 <NotePreview>
-                    <NotePreviewDot $tone="danger" aria-hidden={true} />
+                    <NotePreviewMarker aria-hidden={true}>
+                        <Point
+                            index={0}
+                            pointSize={20}
+                            pointActiveSize={30}
+                            cols={1}
+                            rows={1}
+                            pop={false}
+                            complete={false}
+                            selected={false}
+                            hidden={false}
+                            annotation={{ eliminated: true, positions: [] }}
+                        />
+                    </NotePreviewMarker>
                     Eliminated
                 </NotePreview>
             </NotesHelpRow>
