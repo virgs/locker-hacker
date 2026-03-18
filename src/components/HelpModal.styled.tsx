@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { getConfirmedRingGradient } from "./Point.utils.ts";
 
 export const HelpList = styled.ul`
     list-style: none;
@@ -92,8 +93,11 @@ export const NotePreviewDot = styled.span<{ $tone: "danger" | "success" }>`
             position: absolute;
             inset: -7px;
             border-radius: 50%;
-            border: 3px solid var(--bs-success, #198754);
+            background: ${getConfirmedRingGradient([2], 4, "var(--bs-success, #198754)")};
+            -webkit-mask: radial-gradient(circle, transparent calc(100% - 3px), #000 calc(100% - 3px));
+            mask: radial-gradient(circle, transparent calc(100% - 3px), #000 calc(100% - 3px));
             box-shadow:
+                inset 0 0 0 3px rgba(25, 135, 84, 0.92),
                 0 0 0 4px rgba(25, 135, 84, 0.12),
                 0 0 14px rgba(25, 135, 84, 0.3);
         }
@@ -101,10 +105,10 @@ export const NotePreviewDot = styled.span<{ $tone: "danger" | "success" }>`
         &[data-label]::after {
             content: attr(data-label);
             position: absolute;
-            top: -9px;
+            top: -10px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 800;
             line-height: 1;
             color: var(--bs-success, #198754);

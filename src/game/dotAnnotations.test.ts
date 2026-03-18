@@ -1,39 +1,86 @@
 import {
-    cycleDotAnnotation,
+    applyDotAnnotationSelection,
+    getAnnotationSelections,
     getConfirmedDotAnnotations,
     getAnnotatedDotIndices,
-    toggleDotAnnotation,
     type DotAnnotations,
 } from "./dotAnnotations.ts";
 
 describe("dotAnnotations", () => {
-    it("cycles from none to eliminated to confirmed through all numbered confirmations and back to none", () => {
-        expect(cycleDotAnnotation(undefined, 4)).toBe("eliminated");
-        expect(cycleDotAnnotation("eliminated", 4)).toBe("confirmed");
-        expect(cycleDotAnnotation("confirmed", 4)).toBe("confirmed-1");
-        expect(cycleDotAnnotation("confirmed-1", 4)).toBe("confirmed-2");
-        expect(cycleDotAnnotation("confirmed-4", 4)).toBeUndefined();
+    it("toggles eliminated dots on and off", () => {
+        expect(applyDotAnnotationSelection({}, 2, "eliminate", 4)).toEqual({
+            2: { eliminated: true, positions: [] },
+        });
+        expect(applyDotAnnotationSelection({
+            2: { eliminated: true, positions: [] },
+        }, 2, "eliminate", 4)).toEqual({});
     });
 
-    it("toggles a dot annotation without mutating other dots", () => {
-        const annotations: DotAnnotations = { 1: "eliminated", 4: "confirmed-2" };
+    it("toggles numbered confirmations independently on the same dot", () => {
+        const annotations = applyDotAnnotationSelection({}, 4, "position-2", 4);
+        const withSecond = applyDotAnnotationSelection(annotations, 4, "position-4", 4);
+        const clearedOne = applyDotAnnotationSelection(withSecond, 4, "position-2", 4);
 
-        expect(toggleDotAnnotation(annotations, 1, 3)).toEqual({ 1: "confirmed", 4: "confirmed-2" });
-        expect(toggleDotAnnotation(annotations, 4, 3)).toEqual({ 1: "eliminated", 4: "confirmed-3" });
+        expect(withSecond).toEqual({
+            4: { eliminated: false, positions: [2, 4] },
+        });
+        expect(clearedOne).toEqual({
+            4: { eliminated: false, positions: [4] },
+        });
+    });
+
+    it("treats all as a toggle for every numbered confirmation", () => {
+        const selected = applyDotAnnotationSelection({}, 1, "all", 3);
+        const cleared = applyDotAnnotationSelection(selected, 1, "all", 3);
+
+        expect(selected).toEqual({
+            1: { eliminated: false, positions: [1, 2, 3] },
+        });
+        expect(cleared).toEqual({});
+    });
+
+    it("clears elimination when a numbered confirmation is selected", () => {
+        const annotations: DotAnnotations = {
+            5: { eliminated: true, positions: [] },
+        };
+
+        expect(applyDotAnnotationSelection(annotations, 5, "position-3", 4)).toEqual({
+            5: { eliminated: false, positions: [3] },
+        });
     });
 
     it("returns eliminated dot indices", () => {
-        const annotations: DotAnnotations = { 0: "eliminated", 2: "confirmed-1", 5: "eliminated" };
+        const annotations: DotAnnotations = {
+            0: { eliminated: true, positions: [] },
+            2: { eliminated: false, positions: [1, 3] },
+            5: { eliminated: true, positions: [] },
+        };
 
         expect(getAnnotatedDotIndices(annotations, "eliminated")).toEqual([0, 5]);
     });
 
-    it("returns confirmed annotations with optional positions", () => {
-        const annotations: DotAnnotations = { 1: "confirmed", 2: "confirmed-3", 5: "eliminated" };
+    it("returns confirmed annotations with multiple positions", () => {
+        const annotations: DotAnnotations = {
+            1: { eliminated: false, positions: [1, 4] },
+            2: { eliminated: false, positions: [3] },
+            5: { eliminated: true, positions: [] },
+        };
 
         expect(getConfirmedDotAnnotations(annotations)).toEqual([
-            { index: 1, position: null },
-            { index: 2, position: 3 },
+            { index: 1, positions: [1, 4] },
+            { index: 2, positions: [3] },
+        ]);
+    });
+
+    it("returns reusable selection ids for the radial menu", () => {
+        expect(getAnnotationSelections({ eliminated: true, positions: [] }, 4)).toEqual(["eliminate"]);
+        expect(getAnnotationSelections({ eliminated: false, positions: [2, 4] }, 4)).toEqual(["position-2", "position-4"]);
+        expect(getAnnotationSelections({ eliminated: false, positions: [1, 2, 3, 4] }, 4)).toEqual([
+            "all",
+            "position-1",
+            "position-2",
+            "position-3",
+            "position-4",
         ]);
     });
 });

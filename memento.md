@@ -2,6 +2,32 @@
 
 ## Architectural Decisions
 
+### Radial Dot Annotation Menu With Multi-Position Selection
+
+**Decision:** Replaced the stationary-tap annotation cycle with a double-click/double-tap-and-hold radial menu around the pressed dot. The new menu offers `clear`, `eliminate`, `all`, and every numbered position `1..N`, with multiple numbered selections allowed on the same dot.
+
+**Rationale:** The old cycle interaction was fast to implement but slow to use once numbered confirmations were added. It also prevented players from marking a dot as potentially `2` and `4` at the same time. A radial menu makes the choices explicit, removes repeated tapping, and supports multi-position deduction notes directly.
+
+**Implementation details:**
+- dot annotation state now stores `eliminated` plus an array of confirmed positions per dot
+- `all` toggles every numbered position for that dot, while `eliminate` remains exclusive with confirmations
+- `usePatternLock` now watches for a second press on the same dot within a short window and, on that second hold, switches from path drawing into radial-menu mode
+- radial option layout, double-press timing, and hover hit-testing live in `DotAnnotationMenu.utils.ts`
+- points now render multiple confirmation numbers on the same ring and show an animated radial menu that uses the lock’s success/danger color palette
+
+**Files:**
+- `src/game/dotAnnotations.ts`
+- `src/game/dotAnnotations.test.ts`
+- `src/context/GameContext.tsx`
+- `src/components/DotAnnotationMenu.utils.ts`
+- `src/components/DotAnnotationMenu.utils.test.ts`
+- `src/components/usePatternLock.ts`
+- `src/components/PatternLock.tsx`
+- `src/components/Point.tsx`
+- `src/components/PatternLock.css`
+- `src/components/HelpModal.tsx`
+- `README.md`
+
 ### Stats Modal Footer Summary Replaces Table Total Row
 
 **Decision:** Removed the `Total` row from the stats table and replaced it with a footer summary sentence below the table.

@@ -1,4 +1,4 @@
-import { getConfirmedLabelStyle, getPointInnerClassName } from "./Point.utils.ts";
+import { getConfirmedLabelStyle, getConfirmedRingGradient, getPointInnerClassName } from "./Point.utils.ts";
 
 describe("Point class selection", () => {
     it("marks hint-hidden dots as hidden without the eliminated highlight class", () => {
@@ -35,5 +35,10 @@ describe("Point class selection", () => {
         expect(getConfirmedLabelStyle(1, 4)).toEqual({ transform: "translate(-50%, -50%) translate(0.00px, -24.00px)" });
         expect(getConfirmedLabelStyle(2, 4)).toEqual({ transform: "translate(-50%, -50%) translate(24.00px, 0.00px)" });
         expect(getConfirmedLabelStyle(3, 4)).toEqual({ transform: "translate(-50%, -50%) translate(0.00px, 24.00px)" });
+    });
+
+    it("cuts transparent gaps in the confirmed ring behind numbered labels", () => {
+        expect(getConfirmedRingGradient([2], 4)).toContain("transparent");
+        expect(getConfirmedRingGradient([2], 4)).toContain("var(--confirmed-ring-color)");
     });
 });

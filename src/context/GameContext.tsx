@@ -8,7 +8,8 @@ import { pickEliminationHint } from "../game/HintService.ts";
 import {
     getAnnotatedDotIndices,
     getConfirmedDotAnnotations,
-    toggleDotAnnotation,
+    applyDotAnnotationSelection,
+    type DotAnnotationSelection,
     type ConfirmedDotAnnotation,
     type DotAnnotations,
 } from "../game/dotAnnotations.ts";
@@ -34,6 +35,7 @@ export interface GameContextValue {
     winner          : number | null;
     currentPlayer   : number;
     revealedHints   : number[];
+    dotAnnotations        : DotAnnotations;
     annotatedEliminations : number[];
     annotatedConfirmed    : ConfirmedDotAnnotation[];
     activeStatsRecordId     : string | null;
@@ -46,7 +48,7 @@ export interface GameContextValue {
     onToggleStatsModal   : () => void;
     onDismissTurnModal              : () => void;
     onRevealHint                    : () => void;
-    onCycleDotAnnotation            : (index: number) => void;
+    onSelectDotAnnotation           : (index: number, selection: DotAnnotationSelection) => void;
     onRegisterInvalidGuessListener  : (cb: () => void) => void;
 }
 
@@ -165,9 +167,9 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
             return [...prev, next];
         });
     }, [code, gridConfig.cols, gridConfig.rows]);
-    const onCycleDotAnnotation = React.useCallback((index: number): void => {
+    const onSelectDotAnnotation = React.useCallback((index: number, selection: DotAnnotationSelection): void => {
         if (phase === GamePhase.Revealing) return;
-        setDotAnnotations(prev => toggleDotAnnotation(prev, index, gridConfig.length));
+        setDotAnnotations(prev => applyDotAnnotationSelection(prev, index, selection, gridConfig.length));
     }, [gridConfig.length, phase]);
     const onRegisterInvalidGuessListener = React.useCallback((cb: () => void): void => {
         invalidGuessListenerRef.current = cb;
@@ -197,12 +199,13 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         phase, path, pathHistory, playerHistory, isRunning,
         showStatsModal, showTurnModal, elapsedSeconds,
         winner, currentPlayer, revealedHints,
+        dotAnnotations,
         annotatedEliminations: getAnnotatedDotIndices(dotAnnotations, "eliminated"),
         annotatedConfirmed: getConfirmedDotAnnotations(dotAnnotations),
         activeStatsRecordId: activeRecordId,
         onLevelChange, onPlayerCountChange,
         onGiveUp, onFinishGame,
-        onPathChange, onGuessFinish, onToggleStatsModal, onDismissTurnModal, onRevealHint, onCycleDotAnnotation,
+        onPathChange, onGuessFinish, onToggleStatsModal, onDismissTurnModal, onRevealHint, onSelectDotAnnotation,
         onRegisterInvalidGuessListener,
     };
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

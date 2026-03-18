@@ -1,5 +1,8 @@
 import * as React from "react";
-import { getConfirmedLabelStyle, getPointInnerClassName } from "./Point.utils.ts";
+import { getConfirmedLabelStyle, getConfirmedRingStyle, getPointInnerClassName } from "./Point.utils.ts";
+import { getDotAnnotationMenuOptions } from "./DotAnnotationMenu.utils.ts";
+import { getAnnotationSelections, type DotAnnotationState } from "../game/dotAnnotations.ts";
+import type { ActiveAnnotationMenu } from "./usePatternLock.ts";
 
 const MARKER_EXIT_MS = 180;
 
@@ -37,8 +40,8 @@ interface PointProps {
     complete        : boolean;
     selected        : boolean;
     hidden          : boolean;
-    highlighted     : boolean;
-    confirmedPosition?: number | null;
+    annotation?     : DotAnnotationState;
+    annotationMenu ?: ActiveAnnotationMenu;
     targetLength?   : number;
     pathColor      ?: string;
 }
@@ -52,17 +55,22 @@ const Point: React.FunctionComponent<PointProps> = ({
     selected,
     pop,
     complete,
-    highlighted,
     hidden,
-    confirmedPosition,
+    annotation,
+    annotationMenu,
     targetLength,
     pathColor,
 }): React.ReactElement => {
     const colPercent = 100 / cols;
     const rowPercent = 100 / rows;
-    const confirmedMarker = useAnimatedMarker(confirmedPosition !== undefined);
+    const confirmedPositions = annotation?.eliminated ? [] : annotation?.positions ?? [];
+    const highlighted = annotation?.eliminated ?? false;
+    const confirmedMarker = useAnimatedMarker(confirmedPositions.length > 0);
     const eliminatedMarker = useAnimatedMarker(highlighted);
+    const menuMarker = useAnimatedMarker(annotationMenu !== undefined);
     const innerClass = getPointInnerClassName({ complete, pop, highlighted, hidden, selected });
+    const menuOptions = targetLength ? getDotAnnotationMenuOptions(targetLength) : [];
+    const menuSelections = annotationMenu?.selectedSelections ?? getAnnotationSelections(annotation, targetLength ?? 0);
 
     return (
         <div
@@ -74,38 +82,64 @@ const Point: React.FunctionComponent<PointProps> = ({
             }}
             data-index={ index }
         >
-                <div
-                    className="react-pattern-lock__point"
-                    style={{
-                        width  : pointActiveSize,
-                        height : pointActiveSize
-                    }}
-                >
-                    {!hidden && confirmedMarker.visible && (
-                        <div
-                            className={`react-pattern-lock__point-confirmed${confirmedMarker.exiting ? " is-exiting" : ""}`}
-                            aria-hidden={true}
-                        >
-                            {confirmedPosition !== undefined && confirmedPosition !== null && targetLength !== undefined && (
-                                <span
-                                    className="react-pattern-lock__point-confirmed-label"
-                                    style={getConfirmedLabelStyle(confirmedPosition, targetLength)}
-                                >
-                                    {confirmedPosition}
-                                </span>
-                            )}
-                        </div>
-                    )}
-                    {!hidden && eliminatedMarker.visible && (
-                        <div
-                            className={`react-pattern-lock__point-eliminated${eliminatedMarker.exiting ? " is-exiting" : ""}`}
-                            aria-hidden={true}
-                        />
-                    )}
+            <div
+                className="react-pattern-lock__point"
+                style={{
+                    width  : pointActiveSize,
+                    height : pointActiveSize
+                }}
+            >
+                {!hidden && confirmedMarker.visible && (
                     <div
-                        className={innerClass}
-                        style={{
-                            minWidth   : pointSize,
+                        className={`react-pattern-lock__point-confirmed${confirmedMarker.exiting ? " is-exiting" : ""}`}
+                        style={targetLength ? getConfirmedRingStyle(confirmedPositions, targetLength) : undefined}
+                        aria-hidden={true}
+                    >
+                        {targetLength !== undefined && confirmedPositions.map(position => (
+                            <span
+                                key={position}
+                                className="react-pattern-lock__point-confirmed-label"
+                                style={getConfirmedLabelStyle(position, targetLength)}
+                            >
+                                {position}
+                            </span>
+                        ))}
+                    </div>
+                )}
+                {!hidden && eliminatedMarker.visible && (
+                    <div
+                        className={`react-pattern-lock__point-eliminated${eliminatedMarker.exiting ? " is-exiting" : ""}`}
+                        aria-hidden={true}
+                    />
+                )}
+                {!hidden && menuMarker.visible && menuOptions.length > 0 && (
+                    <div
+                        className={`react-pattern-lock__annotation-menu${menuMarker.exiting ? " is-exiting" : ""}`}
+                        aria-hidden={true}
+                    >
+                        <div className="react-pattern-lock__annotation-menu-core" />
+                        {menuOptions.map(option => (
+                            <div
+                                key={option.selection}
+                                className={[
+                                    "react-pattern-lock__annotation-menu-option",
+                                    `tone-${option.tone}`,
+                                    menuSelections.includes(option.selection) ? "is-selected" : "",
+                                    annotationMenu?.highlightedSelection === option.selection ? "is-highlighted" : "",
+                                ].filter(Boolean).join(" ")}
+                                style={{
+                                    transform: `translate(-50%, -50%) translate(${option.x.toFixed(2)}px, ${option.y.toFixed(2)}px)`,
+                                }}
+                            >
+                                {option.label}
+                            </div>
+                        ))}
+                    </div>
+                )}
+                <div
+                    className={innerClass}
+                    style={{
+                        minWidth   : pointSize,
                         minHeight  : pointSize,
                         ...(pathColor && selected ? { background: pathColor } : {}),
                     }}

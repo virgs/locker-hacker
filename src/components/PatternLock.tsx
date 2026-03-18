@@ -5,7 +5,7 @@ import "./PatternLock.css";
 import Point from "./Point.tsx";
 import Connectors from "./Connectors.tsx";
 import { usePatternLock } from "./usePatternLock.ts";
-import type { ConfirmedDotAnnotation } from "../game/dotAnnotations.ts";
+import type { DotAnnotations, DotAnnotationSelection } from "../game/dotAnnotations.ts";
 
 interface PatternLockProps {
     path: number[];
@@ -31,9 +31,8 @@ interface PatternLockProps {
     targetLength?: number;
     pathColor?: string;
     hiddenPoints?: number[];
-    highlightedPoints?: number[];
-    confirmedPoints?: ConfirmedDotAnnotation[];
-    onTogglePointAnnotation?: (index: number) => void;
+    annotations?: DotAnnotations;
+    onSelectPointAnnotation?: (index: number, selection: DotAnnotationSelection) => void;
     onChange?: (path: number[]) => void;
     onFinish?: () => void;
 }
@@ -61,17 +60,12 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     targetLength,
     pathColor,
     hiddenPoints = [],
-    highlightedPoints = [],
-    confirmedPoints = [],
-    onTogglePointAnnotation,
+    annotations = {},
+    onSelectPointAnnotation,
     onChange,
     onFinish,
     path,
 }): React.ReactElement => {
-    const confirmedPointMap = new Map(
-        confirmedPoints.map(annotation => [annotation.index, annotation.position]),
-    );
-
     const {
         wrapperRef,
         points,
@@ -82,6 +76,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
         firstDotPopActive,
         flashingPoints,
         completionFlash,
+        activeAnnotationMenu,
         onHold,
         onTouch,
     } =
@@ -95,7 +90,8 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
             allowJumping,
             blockedPoints: hiddenPoints,
             targetLength,
-            onTogglePointAnnotation,
+            annotations,
+            onSelectPointAnnotation,
             onChange,
             onFinish,
         });
@@ -137,8 +133,8 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                             ))}
                             selected={path.indexOf(i) > -1}
                             hidden={hiddenPoints.includes(i)}
-                            highlighted={highlightedPoints.includes(i)}
-                            confirmedPosition={confirmedPointMap.has(i) ? confirmedPointMap.get(i) ?? null : undefined}
+                            annotation={annotations[i]}
+                            annotationMenu={activeAnnotationMenu?.index === i ? activeAnnotationMenu : undefined}
                             targetLength={targetLength}
                             pathColor={pathColor}
                         />

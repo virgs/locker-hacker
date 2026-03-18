@@ -1,43 +1,104 @@
-export type DotAnnotation = "eliminated" | "confirmed" | `confirmed-${number}`;
+export type DotAnnotationSelection = "clear" | "eliminate" | "all" | `position-${number}`;
+
+export interface DotAnnotationState {
+    eliminated: boolean;
+    positions: number[];
+}
 
 export interface ConfirmedDotAnnotation {
     index: number;
-    position: number | null;
+    positions: number[];
 }
 
-export type DotAnnotations = Record<number, DotAnnotation | undefined>;
+export type DotAnnotations = Record<number, DotAnnotationState | undefined>;
 
-export const cycleDotAnnotation = (
-    current?: DotAnnotation,
-    codeLength = 0,
-): DotAnnotation | undefined => {
-    if (!current) return "eliminated";
-    if (current === "eliminated") return "confirmed";
-    if (current === "confirmed") return codeLength > 0 ? "confirmed-1" : undefined;
+const createAllPositions = (codeLength: number): number[] =>
+    Array.from({ length: Math.max(codeLength, 0) }, (_, index) => index + 1);
 
-    const position = Number(current.replace("confirmed-", ""));
-    if (!Number.isInteger(position) || position < 1) return undefined;
-    if (position >= codeLength) return undefined;
-    return `confirmed-${position + 1}`;
+const normalizePositions = (
+    positions: number[],
+    codeLength: number,
+): number[] =>
+    Array.from(new Set(positions))
+        .filter(position => Number.isInteger(position) && position >= 1 && position <= codeLength)
+        .sort((left, right) => left - right);
+
+const getPositionFromSelection = (selection: DotAnnotationSelection): number | null => {
+    if (!selection.startsWith("position-")) return null;
+    const position = Number(selection.replace("position-", ""));
+    return Number.isInteger(position) && position >= 1 ? position : null;
 };
 
-export const toggleDotAnnotation = (
+const clearAnnotation = (
     annotations: DotAnnotations,
     index: number,
+): DotAnnotations => {
+    const next = { ...annotations };
+    delete next[index];
+    return next;
+};
+
+const setAnnotation = (
+    annotations: DotAnnotations,
+    index: number,
+    annotation: DotAnnotationState,
+): DotAnnotations => ({
+    ...annotations,
+    [index]: annotation,
+});
+
+export const getAnnotationSelections = (
+    annotation: DotAnnotationState | undefined,
+    codeLength: number,
+): DotAnnotationSelection[] => {
+    if (!annotation) return [];
+    if (annotation.eliminated) return ["eliminate"];
+
+    const positions = normalizePositions(annotation.positions, codeLength);
+    if (positions.length === 0) return [];
+    if (positions.length === codeLength) return ["all", ...positions.map(position => `position-${position}` as const)];
+    return positions.map(position => `position-${position}` as const);
+};
+
+export const applyDotAnnotationSelection = (
+    annotations: DotAnnotations,
+    index: number,
+    selection: DotAnnotationSelection,
     codeLength: number,
 ): DotAnnotations => {
-    const next = cycleDotAnnotation(annotations[index], codeLength);
+    if (selection === "clear") return clearAnnotation(annotations, index);
 
-    if (next) {
-        return {
-            ...annotations,
-            [index]: next,
-        };
+    const current = annotations[index];
+    if (selection === "eliminate") {
+        if (current?.eliminated) return clearAnnotation(annotations, index);
+        return setAnnotation(annotations, index, { eliminated: true, positions: [] });
     }
 
-    const rest = { ...annotations };
-    delete rest[index];
-    return rest;
+    if (selection === "all") {
+        const positions = createAllPositions(codeLength);
+        if (!current?.eliminated && normalizePositions(current?.positions ?? [], codeLength).length === positions.length) {
+            return clearAnnotation(annotations, index);
+        }
+        return setAnnotation(annotations, index, { eliminated: false, positions });
+    }
+
+    const position = getPositionFromSelection(selection);
+    if (position === null || position > codeLength) return annotations;
+
+    const nextPositions = normalizePositions(
+        current?.eliminated
+            ? [position]
+            : current?.positions.includes(position)
+                ? current.positions.filter(entry => entry !== position)
+                : [...(current?.positions ?? []), position],
+        codeLength,
+    );
+
+    if (nextPositions.length === 0) return clearAnnotation(annotations, index);
+    return setAnnotation(annotations, index, {
+        eliminated: false,
+        positions: nextPositions,
+    });
 };
 
 export const getAnnotatedDotIndices = (
@@ -45,7 +106,7 @@ export const getAnnotatedDotIndices = (
     type: "eliminated",
 ): number[] =>
     Object.entries(annotations)
-        .filter(([, value]) => value === type)
+        .filter(([, value]) => type === "eliminated" && value?.eliminated)
         .map(([index]) => Number(index));
 
 export const getConfirmedDotAnnotations = (
@@ -53,12 +114,7 @@ export const getConfirmedDotAnnotations = (
 ): ConfirmedDotAnnotation[] =>
     Object.entries(annotations)
         .flatMap<ConfirmedDotAnnotation>(([index, value]) => {
-            if (!value || value === "eliminated") return [];
-            if (value === "confirmed") {
-                return [{ index: Number(index), position: null }];
-            }
-
-            const position = Number(value.replace("confirmed-", ""));
-            if (!Number.isInteger(position) || position < 1) return [];
-            return [{ index: Number(index), position }];
+            if (!value || value.eliminated) return [];
+            if (value.positions.length === 0) return [];
+            return [{ index: Number(index), positions: value.positions }];
         });
