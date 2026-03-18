@@ -23,7 +23,7 @@ const GuessCounter: React.FunctionComponent = (): React.ReactElement | null => {
     const overflow    = totalDots > MAX_VISIBLE_DOTS;
 
     return (
-        <GuessCounterWrapper aria-label="Guess count">
+        <GuessCounterWrapper $side="left" aria-label="Guess count">
             <CounterMetric $side="left">
                 <CounterIcon><GitCommit /></CounterIcon>
                 <AttemptDots>
@@ -34,7 +34,7 @@ const GuessCounter: React.FunctionComponent = (): React.ReactElement | null => {
                 </AttemptDots>
                 <CounterValue $side="left">{totalDots}</CounterValue>
             </CounterMetric>
-            <AttemptLabel>{formatGuessLabel(totalDots)}</AttemptLabel>
+            <AttemptLabel $side="left">{formatGuessLabel(totalDots)}</AttemptLabel>
         </GuessCounterWrapper>
     );
 };

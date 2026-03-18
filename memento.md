@@ -2,6 +2,22 @@
 
 ## Architectural Decisions
 
+### Counter Build-Type Regression Guard
+
+**Decision:** Kept the shared play-area counter styling strict about its required `$side` prop and made `GuessCounter` pass the left-side prop explicitly at render sites instead of relying on styled-component attribute inference alone.
+
+**Rationale:** The CircleCI build failed under TypeScript because the `styled-components` wrapper around `PlayAreaCounter` did not preserve the injected `$side` prop strongly enough for `GuessCounterWrapper` and `AttemptLabel`. Passing the prop explicitly keeps the side contract obvious and removes dependence on fragile inference. The related Jest test now relies on the already-configured global Jest typings instead of importing `@jest/globals`, which was missing from the build environment.
+
+**Implementation details:**
+- `GuessCounter` now passes `$side="left"` to both the wrapper and label
+- the counter render tests now use `import.meta.jest` with lightweight module stubs, which matches this repo’s ESM Jest setup without relying on `@jest/globals`
+- `GuessCounter.render.test.tsx` adds a render regression test so CI exercises the started/not-started counter states
+
+**Files:**
+- `src/components/GuessCounter.tsx`
+- `src/components/GuessCounter.render.test.tsx`
+- `src/components/TimeCounter.test.tsx`
+
 ### Mirrored Play-Area Guess And Time Counters
 
 **Decision:** Moved the elapsed game timer out of the footer and into the playable area, mirroring the guess counter on the opposite side with shared styling.
