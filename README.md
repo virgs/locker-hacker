@@ -33,13 +33,14 @@ The game ends when Bulls == code length.
 * **Reliable stats persistence** — single-player games are persisted from the first valid guess, wins are finalized immediately on solve, and abandoned runs still count as losses after reload or restart
 * **Smoother hard-mode guess flow** — post-guess UI resets now render at higher priority, while the heavier AI/history work is deferred so the lock becomes playable again faster
 * **Build-aware stats modal** — the stats view shows the running app version and, in CircleCI deployments, the deployment build number for quicker debugging
-* **Clearer stats totals** — the stats modal no longer shows a misleading table total row; it now summarizes games played, wins, losses, overall win rate, and total hours played in a dedicated footer line
+* **Clearer stats totals** — the stats modal no longer shows a misleading table total row; it now summarizes games played, wins, losses, overall win rate, and total hours played in a dedicated footer line, with the summary text stepping down on phones so it stays readable without overwhelming the modal
 * **Expert stays playable** — AI confidence analysis is disabled automatically for oversized boards like Expert, preventing browser lockups from impossible candidate generation
 * **Hidden stats reset** — while the stats modal is open, tapping the build label 7 times within 5 seconds clears saved stats immediately
 * **Gesture-driven guess history** — the desktop history rail can be dragged from anywhere in the visible panel, while the mobile bottom sheet still supports direct title-bar dragging and now keeps collapsing/expanding naturally when scroll gestures run out at the top or bottom edge
 * **Taller mobile guess-history preview** — on smaller screens, the collapsed bottom history sheet is taller so at least four recent guesses stay visible before you need to scroll
 * **Deterministic history auto-scroll** — guess history now scrolls from a single code path, so new guesses and collapse-to-latest behavior stay consistent instead of competing with nested smooth-scroll calls
 * **Latest guess preserved on collapse** — when the guess history panel collapses, its scroll position snaps back to the bottom so the newest guesses stay visible
+* **Balanced play-area counters** — once a round starts, guess count sits at the top-left of the board and elapsed time mirrors it on the top-right, both using the same floating counter style so the footer can stay quieter
 * **Radial dot annotations while solving** — after your first valid guess starts the round, double-click or double-tap and hold a dot to open a circular note menu, then release on `clear`, `eliminate`, `all`, or any numbered position `1..N`; numbered selections can be combined on the same dot and render around the green confirmation ring
 * **Web-only deployment** — Android/Capacitor support and AdMob integration have been removed for now, so the app targets the GitHub Pages web build only
 * **Player count** — Select 1–4 players (future multiplayer support)

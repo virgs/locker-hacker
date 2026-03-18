@@ -13,7 +13,7 @@ describe("DotAnnotationMenu helpers", () => {
         expect(options[0]).toMatchObject({ selection: "position-1", label: "1", tone: "success" });
         expect(options[3]).toMatchObject({ selection: "position-4", label: "4", tone: "success" });
         expect(options[4]).toMatchObject({ selection: "clear", label: "Clear", tone: "neutral" });
-        expect(options[5]).toMatchObject({ selection: "eliminate", label: "Elim", tone: "danger" });
+        expect(options[5]).toMatchObject({ selection: "eliminate", label: "Off", tone: "danger" });
         expect(options[6]).toMatchObject({ selection: "all", label: "All", tone: "success" });
         expect(Math.round(Math.hypot(options[0].x, options[0].y))).toBe(DOT_ANNOTATION_MENU_RADIUS_PX);
     });

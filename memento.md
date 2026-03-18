@@ -2,6 +2,26 @@
 
 ## Architectural Decisions
 
+### Mirrored Play-Area Guess And Time Counters
+
+**Decision:** Moved the elapsed game timer out of the footer and into the playable area, mirroring the guess counter on the opposite side with shared styling.
+
+**Rationale:** Guess count and elapsed time are both in-round status. Keeping them near the lock makes them easier to scan during play, and matching their visual treatment makes the board feel more intentional than mixing one floating counter with one footer stat.
+
+**Implementation details:**
+- `TimeCounter.tsx` now renders elapsed time at the top-right of the main play area once a round has started
+- `GuessCounter` now reuses the same floating counter shell so both corners share spacing, label treatment, and glassy surface styling
+- the footer keeps its AI, player, difficulty, and code-length stats, but no longer shows elapsed time
+
+**Files:**
+- `src/App.tsx`
+- `src/components/TimeCounter.tsx`
+- `src/components/PlayAreaCounter.styled.tsx`
+- `src/components/GuessCounter.tsx`
+- `src/components/GuessCounter.styled.tsx`
+- `src/components/Footer.tsx`
+- `README.md`
+
 ### Radial Dot Annotation Menu With Multi-Position Selection
 
 **Decision:** Replaced the stationary-tap annotation cycle with a double-click/double-tap-and-hold radial menu around the pressed dot. The new menu offers `clear`, `eliminate`, `all`, and every numbered position `1..N`, with multiple numbered selections allowed on the same dot.
@@ -40,6 +60,7 @@
 - the table now shows only per-level rows
 - a footer summary sentence reports total games played, wins, losses, overall win rate, and total hours played in more natural language
 - the summary now sits in a larger highlighted panel so it reads as a conclusion instead of another row of data
+- on small screens, the summary text drops to a smaller font size and tighter line height so the footer stays readable without dominating the modal
 - `formatStatsSummary()` centralizes the copy/formatting so the behavior is unit tested separately from the modal markup
 
 **Files:**

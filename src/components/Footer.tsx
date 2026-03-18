@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Hash, BarChart2, Clock, User, Unlock, Lock} from "react-feather";
+import {Hash, BarChart2, User, Unlock, Lock} from "react-feather";
 import {
     FooterContainer,
     FooterStat,
@@ -11,7 +11,7 @@ import {
 import {PlayerCount, LEVEL_LABELS, LEVEL_LABELS_SHORT} from "../game/GameConfig.ts";
 import {getPlayerColor} from "../game/playerColors.ts";
 import {useGameContext} from "../context/GameContext.tsx";
-import {formatTime, formatPercentDelta, getAiIndicatorColor} from "./Footer.utils.ts";
+import {formatPercentDelta, getAiIndicatorColor} from "./Footer.utils.ts";
 import useInferenceEngine, {GuessQuality, supportsAiInference} from "./useInferenceEngine.ts";
 import Tip from "./Tip.tsx";
 import useMediaQuery from "./useMediaQuery.ts";
@@ -25,7 +25,6 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
     const {
         gridConfig,
         level,
-        elapsedSeconds,
         playerCount,
         currentPlayer,
         code,
@@ -102,12 +101,6 @@ const Footer: React.FunctionComponent = (): React.ReactElement => {
                     <Hash size={20}/>
                     {selectedCount}/{gridConfig.length}
                 </CodeLengthStat>
-            </Tip>
-            <Tip text="Elapsed time" placement="top">
-                <FooterStat aria-label="Elapsed time">
-                    <Clock size={20}/>
-                    {formatTime(elapsedSeconds)}
-                </FooterStat>
             </Tip>
         </FooterContainer>
     );

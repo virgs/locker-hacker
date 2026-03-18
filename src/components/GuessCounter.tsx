@@ -1,4 +1,5 @@
 import * as React from "react";
+import { GitCommit } from "react-feather";
 import { useGameContext } from "../context/GameContext.tsx";
 import {
     GuessCounterWrapper,
@@ -7,6 +8,7 @@ import {
     OverflowBadge,
     AttemptLabel,
 } from "./GuessCounter.styled.tsx";
+import { CounterIcon, CounterMetric, CounterValue } from "./PlayAreaCounter.styled.tsx";
 import { formatGuessLabel } from "./GuessCounter.utils.ts";
 
 const MAX_VISIBLE_DOTS = 10;
@@ -21,14 +23,18 @@ const GuessCounter: React.FunctionComponent = (): React.ReactElement | null => {
     const overflow    = totalDots > MAX_VISIBLE_DOTS;
 
     return (
-        <GuessCounterWrapper>
-            <AttemptDots>
-                {Array.from({ length: visibleDots }).map((_, i) => (
-                    <AttemptDot key={i} $latest={i === visibleDots - 1} />
-                ))}
-                {overflow && <OverflowBadge>+</OverflowBadge>}
-            </AttemptDots>
-            <AttemptLabel className="fs-6 my-1 text-muted"><small>{formatGuessLabel(totalDots)}</small></AttemptLabel>
+        <GuessCounterWrapper aria-label="Guess count">
+            <CounterMetric $side="left">
+                <CounterIcon><GitCommit /></CounterIcon>
+                <AttemptDots>
+                    {Array.from({ length: visibleDots }).map((_, i) => (
+                        <AttemptDot key={i} $latest={i === visibleDots - 1} />
+                    ))}
+                    {overflow && <OverflowBadge>+</OverflowBadge>}
+                </AttemptDots>
+                <CounterValue $side="left">{totalDots}</CounterValue>
+            </CounterMetric>
+            <AttemptLabel>{formatGuessLabel(totalDots)}</AttemptLabel>
         </GuessCounterWrapper>
     );
 };

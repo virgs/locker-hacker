@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { BREAKPOINTS } from "../theme/breakpoints.ts";
 
 export const HelpList = styled.ul`
     list-style: none;
@@ -62,17 +63,22 @@ export const NotesHelpRow = styled.div`
     gap: 12px;
     margin-top: 12px;
     justify-content: center;
+
+    ${BREAKPOINTS.mobile} {
+        flex-direction: column;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
 `;
 
 export const NotePreview = styled.span`
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 0.9rem;
+
+    ${BREAKPOINTS.mobile} {
+        width: min(100%, 280px);
+    }
 `;
 
 export const NotePreviewMarker = styled.span`

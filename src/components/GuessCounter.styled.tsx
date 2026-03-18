@@ -1,5 +1,10 @@
 import styled, { keyframes, css } from "styled-components";
 import { BREAKPOINTS } from "../theme/breakpoints.ts";
+import {
+    PlayAreaCounter,
+    CounterLabel,
+    counterLatestGlow,
+} from "./PlayAreaCounter.styled.tsx";
 
 const popIn = keyframes`
     0%   { transform: scale(0.4); opacity: 0; }
@@ -7,21 +12,7 @@ const popIn = keyframes`
     100% { transform: scale(1);   opacity: 1; }
 `;
 
-export const GuessCounterWrapper = styled.div`
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    pointer-events: none;
-    user-select: none;
-
-    ${BREAKPOINTS.mobile} {
-        top: 12px;
-        left: 12px;
-    }
-`;
+export const GuessCounterWrapper = styled(PlayAreaCounter).attrs({ $side: "left" })``;
 
 export const AttemptDots = styled.div`
     display: flex;
@@ -45,8 +36,7 @@ export const AttemptDot = styled.span<{ $latest: boolean }>`
 
     ${({ $latest }) => $latest && css`
         animation: ${popIn} 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        box-shadow: 0 0 6px var(--bs-gray);
-        opacity: 1;
+        ${counterLatestGlow};
     `}
 
     ${BREAKPOINTS.mobile} {
@@ -63,14 +53,4 @@ export const OverflowBadge = styled.span`
     line-height: 1;
 `;
 
-export const AttemptLabel = styled.span`
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.4);
-    letter-spacing: 0.04em;
-    line-height: 1;
-
-    ${BREAKPOINTS.mobile} {
-        font-size: 0.65rem;
-    }
-`;
+export const AttemptLabel = styled(CounterLabel).attrs({ $side: "left" })``;

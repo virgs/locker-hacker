@@ -58,10 +58,24 @@
     align-items: center;
     position: relative;
     z-index: 2;
+    transition: opacity 140ms ease, filter 140ms ease;
 }
 
 .react-pattern-lock__point-wrapper.menu-open {
     z-index: 30;
+}
+
+.react-pattern-lock__pattern-wrapper.annotation-menu-active .react-pattern-lock__point-wrapper:not(.menu-open) {
+    opacity: 0.18;
+    filter: blur(1.5px) brightness(0.42) saturate(0.55);
+}
+
+.react-pattern-lock__pattern-wrapper.annotation-menu-active .react-pattern-lock__point-wrapper.menu-open .react-pattern-lock__point-inner,
+.react-pattern-lock__pattern-wrapper.annotation-menu-active .react-pattern-lock__point-wrapper.menu-open .react-pattern-lock__point-confirmed,
+.react-pattern-lock__pattern-wrapper.annotation-menu-active .react-pattern-lock__point-wrapper.menu-open .react-pattern-lock__point-eliminated {
+    opacity: 0.16;
+    filter: blur(1px) brightness(0.38) saturate(0.5);
+    transition: opacity 140ms ease, filter 140ms ease;
 }
 
 .react-pattern-lock__point {

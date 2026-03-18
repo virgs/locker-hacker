@@ -19,6 +19,7 @@ import useLockSize from "./components/useLockSize.ts";
 import useEndGameColor from "./components/useEndGameColor.ts";
 import useConfetti from "./components/useConfetti.ts";
 import GuessCounter from "./components/GuessCounter.tsx";
+import TimeCounter from "./components/TimeCounter.tsx";
 import { shouldScrollHistoryToBottom } from "./App.utils.ts";
 
 export const App = (): ReactElement => {
@@ -73,6 +74,7 @@ export const App = (): ReactElement => {
             <ContentArea>
                 <MainArea ref={mainAreaRef} $annotationMenuActive={annotationMenuOpen}>
                     <GuessCounter />
+                    <TimeCounter />
                     {lockSize > 0 && (
                         <PatternLockSizer
                             $size={lockSize}

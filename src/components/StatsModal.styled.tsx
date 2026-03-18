@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { BREAKPOINTS } from "../theme/breakpoints.ts";
 
 export const EmptyState = styled.div`
     text-align: center;
@@ -29,5 +30,10 @@ export const SummaryText = styled.p`
     strong {
         color: rgba(255, 255, 255, 0.98);
         font-weight: 600;
+    }
+
+    ${BREAKPOINTS.mobile} {
+        font-size: 0.94rem;
+        line-height: 1.55;
     }
 `;
