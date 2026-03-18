@@ -5,6 +5,7 @@ import "./PatternLock.css";
 import Point from "./Point.tsx";
 import Connectors from "./Connectors.tsx";
 import { usePatternLock } from "./usePatternLock.ts";
+import type { ConfirmedDotAnnotation } from "../game/dotAnnotations.ts";
 
 interface PatternLockProps {
     path: number[];
@@ -31,7 +32,7 @@ interface PatternLockProps {
     pathColor?: string;
     hiddenPoints?: number[];
     highlightedPoints?: number[];
-    confirmedPoints?: number[];
+    confirmedPoints?: ConfirmedDotAnnotation[];
     onTogglePointAnnotation?: (index: number) => void;
     onChange?: (path: number[]) => void;
     onFinish?: () => void;
@@ -67,6 +68,10 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
     onFinish,
     path,
 }): React.ReactElement => {
+    const confirmedPointMap = new Map(
+        confirmedPoints.map(annotation => [annotation.index, annotation.position]),
+    );
+
     const {
         wrapperRef,
         points,
@@ -133,7 +138,8 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
                             selected={path.indexOf(i) > -1}
                             hidden={hiddenPoints.includes(i)}
                             highlighted={highlightedPoints.includes(i)}
-                            confirmed={confirmedPoints.includes(i)}
+                            confirmedPosition={confirmedPointMap.has(i) ? confirmedPointMap.get(i) ?? null : undefined}
+                            targetLength={targetLength}
                             pathColor={pathColor}
                         />
                     ))}

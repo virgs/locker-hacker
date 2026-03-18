@@ -1,5 +1,5 @@
 import * as React from "react";
-import { getPointInnerClassName } from "./Point.utils.ts";
+import { getConfirmedLabelStyle, getPointInnerClassName } from "./Point.utils.ts";
 
 const MARKER_EXIT_MS = 180;
 
@@ -38,7 +38,8 @@ interface PointProps {
     selected        : boolean;
     hidden          : boolean;
     highlighted     : boolean;
-    confirmed       : boolean;
+    confirmedPosition?: number | null;
+    targetLength?   : number;
     pathColor      ?: string;
 }
 
@@ -53,12 +54,13 @@ const Point: React.FunctionComponent<PointProps> = ({
     complete,
     highlighted,
     hidden,
-    confirmed,
+    confirmedPosition,
+    targetLength,
     pathColor,
 }): React.ReactElement => {
     const colPercent = 100 / cols;
     const rowPercent = 100 / rows;
-    const confirmedMarker = useAnimatedMarker(confirmed);
+    const confirmedMarker = useAnimatedMarker(confirmedPosition !== undefined);
     const eliminatedMarker = useAnimatedMarker(highlighted);
     const innerClass = getPointInnerClassName({ complete, pop, highlighted, hidden, selected });
 
@@ -83,7 +85,16 @@ const Point: React.FunctionComponent<PointProps> = ({
                         <div
                             className={`react-pattern-lock__point-confirmed${confirmedMarker.exiting ? " is-exiting" : ""}`}
                             aria-hidden={true}
-                        />
+                        >
+                            {confirmedPosition !== undefined && confirmedPosition !== null && targetLength !== undefined && (
+                                <span
+                                    className="react-pattern-lock__point-confirmed-label"
+                                    style={getConfirmedLabelStyle(confirmedPosition, targetLength)}
+                                >
+                                    {confirmedPosition}
+                                </span>
+                            )}
+                        </div>
                     )}
                     {!hidden && eliminatedMarker.visible && (
                         <div

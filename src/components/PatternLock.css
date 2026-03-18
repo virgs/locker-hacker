@@ -73,19 +73,46 @@
 }
 
 .react-pattern-lock__point-confirmed {
+    --confirmed-ring-color: rgba(25, 135, 84, 0.95);
     position: absolute;
     width: 48px;
     height: 48px;
     border-radius: 50%;
     z-index: 1;
     pointer-events: none;
-    border: 3px solid rgba(25, 135, 84, 0.95);
+    border: 3px solid var(--confirmed-ring-color);
     background: radial-gradient(circle, rgba(25, 135, 84, 0.22) 0%, rgba(25, 135, 84, 0.08) 52%, rgba(25, 135, 84, 0.02) 68%, transparent 78%);
     box-shadow:
         0 0 0 5px rgba(25, 135, 84, 0.1),
         0 0 16px rgba(25, 135, 84, 0.26),
         0 0 28px rgba(25, 135, 84, 0.18);
     animation: pointConfirmedIn 180ms ease-out forwards;
+}
+
+.react-pattern-lock__point-confirmed-label {
+    --confirmed-label-bg: var(--bs-body-bg, #060606);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 3px;
+    border-radius: 999px;
+    background: var(--confirmed-label-bg);
+    box-shadow:
+        0 0 0 3px var(--confirmed-label-bg),
+        0 0 10px rgba(6, 6, 6, 0.55);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--confirmed-ring-color);
+    text-shadow:
+        0 0 6px rgba(25, 135, 84, 0.35),
+        0 0 12px rgba(25, 135, 84, 0.2);
+    pointer-events: none;
 }
 
 .react-pattern-lock__point-confirmed::after {

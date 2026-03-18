@@ -5,7 +5,13 @@ import { loadConfig, saveConfig } from "../game/ConfigService.ts";
 import { GameSessionStatsTracker } from "./GameSessionStatsTracker.ts";
 import { useSinglePlayerStatsPersistence } from "./useSinglePlayerStatsPersistence.ts";
 import { pickEliminationHint } from "../game/HintService.ts";
-import { getAnnotatedDotIndices, toggleDotAnnotation, type DotAnnotations } from "../game/dotAnnotations.ts";
+import {
+    getAnnotatedDotIndices,
+    getConfirmedDotAnnotations,
+    toggleDotAnnotation,
+    type ConfirmedDotAnnotation,
+    type DotAnnotations,
+} from "../game/dotAnnotations.ts";
 import {
     Level, PlayerCount, GamePhase, GridConfig,
     LEVEL_CONFIGS, DEFAULT_LEVEL, DEFAULT_PLAYER_COUNT,
@@ -29,7 +35,7 @@ export interface GameContextValue {
     currentPlayer   : number;
     revealedHints   : number[];
     annotatedEliminations : number[];
-    annotatedConfirmed    : number[];
+    annotatedConfirmed    : ConfirmedDotAnnotation[];
     activeStatsRecordId     : string | null;
     onLevelChange        : (level: Level) => void;
     onPlayerCountChange  : (count: PlayerCount) => void;
@@ -161,8 +167,8 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     }, [code, gridConfig.cols, gridConfig.rows]);
     const onCycleDotAnnotation = React.useCallback((index: number): void => {
         if (phase === GamePhase.Revealing) return;
-        setDotAnnotations(prev => toggleDotAnnotation(prev, index));
-    }, [phase]);
+        setDotAnnotations(prev => toggleDotAnnotation(prev, index, gridConfig.length));
+    }, [gridConfig.length, phase]);
     const onRegisterInvalidGuessListener = React.useCallback((cb: () => void): void => {
         invalidGuessListenerRef.current = cb;
     }, []);
@@ -192,7 +198,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         showStatsModal, showTurnModal, elapsedSeconds,
         winner, currentPlayer, revealedHints,
         annotatedEliminations: getAnnotatedDotIndices(dotAnnotations, "eliminated"),
-        annotatedConfirmed: getAnnotatedDotIndices(dotAnnotations, "confirmed"),
+        annotatedConfirmed: getConfirmedDotAnnotations(dotAnnotations),
         activeStatsRecordId: activeRecordId,
         onLevelChange, onPlayerCountChange,
         onGiveUp, onFinishGame,

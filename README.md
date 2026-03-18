@@ -38,7 +38,7 @@ The game ends when Bulls == code length.
 * **Gesture-driven guess history** — the desktop history rail can be dragged from anywhere in the visible panel, while the mobile bottom sheet still supports direct title-bar dragging and now keeps collapsing/expanding naturally when scroll gestures run out at the top or bottom edge
 * **Deterministic history auto-scroll** — guess history now scrolls from a single code path, so new guesses and collapse-to-latest behavior stay consistent instead of competing with nested smooth-scroll calls
 * **Latest guess preserved on collapse** — when the guess history panel collapses, its scroll position snaps back to the bottom so the newest guesses stay visible
-* **Dot annotations while solving** — press and release a dot without dragging to cycle your own current-game notes between clear, eliminated (`X`), and confirmed (green ring), and the first-dot pop animation now waits for a slight drag so stationary note gestures stay calmer
+* **Dot annotations while solving** — press and release a dot without dragging to cycle your own current-game notes through `clear -> eliminated -> confirmed -> confirmed 1..N -> clear`, where numbered confirmations are larger green labels placed clockwise around the ring for the active code length
 * **Web-only deployment** — Android/Capacitor support and AdMob integration have been removed for now, so the app targets the GitHub Pages web build only
 * **Player count** — Select 1–4 players (future multiplayer support)
 * **Help modal** — In-app game rules with a "Play Now" button

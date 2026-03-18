@@ -2,6 +2,32 @@
 
 ## Architectural Decisions
 
+### Numbered Confirmed Dot Annotations
+
+**Decision:** Expanded the manual dot-annotation cycle from three states to a code-length-aware sequence: `none -> eliminated -> confirmed -> confirmed-1 -> ... -> confirmed-N -> none`.
+
+**Rationale:** Players sometimes know more than "this dot is in the code" but less than the full path. Letting a confirmed dot carry an optional numbered position captures stronger deductions without adding a separate note-taking UI.
+
+**Implementation details:**
+- annotation state now supports `confirmed-<position>` values in addition to plain `confirmed` and `eliminated`
+- the cycle length is driven by the active level's code length, so the numbered states stop at `N`
+- confirmed rings can render a larger green number on the ring, positioned clockwise from 12 o'clock by the segment angle `360 / N * position`
+- the numbered label now uses a small background mask so the ring stroke does not visually bleed through the text
+- `GameContext` now exposes confirmed annotations with optional positions instead of a flat list of confirmed indices
+- helper and point-render tests cover both the cycle math and the ring-label placement
+
+**Files:**
+- `src/game/dotAnnotations.ts`
+- `src/game/dotAnnotations.test.ts`
+- `src/context/GameContext.tsx`
+- `src/components/PatternLock.tsx`
+- `src/components/Point.tsx`
+- `src/components/Point.utils.ts`
+- `src/components/Point.test.ts`
+- `src/components/PatternLock.css`
+- `src/components/HelpModal.tsx`
+- `src/components/HelpModal.styled.tsx`
+
 ### Guess History Scroll Controlled in One Place
 
 **Decision:** Consolidated guess-history auto-scroll into `App` and removed the nested `scrollIntoView()` call from `PatternHistory`.
@@ -41,13 +67,14 @@
 
 ### Manual Dot Annotations During Play
 
-**Decision:** Added two player-controlled annotations directly on the main lock during normal play: eliminated dots reuse the existing red `X`, and confirmed dots render a green success ring behind the dot. The gesture cycles `none -> eliminated -> confirmed -> none` via a stationary press on the first dot.
+**Decision:** Added player-controlled annotations directly on the main lock during normal play: eliminated dots reuse the existing red `X`, and confirmed dots render a green success ring that can also carry an optional numbered position marker. The gesture now cycles `none -> eliminated -> confirmed -> confirmed-1 -> ... -> confirmed-N -> none` via a stationary press on the first dot.
 
-**Rationale:** The game benefits from deduction notes, but the board should stay lightweight and visually native to the pattern-lock interface. Limiting notes to two states keeps the UI readable, avoids solver-like automation, and matches the existing hint language. Keeping annotations current-game-only prevents stale notes from leaking into the next puzzle.
+**Rationale:** The game benefits from deduction notes, but the board should stay lightweight and visually native to the pattern-lock interface. The later numbered-confirmation extension preserves that direct-on-board workflow while letting players encode likely path positions without adding separate controls. Keeping annotations current-game-only prevents stale notes from leaking into the next puzzle.
 
 **Implementation details:**
 - note state lives in `GameContext` and is cleared on new game / level change
 - hint eliminations and manual eliminations share the same visual `X`
+- confirmed notes can be plain or numbered, with numbered labels placed clockwise around the ring based on the current code length
 - `usePatternLock` now distinguishes stationary presses from actual path drawing so first-dot notes can coexist with normal input
 - stationary single taps no longer submit a one-dot guess; only dragged paths are finished
 

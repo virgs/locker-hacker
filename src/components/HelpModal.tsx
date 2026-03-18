@@ -75,12 +75,17 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
             </p>
             <p className="mt-3 mb-0">
                 <strong>Click a dot</strong> to mark it as
-                <strong> clear</strong>, <strong>confirmed</strong>, or <strong>eliminated</strong>.
+                <strong> clear</strong>, <strong>eliminated</strong>, <strong>confirmed</strong>, or a
+                <strong> numbered confirmed position</strong>.
             </p>
             <NotesHelpRow>
                 <NotePreview>
                     <NotePreviewDot $tone="success" aria-hidden={true} />
                     Confirmed
+                </NotePreview>
+                <NotePreview>
+                    <NotePreviewDot $tone="success" data-label="2" aria-hidden={true} />
+                    Confirmed #2
                 </NotePreview>
                 <NotePreview>
                     <NotePreviewDot $tone="danger" aria-hidden={true} />

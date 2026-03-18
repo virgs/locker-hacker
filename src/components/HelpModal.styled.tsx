@@ -97,6 +97,19 @@ export const NotePreviewDot = styled.span<{ $tone: "danger" | "success" }>`
                 0 0 0 4px rgba(25, 135, 84, 0.12),
                 0 0 14px rgba(25, 135, 84, 0.3);
         }
+
+        &[data-label]::after {
+            content: attr(data-label);
+            position: absolute;
+            top: -9px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--bs-success, #198754);
+            text-shadow: 0 0 8px rgba(25, 135, 84, 0.35);
+        }
     ` : `
         &::before,
         &::after {
