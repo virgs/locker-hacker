@@ -180,4 +180,4 @@ Build incrementally and safely.
 
 # TODO list
 
-1. [ ]  
+1. [ ]  In smaller screen sizes, when the guess history is shown in the bottom, make it taller so it's possible to see at least 4 guesses without scrolling. This will make it easier for users to review their previous attempts and strategize their next move.

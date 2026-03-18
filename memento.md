@@ -2,6 +2,23 @@
 
 ## Architectural Decisions
 
+### Guess History Scroll Controlled in One Place
+
+**Decision:** Consolidated guess-history auto-scroll into `App` and removed the nested `scrollIntoView()` call from `PatternHistory`.
+
+**Rationale:** The history panel had two competing scroll mechanisms: direct `scrollTop` resets from `App` and smooth `scrollIntoView()` from the list component. That split made scroll behavior inconsistent. A single owner is more predictable and avoids nested smooth-scroll timing issues.
+
+**Implementation details:**
+- `App` now auto-scrolls the history container to the bottom both when a new guess is added and when the panel collapses
+- `PatternHistory` no longer reaches out to the DOM to scroll itself
+- `App.utils.test.ts` covers both the new-guess and collapse-triggered scroll cases
+
+**Files:**
+- `src/App.tsx`
+- `src/App.utils.ts`
+- `src/App.utils.test.ts`
+- `src/components/PatternHistory.tsx`
+
 ### First-Dot Pop Requires Pointer Movement
 
 **Decision:** The pop animation for the first selected dot now waits for a small pointer movement instead of firing on a stationary click/touch. With that in place, manual dot annotations now use a single stationary press instead of long-press/double-press. The pop activation distance is controlled by `FIRST_DOT_POP_MOVE_PX`.

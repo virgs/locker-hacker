@@ -32,11 +32,6 @@ const PatternHistory: React.FunctionComponent<PatternHistoryProps> = ({
     const size        = isXS ? Math.round(entrySize * 0.65) : entrySize;
     const validator   = new GuessValidator(code);
     const dotSize     = Math.round(size / 10);
-    const listEndRef  = React.useRef<HTMLDivElement>(null);
-
-    React.useEffect(() => {
-        listEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [pathHistory.length]);
 
     return (
         <HistoryList $expanded={expanded}>
@@ -64,7 +59,6 @@ const PatternHistory: React.FunctionComponent<PatternHistoryProps> = ({
                     </HistoryEntry>
                 );
             })}
-            <div ref={listEndRef} />
         </HistoryList>
     );
 };

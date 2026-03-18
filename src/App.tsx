@@ -22,7 +22,7 @@ import { shouldScrollHistoryToBottom } from "./App.utils.ts";
 
 export const App = (): ReactElement => {
     const {
-        phase, path, code, gameKey, gridConfig, playerCount, currentPlayer, winner, revealedHints,
+        phase, path, code, gameKey, gridConfig, pathHistory, playerCount, currentPlayer, winner, revealedHints,
         annotatedEliminations, annotatedConfirmed, onPathChange, onGuessFinish, onCycleDotAnnotation,
     } = useGameContext();
     const isRevealing   = phase === GamePhase.Revealing;
@@ -42,13 +42,19 @@ export const App = (): ReactElement => {
     const mainAreaRef = useRef<HTMLElement>(null);
     const sidebarContentRef = useRef<HTMLDivElement>(null);
     const wasExpandedRef = useRef(expanded);
+    const previousGuessCountRef = useRef(pathHistory.length);
     const lockSize = useLockSize(mainAreaRef);
     const dragHandlers = { onPointerDown, onPointerMove, onPointerUp };
 
     useConfetti(isRevealing && winner !== null);
 
     useEffect(() => {
-        if (shouldScrollHistoryToBottom(wasExpandedRef.current, expanded)) {
+        if (shouldScrollHistoryToBottom(
+            previousGuessCountRef.current,
+            pathHistory.length,
+            wasExpandedRef.current,
+            expanded,
+        )) {
             window.requestAnimationFrame(() => {
                 const content = sidebarContentRef.current;
                 if (!content) return;
@@ -56,7 +62,8 @@ export const App = (): ReactElement => {
             });
         }
         wasExpandedRef.current = expanded;
-    }, [expanded]);
+        previousGuessCountRef.current = pathHistory.length;
+    }, [expanded, pathHistory.length]);
 
     return (
         <AppLayout>
