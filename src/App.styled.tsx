@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { BREAKPOINTS } from "./theme/breakpoints.ts";
+import { MOBILE_SIDEBAR_COLLAPSED_HEIGHT_PX, getMobileMainAreaPaddingBottom } from "./App.constants.ts";
 
 export const AppLayout = styled.div`
     display: flex;
@@ -36,7 +37,7 @@ export const MainArea = styled.main`
 
     ${BREAKPOINTS.mobile} {
         padding: 16px;
-        padding-bottom: calc(160px + 16px);
+        padding-bottom: ${getMobileMainAreaPaddingBottom()};
     }
 `;
 
@@ -67,7 +68,7 @@ export const Sidebar = styled.aside<{ $expanded?: boolean }>`
         flex-direction: column;
         border-left: none;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
-        height: ${({ $expanded }) => $expanded ? '80%' : '160px'};
+        height: ${({ $expanded }) => $expanded ? '80%' : `${MOBILE_SIDEBAR_COLLAPSED_HEIGHT_PX}px`};
         transition: height 0.3s ease;
     }
 `;

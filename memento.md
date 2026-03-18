@@ -2,6 +2,23 @@
 
 ## Architectural Decisions
 
+### Taller Mobile Guess History Preview
+
+**Decision:** Increased the collapsed mobile guess-history sheet height and derived the main-area bottom padding from the same shared constant.
+
+**Rationale:** The old `160px` bottom sheet was too short to preview enough history on phones. A taller collapsed height lets players review at least four recent guesses before scrolling, while keeping the pattern lock clear of overlap because the main area reserves matching space.
+
+**Implementation details:**
+- `MOBILE_SIDEBAR_COLLAPSED_HEIGHT_PX` now drives the mobile sidebar collapsed height
+- `getMobileMainAreaPaddingBottom()` keeps `MainArea` bottom padding in sync with the sheet height
+- `App.constants.test.ts` guards both the minimum preview height and the derived padding string
+
+**Files:**
+- `src/App.constants.ts`
+- `src/App.constants.test.ts`
+- `src/App.styled.tsx`
+- `README.md`
+
 ### Numbered Confirmed Dot Annotations
 
 **Decision:** Expanded the manual dot-annotation cycle from three states to a code-length-aware sequence: `none -> eliminated -> confirmed -> confirmed-1 -> ... -> confirmed-N -> none`.
