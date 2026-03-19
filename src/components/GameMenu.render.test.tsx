@@ -35,7 +35,7 @@ jest.unstable_mockModule("./StatsModal.tsx", () => ({
 }));
 
 jest.unstable_mockModule("./GameMenu.styled.tsx", () => {
-    const stub = (tag: "div" | "button" | "h6" | "label" | "p" | "input"): React.FC<React.PropsWithChildren<Record<string, unknown>>> =>
+    const stub = (tag: "div" | "button" | "h6" | "label" | "p" | "input" | "section" | "span"): React.FC<React.PropsWithChildren<Record<string, unknown>>> =>
         ({ children, ...props }) => {
             const filteredProps = Object.fromEntries(
                 Object.entries(props).filter(([key]) => !key.startsWith("$")),
@@ -44,8 +44,12 @@ jest.unstable_mockModule("./GameMenu.styled.tsx", () => {
         };
     return {
         MenuBody: stub("div"),
-        MenuTabs: stub("div"),
-        MenuTab: stub("button"),
+        AccordionBody: stub("div"),
+        AccordionChevron: stub("span"),
+        AccordionHeader: stub("button"),
+        AccordionIcon: stub("span"),
+        AccordionItem: stub("section"),
+        AccordionTitle: stub("span"),
         SectionTitle: stub("h6"),
         SettingsCard: stub("div"),
         SettingsRow: stub("label"),
@@ -77,9 +81,11 @@ describe("GameMenu", () => {
         const { default: GameMenu } = await import("./GameMenu.tsx");
         const html = renderToStaticMarkup(<GameMenu />);
 
-        expect(html).toContain("How to Play");
-        expect(html).toContain("help panel");
+        expect(html).toContain("Menu");
+        expect(html).toContain("Game stats");
         expect(html).toContain("Settings");
+        expect(html).toContain("How to play");
+        expect(html).toContain("help panel");
     });
 
     it("renders the settings switch state from context", async () => {

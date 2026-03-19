@@ -2,6 +2,25 @@
 
 ## Architectural Decisions
 
+### Game Menu Now Uses One Accordion Under A Single Modal Title
+
+**Decision:** Replaced the tab strip inside the shared game menu modal with an accordion whose sections are ordered `Game stats`, `Settings`, and `How to play`, each with a left-aligned icon, while the modal title is now always `Menu`.
+
+**Rationale:** The tabbed header duplicated section labeling in the modal title and made the menu feel more segmented than necessary. An accordion keeps all sections visible as choices at once, simplifies the modal header, and gives each section a stronger visual identity through its icon.
+
+**Implementation details:**
+- `GameMenu` now renders icon-led accordion headers instead of tabs
+- the section order is now `stats`, `settings`, `help`
+- the modal title no longer mirrors the active section and stays fixed as `Menu`
+- the existing context-controlled active section still determines which accordion panel is open by default, so current entry points continue to land on the intended section
+- render tests now assert the new header copy and accordion section labels
+
+**Files:**
+- `src/components/GameMenu.tsx`
+- `src/components/GameMenu.styled.tsx`
+- `src/components/GameMenu.render.test.tsx`
+- `README.md`
+
 ### Touch Annotation Menu Now Opens On Long Press Instead Of Repeated Taps
 
 **Decision:** Touch devices now open the radial dot-annotation menu from a stationary long press on a dot instead of from a repeated tap gesture.

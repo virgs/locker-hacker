@@ -1,5 +1,6 @@
 import * as React from "react";
 import Modal from "react-bootstrap/Modal";
+import { BarChart2, HelpCircle, Settings } from "react-feather";
 import { useGameContext, type GameMenuSection } from "../context/GameContext.tsx";
 import { HelpPanel } from "./HelpModal.tsx";
 import { StatsPanel } from "./StatsModal.tsx";
@@ -12,9 +13,13 @@ import {
     shouldClearStatsFromBuildTaps,
 } from "./StatsModal.utils.ts";
 import {
+    AccordionBody,
+    AccordionChevron,
+    AccordionHeader,
+    AccordionIcon,
+    AccordionItem,
+    AccordionTitle,
     MenuBody,
-    MenuTab,
-    MenuTabs,
     SectionTitle,
     SettingsCard,
     SettingsCopy,
@@ -24,10 +29,10 @@ import {
     ToggleInput,
 } from "./GameMenu.styled.tsx";
 
-const MENU_SECTIONS: { id: GameMenuSection; label: string; title: string }[] = [
-    { id: "stats", label: "Stats", title: "Game Stats" },
-    { id: "help", label: "Help", title: "How to Play" },
-    { id: "settings", label: "Settings", title: "Settings" },
+const MENU_SECTIONS: { id: GameMenuSection; title: string; icon: React.ReactElement }[] = [
+    { id: "stats", title: "Game stats", icon: <BarChart2 size={16} /> },
+    { id: "settings", title: "Settings", icon: <Settings size={16} /> },
+    { id: "help", title: "How to play", icon: <HelpCircle size={16} /> },
 ];
 
 const SettingsPanel: React.FunctionComponent = (): React.ReactElement => {
@@ -69,7 +74,6 @@ const renderSection = (section: GameMenuSection): React.ReactElement => {
 
 const GameMenu: React.FunctionComponent = (): React.ReactElement => {
     const { showGameMenu, activeGameMenuSection, onCloseGameMenu, onOpenGameMenu } = useGameContext();
-    const activeSection = MENU_SECTIONS.find(section => section.id === activeGameMenuSection) ?? MENU_SECTIONS[0];
     const [, rerender] = React.useReducer((value: number) => value + 1, 0);
     const resetTapCountRef = React.useRef(0);
     const resetTapTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -103,25 +107,30 @@ const GameMenu: React.FunctionComponent = (): React.ReactElement => {
     return (
         <Modal show={showGameMenu} onHide={onCloseGameMenu} centered size="lg">
             <Modal.Header closeButton>
-                <Modal.Title>{activeSection.title}</Modal.Title>
+                <Modal.Title>Menu</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <MenuBody>
-                    <MenuTabs role="tablist" aria-label="Game menu sections">
-                        {MENU_SECTIONS.map(section => (
-                            <MenuTab
-                                key={section.id}
-                                type="button"
-                                role="tab"
-                                $active={section.id === activeGameMenuSection}
-                                aria-selected={section.id === activeGameMenuSection}
-                                onClick={() => onOpenGameMenu(section.id)}
-                            >
-                                {section.label}
-                            </MenuTab>
-                        ))}
-                    </MenuTabs>
-                    {renderSection(activeGameMenuSection)}
+                    {MENU_SECTIONS.map(section => {
+                        const open = section.id === activeGameMenuSection;
+
+                        return (
+                            <AccordionItem key={section.id}>
+                                <AccordionHeader
+                                    type="button"
+                                    onClick={() => onOpenGameMenu(section.id)}
+                                    aria-expanded={open}
+                                >
+                                    <AccordionTitle>
+                                        <AccordionIcon aria-hidden={true}>{section.icon}</AccordionIcon>
+                                        {section.title}
+                                    </AccordionTitle>
+                                    <AccordionChevron $open={open} aria-hidden={true}>⌄</AccordionChevron>
+                                </AccordionHeader>
+                                {open && <AccordionBody>{renderSection(section.id)}</AccordionBody>}
+                            </AccordionItem>
+                        );
+                    })}
                 </MenuBody>
             </Modal.Body>
             <Modal.Footer>
