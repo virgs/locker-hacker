@@ -2,6 +2,34 @@
 
 ## Architectural Decisions
 
+### Stats, Help, And Settings Now Share One Tabbed Game Menu
+
+**Decision:** Replaced the separate stats/help modals with one shared tabbed game menu containing `stats`, `help`, and `settings`.
+
+**Rationale:** The previous modal split scattered closely related information across multiple entry points and made it harder to expand the UI cleanly. A single menu model simplifies navigation, removes duplicated modal state, and gives the app a natural place for persistent settings like annotation enablement.
+
+**Implementation details:**
+- `GameContext` now owns one menu visibility flag plus the active section id instead of a dedicated stats-modal toggle, and `onFinishGame()` now reopens the shared menu on the stats tab after `Play again`
+- the help icon now opens the shared menu on the help tab, while the navbar app icon no longer opens any modal
+- `GameMenu.tsx` renders the shared modal shell and tabs, reusing the former stats/help content as `StatsPanel` and `HelpPanel`
+- the settings tab adds a persisted `Enable annotations` toggle backed by `ConfigService`; the app now gates annotation rendering and annotation input off that stored preference, and the settings copy now describes only the toggle itself rather than the persistence behavior
+- the shared menu now keeps one fixed large body height across all tabs, and the build label/reset gesture moved out of the stats content into a shared modal footer that appears on every tab
+- `ConfigService` parses and saves `annotationsEnabled` alongside level and player-count preferences
+- server-render tests cover the shared menu section rendering, and config tests cover the persisted annotation toggle parsing
+
+**Files:**
+- `src/components/GameMenu.tsx`
+- `src/components/GameMenu.styled.tsx`
+- `src/components/GameMenu.render.test.tsx`
+- `src/components/Navbar.tsx`
+- `src/components/HelpModal.tsx`
+- `src/components/StatsModal.tsx`
+- `src/context/GameContext.tsx`
+- `src/game/ConfigService.ts`
+- `src/game/ConfigService.test.ts`
+- `src/App.tsx`
+- `README.md`
+
 ### Mobile Annotation Menu Uses Responsive Sizing And Elevated Play-Layer Stacking
 
 **Decision:** Kept the radial annotation interaction, but made its footprint responsive on compact screens and promoted the active play layer above the navbar, sidebar, and footer while the menu is open.

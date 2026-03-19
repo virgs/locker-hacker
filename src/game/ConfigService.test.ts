@@ -19,6 +19,19 @@ describe("parseConfig", () => {
         expect(parseConfig(raw)).toEqual({ level: Level.Hard, playerCount: PlayerCount.Two });
     });
 
+    it("parses the persisted annotations toggle when present", () => {
+        const raw = JSON.stringify({
+            level: Level.Medium,
+            playerCount: PlayerCount.One,
+            annotationsEnabled: false,
+        });
+        expect(parseConfig(raw)).toEqual({
+            level: Level.Medium,
+            playerCount: PlayerCount.One,
+            annotationsEnabled: false,
+        });
+    });
+
     it("accepts all valid levels", () => {
         for (const level of [Level.Easy, Level.Medium, Level.Hard, Level.Expert]) {
             const raw = JSON.stringify({ level, playerCount: PlayerCount.One });
@@ -50,5 +63,17 @@ describe("parseConfig", () => {
     it("returns empty object when both values are invalid", () => {
         const raw = JSON.stringify({ level: "unknown", playerCount: 0 });
         expect(parseConfig(raw)).toEqual({});
+    });
+
+    it("ignores a non-boolean annotations setting", () => {
+        const raw = JSON.stringify({
+            level: Level.Easy,
+            playerCount: PlayerCount.Two,
+            annotationsEnabled: "yes",
+        });
+        expect(parseConfig(raw)).toEqual({
+            level: Level.Easy,
+            playerCount: PlayerCount.Two,
+        });
     });
 });

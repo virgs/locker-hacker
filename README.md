@@ -32,10 +32,12 @@ The game ends when Bulls == code length.
 * **Larger mobile dropdown targets** — navbar dropdown items now use taller touch targets, and the hint menu routes actions through dropdown selection so `Give up` works reliably on phones
 * **Reliable stats persistence** — single-player games are persisted from the first valid guess, wins are finalized immediately on solve, and abandoned runs still count as losses after reload or restart
 * **Smoother hard-mode guess flow** — post-guess UI resets now render at higher priority, while the heavier AI/history work is deferred so the lock becomes playable again faster
-* **Build-aware stats modal** — the stats view shows the running app version and, in CircleCI deployments, the deployment build number for quicker debugging
-* **Clearer stats totals** — the stats modal no longer shows a misleading table total row; it now summarizes games played, wins, losses, overall win rate, and total hours played in a dedicated footer line, with the summary text stepping down on phones so it stays readable without overwhelming the modal
+* **Unified game menu** — stats, help, and settings now live in one tabbed menu; `Play again` reopens it on the stats tab, the help icon opens it directly on help, the navbar app icon is now decorative instead of opening a separate modal, the modal keeps a stable large footprint across tabs, and the build label/reset gesture now lives in a shared footer visible everywhere
+* **Build-aware stats panel** — the stats section shows the running app version and, in CircleCI deployments, the deployment build number for quicker debugging
+* **Clearer stats totals** — the stats section no longer shows a misleading table total row; it now summarizes games played, wins, losses, overall win rate, and total hours played in a dedicated footer line, with the summary text stepping down on phones so it stays readable without overwhelming the menu
 * **Expert stays playable** — AI confidence analysis is disabled automatically for oversized boards like Expert, preventing browser lockups from impossible candidate generation
-* **Hidden stats reset** — while the stats modal is open, tapping the build label 7 times within 5 seconds clears saved stats immediately
+* **Persistent annotation setting** — the settings tab includes an `Enable annotations` switch, and that preference is saved in local storage across sessions
+* **Hidden stats reset** — while the stats section is open, tapping the build label 7 times within 5 seconds clears saved stats immediately
 * **Gesture-driven guess history** — the desktop history rail can be dragged from anywhere in the visible panel, while the mobile bottom sheet still supports direct title-bar dragging and now keeps collapsing/expanding naturally when scroll gestures run out at the top or bottom edge
 * **Taller mobile guess-history preview** — on smaller screens, the collapsed bottom history sheet is taller so at least four recent guesses stay visible before you need to scroll
 * **Deterministic history auto-scroll** — guess history now scrolls from a single code path, so new guesses and collapse-to-latest behavior stay consistent instead of competing with nested smooth-scroll calls
@@ -44,7 +46,7 @@ The game ends when Bulls == code length.
 * **Radial dot annotations while solving** — after your first valid guess starts the round, double-click or double-tap and hold a dot to open a circular note menu, then release on `clear`, `eliminate`, `all`, or any numbered position `1..N`; on phones the menu expands to a much larger footprint with bigger touch targets, keeps a wider safety margin from the screen edge, pushes the numbered options farther from the center with larger labels, and lifts above the navbar, history rail, and footer so annotation choices stay visible
 * **Web-only deployment** — Android/Capacitor support and AdMob integration have been removed for now, so the app targets the GitHub Pages web build only
 * **Player count** — Select 1–4 players (future multiplayer support)
-* **Help modal** — In-app game rules with a "Play Now" button
+* **In-app help section** — the shared game menu includes the full rules and annotation guide without a separate help modal
 * **Shareable previews** — Open Graph metadata now uses the gameplay screenshot and a tailored description for richer social link previews
 * **Responsive** — Works on desktop and mobile, navbar wraps to two rows on small screens
 

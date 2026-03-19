@@ -18,6 +18,8 @@ import {
     LEVEL_CONFIGS, DEFAULT_LEVEL, DEFAULT_PLAYER_COUNT,
 } from "../game/GameConfig.ts";
 
+export type GameMenuSection = "stats" | "help" | "settings";
+
 export interface GameContextValue {
     level           : Level;
     playerCount     : PlayerCount;
@@ -29,12 +31,14 @@ export interface GameContextValue {
     pathHistory     : number[][];
     playerHistory   : number[];
     isRunning       : boolean;
-    showStatsModal  : boolean;
+    showGameMenu    : boolean;
+    activeGameMenuSection: GameMenuSection;
     showTurnModal   : boolean;
     elapsedSeconds  : number;
     winner          : number | null;
     currentPlayer   : number;
     revealedHints   : number[];
+    annotationsEnabled: boolean;
     dotAnnotations        : DotAnnotations;
     annotatedEliminations : number[];
     annotatedConfirmed    : ConfirmedDotAnnotation[];
@@ -45,7 +49,9 @@ export interface GameContextValue {
     onFinishGame         : () => void;
     onPathChange         : (path: number[]) => void;
     onGuessFinish        : () => void;
-    onToggleStatsModal   : () => void;
+    onCloseGameMenu      : () => void;
+    onOpenGameMenu       : (section?: GameMenuSection) => void;
+    onToggleAnnotationsEnabled: () => void;
     onDismissTurnModal              : () => void;
     onRevealHint                    : () => void;
     onSelectDotAnnotation           : (index: number, selection: DotAnnotationSelection) => void;
@@ -68,6 +74,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const [savedConfig]     = React.useState(() => loadConfig());
     const initialLevel       = savedConfig.level       ?? DEFAULT_LEVEL;
     const initialPlayerCount = savedConfig.playerCount ?? DEFAULT_PLAYER_COUNT;
+    const initialAnnotationsEnabled = savedConfig.annotationsEnabled ?? true;
 
     const [level, setLevel]             = React.useState<Level>(initialLevel);
     const [playerCount, setPlayerCount] = React.useState<PlayerCount>(initialPlayerCount);
@@ -76,13 +83,15 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const [path, setPath]               = React.useState<number[]>([]);
     const [pathHistory, setPathHistory] = React.useState<number[][]>([]);
     const [gameKey, setGameKey]         = React.useState(0);
-    const [showStatsModal, setShowStatsModal]   = React.useState(false);
+    const [showGameMenu, setShowGameMenu]       = React.useState(false);
+    const [activeGameMenuSection, setActiveGameMenuSection] = React.useState<GameMenuSection>("stats");
     const [showTurnModal, setShowTurnModal]     = React.useState(false);
     const [elapsedSeconds, setElapsedSeconds]   = React.useState<number>(0);
     const [winner, setWinner]                   = React.useState<number | null>(null);
     const [currentPlayer, setCurrentPlayer]     = React.useState(1);
     const [playerHistory, setPlayerHistory]     = React.useState<number[]>([]);
     const [revealedHints, setRevealedHints]     = React.useState<number[]>([]);
+    const [annotationsEnabled, setAnnotationsEnabled] = React.useState(initialAnnotationsEnabled);
     const [dotAnnotations, setDotAnnotations]   = React.useState<DotAnnotations>({});
     const sessionTrackerRef                      = React.useRef(new GameSessionStatsTracker());
     const invalidGuessListenerRef                = React.useRef<(() => void) | null>(null);
@@ -104,8 +113,8 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     }, [isRunning, phase]);
 
     React.useEffect(() => {
-        saveConfig({ level, playerCount });
-    }, [level, playerCount]);
+        saveConfig({ level, playerCount, annotationsEnabled });
+    }, [annotationsEnabled, level, playerCount]);
     React.useEffect(() => {
         const onPageHide = (): void => finalizeActive({ won: false });
         window.addEventListener("pagehide", onPageHide);
@@ -130,15 +139,23 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         setPhase(GamePhase.Revealing);
     }, [finalizeActive]);
 
-    const onToggleStatsModal = React.useCallback((): void => {
-        setShowStatsModal(prev => !prev);
+    const onOpenGameMenu = React.useCallback((section: GameMenuSection = "stats"): void => {
+        setActiveGameMenuSection(section);
+        setShowGameMenu(true);
+    }, []);
+
+    const onCloseGameMenu = React.useCallback((): void => {
+        setShowGameMenu(false);
+    }, []);
+
+    const onToggleAnnotationsEnabled = React.useCallback((): void => {
+        setAnnotationsEnabled(prev => !prev);
     }, []);
 
     const onFinishGame = React.useCallback((): void => {
         finalizeActive({ won: winner !== null });
-        if (playerCount === PlayerCount.One) {
-            setShowStatsModal(true);
-        }
+        setActiveGameMenuSection("stats");
+        setShowGameMenu(true);
         setCode(generateCode(gridConfig));
         setPath([]); setPathHistory([]); setPlayerHistory([]);
         setPhase(GamePhase.Playing);
@@ -168,9 +185,9 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         });
     }, [code, gridConfig.cols, gridConfig.rows]);
     const onSelectDotAnnotation = React.useCallback((index: number, selection: DotAnnotationSelection): void => {
-        if (phase === GamePhase.Revealing) return;
+        if (phase === GamePhase.Revealing || !annotationsEnabled) return;
         setDotAnnotations(prev => applyDotAnnotationSelection(prev, index, selection, gridConfig.length));
-    }, [gridConfig.length, phase]);
+    }, [annotationsEnabled, gridConfig.length, phase]);
     const onRegisterInvalidGuessListener = React.useCallback((cb: () => void): void => {
         invalidGuessListenerRef.current = cb;
     }, []);
@@ -197,15 +214,17 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const value: GameContextValue = {
         level, playerCount, gridConfig, code, gameKey,
         phase, path, pathHistory, playerHistory, isRunning,
-        showStatsModal, showTurnModal, elapsedSeconds,
+        showGameMenu, activeGameMenuSection, showTurnModal, elapsedSeconds,
         winner, currentPlayer, revealedHints,
+        annotationsEnabled,
         dotAnnotations,
         annotatedEliminations: getAnnotatedDotIndices(dotAnnotations, "eliminated"),
         annotatedConfirmed: getConfirmedDotAnnotations(dotAnnotations),
         activeStatsRecordId: activeRecordId,
         onLevelChange, onPlayerCountChange,
         onGiveUp, onFinishGame,
-        onPathChange, onGuessFinish, onToggleStatsModal, onDismissTurnModal, onRevealHint, onSelectDotAnnotation,
+        onPathChange, onGuessFinish, onCloseGameMenu, onOpenGameMenu, onToggleAnnotationsEnabled,
+        onDismissTurnModal, onRevealHint, onSelectDotAnnotation,
         onRegisterInvalidGuessListener,
     };
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

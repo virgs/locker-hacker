@@ -1,5 +1,4 @@
 import * as React from "react";
-import Modal from "react-bootstrap/Modal";
 import {
     HelpList,
     ExampleTable,
@@ -10,11 +9,6 @@ import {
 } from "./HelpModal.styled.tsx";
 import { FEEDBACK_THEME } from "./FeedbackIndicator.utils.ts";
 import Point from "./Point.tsx";
-
-interface HelpModalProps {
-    show    : boolean;
-    onClose : () => void;
-}
 
 const bull = FEEDBACK_THEME.bull;
 const cow  = FEEDBACK_THEME.cow;
@@ -28,112 +22,104 @@ const FeedbackCell: React.FunctionComponent<{ entries: typeof bull[] }> = ({ ent
     </td>
 );
 
-const HelpModal: React.FunctionComponent<HelpModalProps> = ({
-    show,
-    onClose,
-}): React.ReactElement => (
-    <Modal show={show} onHide={onClose} centered size="lg">
-        <Modal.Header closeButton>
-            <Modal.Title>How to Play</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-            <p>
-                Connect the dots and <strong>crack the code!</strong>
-            </p>
-                Submit guesses and receive <strong>feedback</strong>:
-            <p>
-            </p>
-            <HelpList>
-                <li><strong style={{ color: bull.color }}>{bull.symbol}</strong> — correct dot in the <em>correct position</em>.</li>
-                <li><strong style={{ color: cow.color }}>{cow.symbol}</strong> — correct dot but <em>wrong position</em>.</li>
-                <li><strong style={{ color: miss.color }}>{miss.symbol}</strong> — dot <em>not in the code</em>.</li>
-            </HelpList>
+export const HelpPanel: React.FunctionComponent = (): React.ReactElement => (
+    <>
+        <p>
+            Connect the dots and <strong>crack the code!</strong>
+        </p>
+            Submit guesses and receive <strong>feedback</strong>:
+        <p>
+        </p>
+        <HelpList>
+            <li><strong style={{ color: bull.color }}>{bull.symbol}</strong> — correct dot in the <em>correct position</em>.</li>
+            <li><strong style={{ color: cow.color }}>{cow.symbol}</strong> — correct dot but <em>wrong position</em>.</li>
+            <li><strong style={{ color: miss.color }}>{miss.symbol}</strong> — dot <em>not in the code</em>.</li>
+        </HelpList>
 
-            <ExampleCaption>Examples</ExampleCaption>
-            <ExampleTable>
-                <thead>
-                    <tr><th>Secret</th><th>Guess</th><th>Feedback</th><th>Explanation</th></tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><code>A B C D</code></td>
-                        <td><code>A B E F</code></td>
-                        <FeedbackCell entries={[bull, bull, miss, miss]} />
-                        <td>A, B correct position; E, F not in code</td>
-                    </tr>
-                    <tr>
-                        <td><code>A B C D</code></td>
-                        <td><code>C D E A</code></td>
-                        <FeedbackCell entries={[cow, cow, cow, miss]} />
-                        <td>C, D, A are in code but wrong position; E not in code</td>
-                    </tr>
-                </tbody>
-            </ExampleTable>
+        <ExampleCaption>Examples</ExampleCaption>
+        <ExampleTable>
+            <thead>
+                <tr><th>Secret</th><th>Guess</th><th>Feedback</th><th>Explanation</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>A B C D</code></td>
+                    <td><code>A B E F</code></td>
+                    <FeedbackCell entries={[bull, bull, miss, miss]} />
+                    <td>A, B correct position; E, F not in code</td>
+                </tr>
+                <tr>
+                    <td><code>A B C D</code></td>
+                    <td><code>C D E A</code></td>
+                    <FeedbackCell entries={[cow, cow, cow, miss]} />
+                    <td>C, D, A are in code but wrong position; E not in code</td>
+                </tr>
+            </tbody>
+        </ExampleTable>
 
-            <p className="mt-3 mb-0">
-                The game ends when the guess has <strong>all dots are in the correct position</strong>.<br/>
-                Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
-            </p>
-            <p className="mt-3 mb-0">
-                <strong>Double-click and hold a dot</strong> then release to place deduction notes.
-            </p>
-            <NotesHelpRow>
-                <NotePreview>
-                    <NotePreviewMarker aria-hidden={true}>
-                        <Point
-                            index={0}
-                            pointSize={20}
-                            pointActiveSize={30}
-                            cols={1}
-                            rows={1}
-                            pop={false}
-                            complete={false}
-                            selected={false}
-                            hidden={false}
-                            annotation={{ eliminated: false, positions: [1, 2, 3, 4] }}
-                            targetLength={4}
-                        />
-                    </NotePreviewMarker>
-                    All positions
-                </NotePreview>
-                <NotePreview>
-                    <NotePreviewMarker aria-hidden={true}>
-                        <Point
-                            index={0}
-                            pointSize={20}
-                            pointActiveSize={30}
-                            cols={1}
-                            rows={1}
-                            pop={false}
-                            complete={false}
-                            selected={false}
-                            hidden={false}
-                            annotation={{ eliminated: false, positions: [2] }}
-                            targetLength={4}
-                        />
-                    </NotePreviewMarker>
-                    Position #2
-                </NotePreview>
-                <NotePreview>
-                    <NotePreviewMarker aria-hidden={true}>
-                        <Point
-                            index={0}
-                            pointSize={20}
-                            pointActiveSize={30}
-                            cols={1}
-                            rows={1}
-                            pop={false}
-                            complete={false}
-                            selected={false}
-                            hidden={false}
-                            annotation={{ eliminated: true, positions: [] }}
-                        />
-                    </NotePreviewMarker>
-                    Eliminated
-                </NotePreview>
-            </NotesHelpRow>
-        </Modal.Body>
-    </Modal>
+        <p className="mt-3 mb-0">
+            The game ends when the guess has <strong>all dots are in the correct position</strong>.<br/>
+            Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
+        </p>
+        <p className="mt-3 mb-0">
+            <strong>Double-click and hold a dot</strong> then release to place deduction notes.
+        </p>
+        <NotesHelpRow>
+            <NotePreview>
+                <NotePreviewMarker aria-hidden={true}>
+                    <Point
+                        index={0}
+                        pointSize={20}
+                        pointActiveSize={30}
+                        cols={1}
+                        rows={1}
+                        pop={false}
+                        complete={false}
+                        selected={false}
+                        hidden={false}
+                        annotation={{ eliminated: false, positions: [1, 2, 3, 4] }}
+                        targetLength={4}
+                    />
+                </NotePreviewMarker>
+                All positions
+            </NotePreview>
+            <NotePreview>
+                <NotePreviewMarker aria-hidden={true}>
+                    <Point
+                        index={0}
+                        pointSize={20}
+                        pointActiveSize={30}
+                        cols={1}
+                        rows={1}
+                        pop={false}
+                        complete={false}
+                        selected={false}
+                        hidden={false}
+                        annotation={{ eliminated: false, positions: [2] }}
+                        targetLength={4}
+                    />
+                </NotePreviewMarker>
+                Position #2
+            </NotePreview>
+            <NotePreview>
+                <NotePreviewMarker aria-hidden={true}>
+                    <Point
+                        index={0}
+                        pointSize={20}
+                        pointActiveSize={30}
+                        cols={1}
+                        rows={1}
+                        pop={false}
+                        complete={false}
+                        selected={false}
+                        hidden={false}
+                        annotation={{ eliminated: true, positions: [] }}
+                    />
+                </NotePreviewMarker>
+                Eliminated
+            </NotePreview>
+        </NotesHelpRow>
+    </>
 );
 
-export default HelpModal;
+export default HelpPanel;

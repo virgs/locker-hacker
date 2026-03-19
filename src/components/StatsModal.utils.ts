@@ -59,5 +59,5 @@ export const formatStatsSummary = ({
     if (gamesPlayed === 0) return "No completed games yet. Play a round to start building your stats.";
 
     const summary = buildStatsSummaryParts({ gamesPlayed, wins, totalSeconds });
-    return `Across ${summary.games}, you won ${summary.wins}, abandoned ${summary.abandoned}, and spent ${summary.playTime} playing. Your overall win rate is ${summary.winRate}.`;
+    return `Your record so far: ${summary.wins} successful hacks out of ${summary.games}, with ${summary.abandoned} failed attempts and ${summary.playTime} spent on the grid. That puts your win rate at ${summary.winRate}.`;
 };

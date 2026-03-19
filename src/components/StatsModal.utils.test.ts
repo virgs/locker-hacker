@@ -24,7 +24,7 @@ describe("StatsModal hidden reset gesture", () => {
             gamesPlayed: 12,
             wins: 7,
             totalSeconds: 5_400,
-        })).toBe("Across 12 games, you won 7, abandoned 5, and spent 1 hour and 30 minutes playing. Your overall win rate is 58.3%.");
+        })).toBe("Your record so far: 7 successful hacks out of 12 games, with 5 failed attempts and 1 hour and 30 minutes spent on the grid. That puts your win rate at 58.3%.");
     });
 
     it("uses an inviting empty-state sentence for zero stats", () => {

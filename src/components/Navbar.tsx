@@ -11,16 +11,12 @@ import {
     Level, PlayerCount, GamePhase,
     LEVEL_LABELS, PLAYER_LABELS, ALL_LEVELS, ALL_PLAYER_COUNTS,
 } from "../game/GameConfig.ts";
-import {clearRecords} from "../game/StatsService.ts";
-import HelpModal from "./HelpModal.tsx";
-import StatsModal from "./StatsModal.tsx";
 import {getPlayerColor} from "../game/playerColors.ts";
 import {useGameContext} from "../context/GameContext.tsx";
 import Tip from "./Tip.tsx";
 import {hasEliminationHintCandidates} from "../game/HintService.ts";
 import { HINT_ACTION_KEYS, runHintAction, type HintActionKey } from "./Navbar.utils.ts";
-
-const LONG_PRESS_MS = 10_000;
+import GameMenu from "./GameMenu.tsx";
 
 const PlayerCountIcons: React.FunctionComponent<{ count: number }> = ({count}): React.ReactElement => (
     <>
@@ -34,14 +30,10 @@ const levelDetailLabel = (l: Level): string =>
     `${LEVEL_LABELS[l]}`;
 
 const Navbar: React.FunctionComponent = (): React.ReactElement => {
-    const [helpOpen, setHelpOpen] = React.useState(false);
-    const longPressRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-
     const {
         phase, level, playerCount, isRunning, gridConfig, code, revealedHints,
-        showStatsModal, onToggleStatsModal,
         winner,
-        onLevelChange, onPlayerCountChange, onGiveUp, onRevealHint, onFinishGame,
+        onLevelChange, onPlayerCountChange, onGiveUp, onRevealHint, onFinishGame, onOpenGameMenu,
     } = useGameContext();
     const configDisabled = isRunning || phase === GamePhase.Revealing;
     const canEliminateDot = phase === GamePhase.Playing && hasEliminationHintCandidates({
@@ -49,22 +41,6 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
         code,
         alreadyEliminated: revealedHints,
     });
-
-    const handleIconDown = (): void => {
-        longPressRef.current = setTimeout(() => {
-            console.log(`Long press detected, clearing records...`);
-            clearRecords();
-            longPressRef.current = null;
-        }, LONG_PRESS_MS);
-    };
-
-    const handleIconUp = (): void => {
-        if (longPressRef.current) {
-            clearTimeout(longPressRef.current);
-            longPressRef.current = null;
-            onToggleStatsModal();
-        }
-    };
 
     const onHintMenuSelect = (eventKey: string | null): void => {
         runHintAction(eventKey as HintActionKey | null, { onRevealHint, onGiveUp });
@@ -108,20 +84,10 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
             <NavbarContainer>
                 <NavbarRow>
                     <NavbarLeft>
-                        <Tip text="Game stats">
+                        <Tip text={APP_TITLE}>
                             <AppIconLink
                                 className="me-2 ms-1"
                                 aria-label={APP_TITLE}
-                                onMouseDown={handleIconDown}
-                                onMouseUp={handleIconUp}
-                                onMouseLeave={() => {
-                                    if (longPressRef.current) {
-                                        clearTimeout(longPressRef.current);
-                                        longPressRef.current = null;
-                                    }
-                                }}
-                                onTouchStart={handleIconDown}
-                                onTouchEnd={handleIconUp}
                             >
                                 <AppIconImage src={`${import.meta.env.BASE_URL}icon.png`} alt={APP_TITLE}/>
                             </AppIconLink>
@@ -167,7 +133,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                     <NavbarCenter>{centerContent()}</NavbarCenter>
                     <NavbarRight>
                         <Tip text="How to play">
-                            <HelpButton onClick={() => setHelpOpen(true)} aria-label="How to play">
+                            <HelpButton onClick={() => onOpenGameMenu("help")} aria-label="How to play">
                                 <HelpCircle size={20}/>
                             </HelpButton>
                         </Tip>
@@ -186,8 +152,7 @@ const Navbar: React.FunctionComponent = (): React.ReactElement => {
                     </NavbarRight>
                 </NavbarRow>
             </NavbarContainer>
-            <HelpModal show={helpOpen} onClose={() => setHelpOpen(false)}/>
-            <StatsModal show={showStatsModal} onClose={onToggleStatsModal}/>
+            <GameMenu />
         </>
     );
 };

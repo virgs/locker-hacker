@@ -5,6 +5,7 @@ const CONFIG_KEY = "locker-hacker-config";
 export interface GameConfig {
     level       : Level;
     playerCount : PlayerCount;
+    annotationsEnabled: boolean;
 }
 
 export const parseConfig = (raw: string | null): Partial<GameConfig> => {
@@ -14,6 +15,7 @@ export const parseConfig = (raw: string | null): Partial<GameConfig> => {
         return {
             level:       ALL_LEVELS.includes(parsed.level as Level)             ? parsed.level       : undefined,
             playerCount: ALL_PLAYER_COUNTS.includes(parsed.playerCount as PlayerCount) ? parsed.playerCount : undefined,
+            annotationsEnabled: typeof parsed.annotationsEnabled === "boolean" ? parsed.annotationsEnabled : undefined,
         };
     } catch {
         return {};
