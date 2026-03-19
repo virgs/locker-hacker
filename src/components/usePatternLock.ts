@@ -96,6 +96,11 @@ export const shouldIgnoreEmulatedMouseEvent = (
     now: number,
 ): boolean => now - lastTouchTime <= TOUCH_MOUSE_GUARD_MS;
 
+export const shouldPreventTouchStartDefault = (
+    disabled: boolean,
+    touchCount: number,
+): boolean => !disabled && touchCount > 0;
+
 export const isBlockedPoint = (
     index: number,
     blockedPoints: number[],
@@ -274,8 +279,13 @@ export const usePatternLock = ({
         beginInteraction({ x: clientX, y: clientY });
     };
 
-    const onTouch = ({ touches }: React.TouchEvent): void => {
+    const onTouch = (event: React.TouchEvent): void => {
+        if (shouldPreventTouchStartDefault(disabled, event.touches.length)) {
+            event.preventDefault();
+        }
         if (disabled) return;
+        const { touches } = event;
+        if (touches.length === 0) return;
         lastTouchTimeRef.current = Date.now();
         beginInteraction({ x: touches[0].clientX, y: touches[0].clientY });
     };

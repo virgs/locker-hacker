@@ -5,6 +5,7 @@ import {
     isBlockedPoint,
     shouldIgnoreEmulatedMouseEvent,
     shouldActivateFirstDotPop,
+    shouldPreventTouchStartDefault,
 } from "./usePatternLock.ts";
 
 describe("usePatternLock helpers", () => {
@@ -23,6 +24,13 @@ describe("usePatternLock helpers", () => {
     it("ignores emulated mouse events immediately after touch input", () => {
         expect(shouldIgnoreEmulatedMouseEvent(1_000, 1_200)).toBe(true);
         expect(shouldIgnoreEmulatedMouseEvent(1_000, 1_800)).toBe(false);
+    });
+
+    it("prevents the browser touchstart default only for active lock touches", () => {
+        expect(shouldPreventTouchStartDefault(false, 1)).toBe(true);
+        expect(shouldPreventTouchStartDefault(false, 2)).toBe(true);
+        expect(shouldPreventTouchStartDefault(false, 0)).toBe(false);
+        expect(shouldPreventTouchStartDefault(true, 1)).toBe(false);
     });
 
     it("treats hidden hint dots as blocked input targets", () => {

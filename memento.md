@@ -2,6 +2,21 @@
 
 ## Architectural Decisions
 
+### Pattern Lock Touchstart Now Cancels Mobile Browser Magnifier Defaults
+
+**Decision:** The pattern-lock touch entry point now calls `preventDefault()` on active `touchstart` events before beginning lock interaction.
+
+**Rationale:** Safari on phones can still open the text loupe/magnifier on repeated taps over a dot even with the existing `touch-action`, selection, and double-click guards. Canceling the touchstart default at the control boundary suppresses that browser behavior while keeping the existing annotation and drag logic intact.
+
+**Implementation details:**
+- `usePatternLock` now exposes `shouldPreventTouchStartDefault()` so the touch contract stays explicit and unit-testable
+- `onTouch` prevents the default browser touch handling for active touches, then continues with the existing pattern-lock interaction flow
+- helper tests now cover the new default-prevention rule alongside the other gesture helpers
+
+**Files:**
+- `src/components/usePatternLock.ts`
+- `src/components/usePatternLock.test.ts`
+
 ### Stats, Help, And Settings Now Share One Tabbed Game Menu
 
 **Decision:** Replaced the separate stats/help modals with one shared tabbed game menu containing `stats`, `help`, and `settings`.
