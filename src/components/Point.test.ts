@@ -1,4 +1,9 @@
-import { getConfirmedLabelStyle, getConfirmedRingSegments, getPointInnerClassName } from "./Point.utils.ts";
+import {
+    getAnnotationMenuOffsetStyle,
+    getConfirmedLabelStyle,
+    getConfirmedRingSegments,
+    getPointInnerClassName,
+} from "./Point.utils.ts";
 
 describe("Point class selection", () => {
     it("marks hint-hidden dots as hidden without the eliminated highlight class", () => {
@@ -41,5 +46,11 @@ describe("Point class selection", () => {
         expect(getConfirmedRingSegments([2], 4)).toEqual([
             { start: 90, end: 360 },
         ]);
+    });
+
+    it("keeps annotation menu offset separate from option positioning", () => {
+        expect(getAnnotationMenuOffsetStyle(18, -24)).toEqual({
+            transform: "translate(18px, -24px)",
+        });
     });
 });

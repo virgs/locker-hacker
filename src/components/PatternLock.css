@@ -107,6 +107,11 @@
     animation: annotationMenuOut 140ms ease-in forwards;
 }
 
+.react-pattern-lock__annotation-menu-offset {
+    position: absolute;
+    inset: 0;
+}
+
 .react-pattern-lock__annotation-menu::before {
     content: "";
     position: absolute;

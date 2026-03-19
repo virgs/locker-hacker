@@ -1,5 +1,9 @@
 import * as React from "react";
-import { getConfirmedLabelStyle, getPointInnerClassName } from "./Point.utils.ts";
+import {
+    getAnnotationMenuOffsetStyle,
+    getConfirmedLabelStyle,
+    getPointInnerClassName,
+} from "./Point.utils.ts";
 import ConfirmedRing from "./ConfirmedRing.tsx";
 import { getDotAnnotationMenuOptions } from "./DotAnnotationMenu.utils.ts";
 import { getAnnotationSelections, type DotAnnotationState } from "../game/dotAnnotations.ts";
@@ -125,27 +129,31 @@ const Point: React.FunctionComponent<PointProps> = ({
                         aria-hidden={true}
                         style={{
                             ["--annotation-menu-backdrop-size" as string]: `${annotationMenu?.backdropDiameterPx ?? 164}px`,
-                            transform: `translate(${annotationMenu?.offsetX ?? 0}px, ${annotationMenu?.offsetY ?? 0}px)`,
                         }}
                     >
-                        <div className="react-pattern-lock__annotation-menu-core" />
-                        {menuOptions.map(option => (
-                            <div
-                                key={option.selection}
-                                data-annotation-selection={option.selection}
-                                className={[
-                                    "react-pattern-lock__annotation-menu-option",
-                                    `tone-${option.tone}`,
-                                    menuSelections.includes(option.selection) ? "is-selected" : "",
-                                    annotationMenu?.highlightedSelection === option.selection ? "is-highlighted" : "",
-                                ].filter(Boolean).join(" ")}
-                                style={{
-                                    transform: `translate(-50%, -50%) translate(${option.x.toFixed(2)}px, ${option.y.toFixed(2)}px)`,
-                                }}
-                            >
-                                {option.label}
-                            </div>
-                        ))}
+                        <div
+                            className="react-pattern-lock__annotation-menu-offset"
+                            style={getAnnotationMenuOffsetStyle(annotationMenu?.offsetX, annotationMenu?.offsetY)}
+                        >
+                            <div className="react-pattern-lock__annotation-menu-core" />
+                            {menuOptions.map(option => (
+                                <div
+                                    key={option.selection}
+                                    data-annotation-selection={option.selection}
+                                    className={[
+                                        "react-pattern-lock__annotation-menu-option",
+                                        `tone-${option.tone}`,
+                                        menuSelections.includes(option.selection) ? "is-selected" : "",
+                                        annotationMenu?.highlightedSelection === option.selection ? "is-highlighted" : "",
+                                    ].filter(Boolean).join(" ")}
+                                    style={{
+                                        transform: `translate(-50%, -50%) translate(${option.x.toFixed(2)}px, ${option.y.toFixed(2)}px)`,
+                                    }}
+                                >
+                                    {option.label}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
                 <div

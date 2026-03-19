@@ -51,6 +51,13 @@ export const getConfirmedLabelStyle = (
     };
 };
 
+export const getAnnotationMenuOffsetStyle = (
+    offsetX = 0,
+    offsetY = 0,
+): CSSProperties => ({
+    transform: `translate(${offsetX}px, ${offsetY}px)`,
+});
+
 const normalizeAngle = (angle: number): number => {
     const normalized = angle % 360;
     return normalized < 0 ? normalized + 360 : normalized;

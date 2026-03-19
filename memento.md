@@ -2,6 +2,24 @@
 
 ## Architectural Decisions
 
+### Annotation Menu Edge Clamp Uses A Dedicated Offset Layer
+
+**Decision:** The radial annotation menu now applies its viewport-clamp offset on an inner positioning layer instead of on the animated menu shell itself.
+
+**Rationale:** The menu shell already animates with `transform` for scale-in/scale-out. Reusing that same property for the edge-clamp translation let the CSS animation override the visual offset while pointer hit-testing still used the shifted center. That put the rendered menu and the active hover/selection targets out of sync near screen edges.
+
+**Implementation details:**
+- `Point` now renders a `.react-pattern-lock__annotation-menu-offset` child that owns the clamp translation
+- the outer `.react-pattern-lock__annotation-menu` keeps only opacity/scale animation concerns
+- `Point.utils` now exposes `getAnnotationMenuOffsetStyle()` so the translation format is shared and testable
+- helper tests now cover the offset style contract alongside the other point-layout helpers
+
+**Files:**
+- `src/components/Point.tsx`
+- `src/components/Point.utils.ts`
+- `src/components/Point.test.ts`
+- `src/components/PatternLock.css`
+
 ### Pattern Lock Touchstart Now Cancels Mobile Browser Magnifier Defaults
 
 **Decision:** The pattern-lock touch entry point now calls `preventDefault()` on active `touchstart` events before beginning lock interaction.
