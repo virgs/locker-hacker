@@ -27,6 +27,7 @@ export interface DotAnnotationMenuOffset {
 }
 
 export const DOT_ANNOTATION_DOUBLE_PRESS_MS = 350;
+export const DOT_ANNOTATION_LONG_PRESS_MS = 420;
 export const DOT_ANNOTATION_MENU_RADIUS_PX = 58;
 export const DOT_ANNOTATION_MENU_HIT_RADIUS_PX = 24;
 export const DOT_ANNOTATION_MENU_BACKDROP_PX = 164;

@@ -62,7 +62,7 @@ export const HelpPanel: React.FunctionComponent = (): React.ReactElement => (
             Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
         </p>
         <p className="mt-3 mb-0">
-            <strong>Double-click and hold a dot</strong> then release to place deduction notes.
+            <strong>Double-click a dot on desktop, or long-press it on touch screens</strong> then release to place deduction notes.
         </p>
         <NotesHelpRow>
             <NotePreview>

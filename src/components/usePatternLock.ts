@@ -3,6 +3,7 @@ import * as React from "react";
 import { Point as PointType } from "../math/point.ts";
 import { getPoints, getCollidedPointIndex, getPointsInTheMiddle } from "../math/math.ts";
 import {
+    DOT_ANNOTATION_LONG_PRESS_MS,
     getDotAnnotationSelectionAtPointer,
     getDotAnnotationMenuMetrics,
     getDotAnnotationMenuOffset,
@@ -75,6 +76,8 @@ interface AnnotationPressRecord {
     timestamp: number;
 }
 
+type InteractionInput = "mouse" | "touch";
+
 export const isStationaryGesture = (
     start: PointType | null,
     current: PointType,
@@ -100,6 +103,18 @@ export const shouldPreventTouchStartDefault = (
     disabled: boolean,
     touchCount: number,
 ): boolean => !disabled && touchCount > 0;
+
+export const shouldDeferTouchPathStart = (
+    pressedPointIndex: number,
+    targetLength?: number,
+    hasAnnotationHandler = false,
+): boolean => pressedPointIndex >= 0 && !!targetLength && hasAnnotationHandler;
+
+export const shouldTrackAnnotationTap = (
+    inputType: InteractionInput | null,
+    pathLength: number,
+    gestureMoved: boolean,
+): boolean => inputType === "mouse" && pathLength <= 1 && !gestureMoved;
 
 export const isBlockedPoint = (
     index: number,
@@ -144,19 +159,27 @@ export const usePatternLock = ({
     const [flashingPoints, setFlashingPoints]     = React.useState<Set<number>>(new Set());
     const [activeAnnotationMenu, setActiveAnnotationMenu] = React.useState<ActiveAnnotationMenu | null>(null);
     const flashTimerRef        = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+    const touchLongPressTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const gestureMovedRef      = React.useRef(false);
     const pressStartRef        = React.useRef<PointType | null>(null);
     const pressedPointRef      = React.useRef<number | null>(null);
     const lastTouchTimeRef     = React.useRef(0);
     const lastAnnotationPressRef = React.useRef<AnnotationPressRecord | null>(null);
     const activeAnnotationMenuRef = React.useRef<ActiveAnnotationMenu | null>(null);
+    const activeInputRef       = React.useRef<InteractionInput | null>(null);
 
     const updateActiveAnnotationMenu = React.useCallback((menu: ActiveAnnotationMenu | null): void => {
         activeAnnotationMenuRef.current = menu;
         setActiveAnnotationMenu(menu);
     }, []);
 
-    const onResize = (): [number, number] => {
+    const clearTouchLongPressTimer = React.useCallback((): void => {
+        if (touchLongPressTimerRef.current === null) return;
+        clearTimeout(touchLongPressTimerRef.current);
+        touchLongPressTimerRef.current = null;
+    }, []);
+
+    const onResize = React.useCallback((): [number, number] => {
         const el = wrapperRef.current;
         if (!el || !el.isConnected) return [0, 0];
         const { top, left } = el.getBoundingClientRect();
@@ -164,13 +187,13 @@ export const usePatternLock = ({
         setContainerWidth(el.offsetWidth);
         setContainerHeight(el.offsetHeight);
         return [top, left];
-    };
+    }, []);
 
-    const getPointIndexAtClientPosition = ({ x, y }: PointType): number => {
+    const getPointIndexAtClientPosition = React.useCallback(({ x, y }: PointType): number => {
         const { top, left } = wrapperRef.current.getBoundingClientRect();
         const index = getCollidedPointIndex({ x: x - left, y: y - top }, points, pointActiveSize);
         return isBlockedPoint(index, blockedPoints) ? -1 : index;
-    };
+    }, [blockedPoints, pointActiveSize, points]);
 
     const getPointCenter = React.useCallback((index: number): PointType | null => {
         const point = points[index];
@@ -196,7 +219,7 @@ export const usePatternLock = ({
         }, targetLength, activeMenu.radiusPx, activeMenu.hitRadiusPx);
     }, [getPointCenter, targetLength]);
 
-    const checkCollision = (clientPosition: PointType): void => {
+    const checkCollision = React.useCallback((clientPosition: PointType): void => {
         const index = getPointIndexAtClientPosition(clientPosition);
         if (~index && path[path.length - 1] !== index) {
             if (allowOverlapping || path.indexOf(index) === -1) {
@@ -214,68 +237,84 @@ export const usePatternLock = ({
                 }
             }
         }
-    };
+    }, [allowJumping, allowOverlapping, blockedPoints, cols, getPointIndexAtClientPosition, onChange, path]);
 
-    const beginInteraction = (clientPosition: PointType): void => {
+    const openAnnotationMenu = React.useCallback((pressedPointIndex: number): void => {
+        if (!targetLength) return;
         const [top, left] = onResize();
-        const pressedPointIndex = getPointIndexAtClientPosition(clientPosition);
-        const now = Date.now();
         const menuMetrics = getDotAnnotationMenuMetrics(
             Math.min(containerWidth, containerHeight),
             window.matchMedia(BREAKPOINT_QUERIES.mobile).matches,
         );
-        const shouldOpenAnnotationMenu = (
+        const pointCenter = getPointCenter(pressedPointIndex);
+        const menuOffset = pointCenter
+            ? getDotAnnotationMenuOffset(
+                {
+                    x: left + pointCenter.x,
+                    y: top + pointCenter.y,
+                },
+                menuMetrics.footprintRadiusPx,
+                {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                },
+            )
+            : { x: 0, y: 0 };
+        onChange?.([]);
+        setInitialMousePosition(null);
+        updateActiveAnnotationMenu({
+            index: pressedPointIndex,
+            highlightedSelection: null,
+            selectedSelections: getAnnotationSelections(annotations[pressedPointIndex], targetLength),
+            radiusPx: menuMetrics.radiusPx,
+            hitRadiusPx: menuMetrics.hitRadiusPx,
+            backdropDiameterPx: menuMetrics.backdropDiameterPx,
+            footprintRadiusPx: menuMetrics.footprintRadiusPx,
+            offsetX: menuOffset.x,
+            offsetY: menuOffset.y,
+        });
+    }, [annotations, containerWidth, containerHeight, getPointCenter, onChange, onResize, targetLength, updateActiveAnnotationMenu]);
+
+    const beginPathInteraction = React.useCallback((clientPosition: PointType): void => {
+        const [top, left] = onResize();
+        setIsMouseDown(true);
+        setFirstDotPopActive(false);
+        gestureMovedRef.current = false;
+        pressStartRef.current = clientPosition;
+        updateActiveAnnotationMenu(null);
+        setInitialMousePosition({ x: clientPosition.x - left, y: clientPosition.y - top });
+        checkCollision(clientPosition);
+    }, [checkCollision, onResize, updateActiveAnnotationMenu]);
+
+    const beginInteraction = (clientPosition: PointType): void => {
+        const pressedPointIndex = getPointIndexAtClientPosition(clientPosition);
+        const now = Date.now();
+        const shouldOpenWithRepeatedPress = (
             pressedPointIndex >= 0 &&
             !!targetLength &&
             !!onSelectPointAnnotation &&
             isRepeatedAnnotationPress(lastAnnotationPressRef.current, pressedPointIndex, now)
         );
 
-        setIsMouseDown(true);
-        setFirstDotPopActive(false);
-        gestureMovedRef.current = false;
-        pressStartRef.current = clientPosition;
         pressedPointRef.current = pressedPointIndex;
 
-        if (shouldOpenAnnotationMenu) {
-            const pointCenter = getPointCenter(pressedPointIndex);
-            const menuOffset = pointCenter
-                ? getDotAnnotationMenuOffset(
-                    {
-                        x: left + pointCenter.x,
-                        y: top + pointCenter.y,
-                    },
-                    menuMetrics.footprintRadiusPx,
-                    {
-                        width: window.innerWidth,
-                        height: window.innerHeight,
-                    },
-                )
-                : { x: 0, y: 0 };
-            onChange?.([]);
-            setInitialMousePosition(null);
-            updateActiveAnnotationMenu({
-                index: pressedPointIndex,
-                highlightedSelection: null,
-                selectedSelections: getAnnotationSelections(annotations[pressedPointIndex], targetLength ?? 0),
-                radiusPx: menuMetrics.radiusPx,
-                hitRadiusPx: menuMetrics.hitRadiusPx,
-                backdropDiameterPx: menuMetrics.backdropDiameterPx,
-                footprintRadiusPx: menuMetrics.footprintRadiusPx,
-                offsetX: menuOffset.x,
-                offsetY: menuOffset.y,
-            });
+        if (shouldOpenWithRepeatedPress) {
+            setIsMouseDown(true);
+            setFirstDotPopActive(false);
+            gestureMovedRef.current = false;
+            pressStartRef.current = clientPosition;
+            openAnnotationMenu(pressedPointIndex);
             return;
         }
 
-        updateActiveAnnotationMenu(null);
-        setInitialMousePosition({ x: clientPosition.x - left, y: clientPosition.y - top });
-        checkCollision(clientPosition);
+        beginPathInteraction(clientPosition);
     };
 
     const onHold = ({ clientX, clientY }: React.MouseEvent): void => {
         if (disabled) return;
         if (shouldIgnoreEmulatedMouseEvent(lastTouchTimeRef.current, Date.now())) return;
+        activeInputRef.current = "mouse";
+        clearTouchLongPressTimer();
         beginInteraction({ x: clientX, y: clientY });
     };
 
@@ -287,7 +326,30 @@ export const usePatternLock = ({
         const { touches } = event;
         if (touches.length === 0) return;
         lastTouchTimeRef.current = Date.now();
-        beginInteraction({ x: touches[0].clientX, y: touches[0].clientY });
+        activeInputRef.current = "touch";
+
+        const clientPosition = { x: touches[0].clientX, y: touches[0].clientY };
+        const pressedPointIndex = getPointIndexAtClientPosition(clientPosition);
+        pressedPointRef.current = pressedPointIndex;
+
+        if (!shouldDeferTouchPathStart(pressedPointIndex, targetLength, !!onSelectPointAnnotation)) {
+            clearTouchLongPressTimer();
+            beginPathInteraction(clientPosition);
+            return;
+        }
+
+        setIsMouseDown(true);
+        setFirstDotPopActive(false);
+        gestureMovedRef.current = false;
+        pressStartRef.current = clientPosition;
+        setInitialMousePosition(null);
+        updateActiveAnnotationMenu(null);
+        clearTouchLongPressTimer();
+        touchLongPressTimerRef.current = setTimeout(() => {
+            touchLongPressTimerRef.current = null;
+            if (gestureMovedRef.current || pressedPointRef.current !== pressedPointIndex) return;
+            openAnnotationMenu(pressedPointIndex);
+        }, DOT_ANNOTATION_LONG_PRESS_MS);
     };
 
     React.useEffect(() => {
@@ -312,8 +374,9 @@ export const usePatternLock = ({
             checkCollision({ x: clientX, y: clientY });
         };
         const onTouchMove = ({ touches }: TouchEvent): void => {
+            const currentPosition = { x: touches[0].clientX, y: touches[0].clientY };
             if (activeAnnotationMenuRef.current) {
-                const highlightedSelection = getAnnotationMenuSelection({ x: touches[0].clientX, y: touches[0].clientY });
+                const highlightedSelection = getAnnotationMenuSelection(currentPosition);
                 if (highlightedSelection === activeAnnotationMenuRef.current.highlightedSelection) return;
                 updateActiveAnnotationMenu({
                     ...activeAnnotationMenuRef.current,
@@ -321,13 +384,25 @@ export const usePatternLock = ({
                 });
                 return;
             }
-            if (!firstDotPopActive && shouldActivateFirstDotPop(pressStartRef.current, { x: touches[0].clientX, y: touches[0].clientY })) {
+
+            if (
+                touchLongPressTimerRef.current !== null &&
+                pressStartRef.current &&
+                !isStationaryGesture(pressStartRef.current, currentPosition)
+            ) {
+                gestureMovedRef.current = true;
+                clearTouchLongPressTimer();
+                beginPathInteraction(pressStartRef.current);
+            }
+
+            if (!firstDotPopActive && shouldActivateFirstDotPop(pressStartRef.current, currentPosition)) {
                 setFirstDotPopActive(true);
             }
-            if (!isStationaryGesture(pressStartRef.current, { x: touches[0].clientX, y: touches[0].clientY })) {
+            if (!isStationaryGesture(pressStartRef.current, currentPosition)) {
                 gestureMovedRef.current = true;
             }
-            checkCollision({ x: touches[0].clientX, y: touches[0].clientY });
+            if (touchLongPressTimerRef.current !== null) return;
+            checkCollision(currentPosition);
         };
         ref.addEventListener("mousemove", onMouseMove);
         ref.addEventListener("touchmove", onTouchMove);
@@ -340,14 +415,14 @@ export const usePatternLock = ({
     React.useEffect(() => {
         setContainerWidth(wrapperRef.current.offsetWidth);
         setContainerHeight(wrapperRef.current.offsetHeight);
-    }, []);
+    }, [onResize]);
 
     React.useEffect(() => {
         const ref = wrapperRef.current;
         const observer = new ResizeObserver(() => onResize());
         observer.observe(ref);
         return () => observer.disconnect();
-    }, []);
+    }, [onResize]);
 
     React.useEffect(() => {
         const rafId = window.requestAnimationFrame(() => {
@@ -364,10 +439,11 @@ export const usePatternLock = ({
             onResize();
         });
         return () => window.cancelAnimationFrame(rafId);
-    }, [containerWidth, containerHeight, pointActiveSize, cols, rows]);
+    }, [containerWidth, containerHeight, pointActiveSize, cols, rows, onResize]);
 
     React.useEffect(() => {
         const finishInteraction = (): void => {
+            clearTouchLongPressTimer();
             setIsMouseDown(false);
             setInitialMousePosition(null);
             setFirstDotPopActive(false);
@@ -382,12 +458,13 @@ export const usePatternLock = ({
                 onChange?.([]);
                 pressStartRef.current = null;
                 pressedPointRef.current = null;
+                activeInputRef.current = null;
                 return;
             }
 
             if (disabled) return;
             const tappedIndex = pressedPointRef.current;
-            const tappedWithoutDrag = path.length <= 1 && !gestureMovedRef.current;
+            const tappedWithoutDrag = shouldTrackAnnotationTap(activeInputRef.current, path.length, gestureMovedRef.current);
 
             if (tappedWithoutDrag && tappedIndex !== null && tappedIndex >= 0) {
                 onChange?.([]);
@@ -397,12 +474,14 @@ export const usePatternLock = ({
                 };
                 pressStartRef.current = null;
                 pressedPointRef.current = null;
+                activeInputRef.current = null;
                 return;
             }
 
             lastAnnotationPressRef.current = null;
             pressStartRef.current = null;
             pressedPointRef.current = null;
+            activeInputRef.current = null;
             if (path.length) onFinish?.();
         };
 
@@ -421,15 +500,16 @@ export const usePatternLock = ({
             window.removeEventListener("mouseup", onMouseRelease);
             window.removeEventListener("touchend", onTouchRelease);
         };
-    }, [disabled, onChange, onFinish, onSelectPointAnnotation, path, updateActiveAnnotationMenu]);
+    }, [clearTouchLongPressTimer, disabled, onChange, onFinish, onSelectPointAnnotation, path, updateActiveAnnotationMenu]);
 
     const completionFlash = isMouseDown && !!targetLength && path.length >= targetLength;
 
     React.useEffect(() => {
         return () => {
             if (flashTimerRef.current !== null) clearTimeout(flashTimerRef.current);
+            clearTouchLongPressTimer();
         };
-    }, []);
+    }, [clearTouchLongPressTimer]);
 
     React.useEffect(() => {
         onAnnotationMenuVisibilityChange?.(activeAnnotationMenu !== null);

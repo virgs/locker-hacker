@@ -2,6 +2,24 @@
 
 ## Architectural Decisions
 
+### Touch Annotation Menu Now Opens On Long Press Instead Of Repeated Taps
+
+**Decision:** Touch devices now open the radial dot-annotation menu from a stationary long press on a dot instead of from a repeated tap gesture.
+
+**Rationale:** Repeated taps on phones were still competing with the browser loupe/magnifier behavior. A long press is simpler to discover, avoids the double-tap timing race, and lets touch drawing continue naturally when the finger starts moving before the hold completes.
+
+**Implementation details:**
+- `usePatternLock` now defers touch path start only when the pressed dot is eligible for annotations
+- a touch long-press timer opens the radial menu if the finger stays stationary; moving first cancels the timer and resumes normal path drawing from the original touch point
+- stationary touch taps no longer feed the desktop repeated-click annotation path, so desktop keeps double-click behavior while phones use long press
+- helper tests now cover the deferred touch-start and mouse-only repeated-tap tracking rules
+
+**Files:**
+- `src/components/usePatternLock.ts`
+- `src/components/usePatternLock.test.ts`
+- `src/components/HelpModal.tsx`
+- `README.md`
+
 ### Annotation Menu Edge Clamp Uses A Dedicated Offset Layer
 
 **Decision:** The radial annotation menu now applies its viewport-clamp offset on an inner positioning layer instead of on the animated menu shell itself.

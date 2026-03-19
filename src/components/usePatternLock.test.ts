@@ -3,9 +3,11 @@ import {
     getAvailableImplicitDots,
     isStationaryGesture,
     isBlockedPoint,
+    shouldDeferTouchPathStart,
     shouldIgnoreEmulatedMouseEvent,
     shouldActivateFirstDotPop,
     shouldPreventTouchStartDefault,
+    shouldTrackAnnotationTap,
 } from "./usePatternLock.ts";
 
 describe("usePatternLock helpers", () => {
@@ -31,6 +33,21 @@ describe("usePatternLock helpers", () => {
         expect(shouldPreventTouchStartDefault(false, 2)).toBe(true);
         expect(shouldPreventTouchStartDefault(false, 0)).toBe(false);
         expect(shouldPreventTouchStartDefault(true, 1)).toBe(false);
+    });
+
+    it("defers touch path start only when a dot can open the annotation menu", () => {
+        expect(shouldDeferTouchPathStart(4, 5, true)).toBe(true);
+        expect(shouldDeferTouchPathStart(-1, 5, true)).toBe(false);
+        expect(shouldDeferTouchPathStart(4, undefined, true)).toBe(false);
+        expect(shouldDeferTouchPathStart(4, 5, false)).toBe(false);
+    });
+
+    it("tracks stationary annotation taps only for mouse input", () => {
+        expect(shouldTrackAnnotationTap("mouse", 1, false)).toBe(true);
+        expect(shouldTrackAnnotationTap("mouse", 2, false)).toBe(false);
+        expect(shouldTrackAnnotationTap("mouse", 1, true)).toBe(false);
+        expect(shouldTrackAnnotationTap("touch", 1, false)).toBe(false);
+        expect(shouldTrackAnnotationTap(null, 1, false)).toBe(false);
     });
 
     it("treats hidden hint dots as blocked input targets", () => {
