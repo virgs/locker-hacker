@@ -43,6 +43,7 @@
 - the menu backdrop size is now driven by a CSS variable, and compact screens also get larger option pills, larger numbered labels, and a larger center core for better finger targeting
 - the pattern-lock surface now suppresses browser double-click behavior and adds stronger iOS-oriented selection/tap-highlight guards
 - `ContentArea` and `MainArea` temporarily switch to visible overflow and higher stacking while the menu is open so it can overlap the sidebar, navbar, and footer instead of being hidden under them
+- the old full-square `annotation-menu-active::before` lock overlay was later removed because the shared app-level dimmer and per-point dimming already handled focus, and the extra wrapper overlay made the `.pattern-lock-focus-layer` bounds visibly darker than the surrounding UI
 - helper tests now cover responsive menu sizing and compact-screen hit detection
 
 **Files:**
