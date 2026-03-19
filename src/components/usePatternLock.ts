@@ -4,6 +4,8 @@ import { Point as PointType } from "../math/point.ts";
 import { getPoints, getCollidedPointIndex, getPointsInTheMiddle } from "../math/math.ts";
 import {
     getDotAnnotationSelectionAtPointer,
+    getDotAnnotationMenuMetrics,
+    getDotAnnotationMenuOffset,
     isRepeatedAnnotationPress,
 } from "./DotAnnotationMenu.utils.ts";
 import {
@@ -11,6 +13,7 @@ import {
     type DotAnnotations,
     type DotAnnotationSelection,
 } from "../game/dotAnnotations.ts";
+import { BREAKPOINT_QUERIES } from "../theme/breakpoints.ts";
 
 interface UsePatternLockOptions {
     path: number[];
@@ -40,6 +43,11 @@ export interface ActiveAnnotationMenu {
     index: number;
     highlightedSelection: DotAnnotationSelection | null;
     selectedSelections: DotAnnotationSelection[];
+    radiusPx: number;
+    hitRadiusPx: number;
+    backdropDiameterPx: number;
+    offsetX: number;
+    offsetY: number;
 }
 
 export interface UsePatternLockResult {
@@ -176,7 +184,10 @@ export const usePatternLock = ({
         return getDotAnnotationSelectionAtPointer({
             x: clientPosition.x - left,
             y: clientPosition.y - top,
-        }, center, targetLength);
+        }, {
+            x: center.x + activeMenu.offsetX,
+            y: center.y + activeMenu.offsetY,
+        }, targetLength, activeMenu.radiusPx, activeMenu.hitRadiusPx);
     }, [getPointCenter, targetLength]);
 
     const checkCollision = (clientPosition: PointType): void => {
@@ -203,6 +214,10 @@ export const usePatternLock = ({
         const [top, left] = onResize();
         const pressedPointIndex = getPointIndexAtClientPosition(clientPosition);
         const now = Date.now();
+        const menuMetrics = getDotAnnotationMenuMetrics(
+            Math.min(containerWidth, containerHeight),
+            window.matchMedia(BREAKPOINT_QUERIES.mobile).matches,
+        );
         const shouldOpenAnnotationMenu = (
             pressedPointIndex >= 0 &&
             !!targetLength &&
@@ -217,12 +232,31 @@ export const usePatternLock = ({
         pressedPointRef.current = pressedPointIndex;
 
         if (shouldOpenAnnotationMenu) {
+            const pointCenter = getPointCenter(pressedPointIndex);
+            const menuOffset = pointCenter
+                ? getDotAnnotationMenuOffset(
+                    {
+                        x: left + pointCenter.x,
+                        y: top + pointCenter.y,
+                    },
+                    menuMetrics.backdropDiameterPx,
+                    {
+                        width: window.innerWidth,
+                        height: window.innerHeight,
+                    },
+                )
+                : { x: 0, y: 0 };
             onChange?.([]);
             setInitialMousePosition(null);
             updateActiveAnnotationMenu({
                 index: pressedPointIndex,
                 highlightedSelection: null,
                 selectedSelections: getAnnotationSelections(annotations[pressedPointIndex], targetLength ?? 0),
+                radiusPx: menuMetrics.radiusPx,
+                hitRadiusPx: menuMetrics.hitRadiusPx,
+                backdropDiameterPx: menuMetrics.backdropDiameterPx,
+                offsetX: menuOffset.x,
+                offsetY: menuOffset.y,
             });
             return;
         }

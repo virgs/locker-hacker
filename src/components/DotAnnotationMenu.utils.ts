@@ -14,9 +14,30 @@ export interface AnnotationPressRecord {
     timestamp: number;
 }
 
+export interface DotAnnotationMenuMetrics {
+    radiusPx: number;
+    hitRadiusPx: number;
+    backdropDiameterPx: number;
+}
+
+export interface DotAnnotationMenuOffset {
+    x: number;
+    y: number;
+}
+
 export const DOT_ANNOTATION_DOUBLE_PRESS_MS = 350;
 export const DOT_ANNOTATION_MENU_RADIUS_PX = 58;
 export const DOT_ANNOTATION_MENU_HIT_RADIUS_PX = 24;
+export const DOT_ANNOTATION_MENU_BACKDROP_PX = 164;
+export const DOT_ANNOTATION_MENU_MOBILE_MIN_RADIUS_PX = 108;
+export const DOT_ANNOTATION_MENU_MOBILE_MAX_RADIUS_PX = 148;
+export const DOT_ANNOTATION_MENU_VIEWPORT_PADDING_PX = 28;
+
+const clamp = (
+    value: number,
+    min: number,
+    max: number,
+): number => Math.min(max, Math.max(min, value));
 
 const toOffset = (angleDeg: number, radiusPx: number): Point => {
     const angleRad = angleDeg * (Math.PI / 180);
@@ -33,6 +54,55 @@ const getPositionAngles = (codeLength: number): number[] => {
         const ratio = index / (codeLength - 1);
         return -150 + ratio * 120;
     });
+};
+
+export const getDotAnnotationMenuMetrics = (
+    boardSizePx: number,
+    isCompactViewport: boolean,
+): DotAnnotationMenuMetrics => {
+    const safeBoardSizePx = boardSizePx > 0 ? boardSizePx : DOT_ANNOTATION_MENU_BACKDROP_PX;
+
+    if (!isCompactViewport) {
+        return {
+            radiusPx: DOT_ANNOTATION_MENU_RADIUS_PX,
+            hitRadiusPx: DOT_ANNOTATION_MENU_HIT_RADIUS_PX,
+            backdropDiameterPx: DOT_ANNOTATION_MENU_BACKDROP_PX,
+        };
+    }
+
+    const radiusPx = clamp(
+        Math.round(safeBoardSizePx * 0.35),
+        DOT_ANNOTATION_MENU_MOBILE_MIN_RADIUS_PX,
+        DOT_ANNOTATION_MENU_MOBILE_MAX_RADIUS_PX,
+    );
+
+    return {
+        radiusPx,
+        hitRadiusPx: clamp(Math.round(radiusPx * 0.34), 36, 48),
+        backdropDiameterPx: clamp(
+            Math.round(safeBoardSizePx * 0.98),
+            radiusPx * 2 + 92,
+            safeBoardSizePx,
+        ),
+    };
+};
+
+export const getDotAnnotationMenuOffset = (
+    centerInViewport: Point,
+    backdropDiameterPx: number,
+    viewportSize: { width: number; height: number },
+    paddingPx = DOT_ANNOTATION_MENU_VIEWPORT_PADDING_PX,
+): DotAnnotationMenuOffset => {
+    const halfBackdropPx = backdropDiameterPx / 2;
+    const minX = paddingPx + halfBackdropPx;
+    const maxX = viewportSize.width - paddingPx - halfBackdropPx;
+    const minY = paddingPx + halfBackdropPx;
+    const maxY = viewportSize.height - paddingPx - halfBackdropPx;
+
+    return {
+        x: clamp(clamp(centerInViewport.x, minX, maxX) - centerInViewport.x, -halfBackdropPx, halfBackdropPx),
+        y: clamp(clamp(centerInViewport.y, minY, maxY) - centerInViewport.y, -halfBackdropPx, halfBackdropPx),
+    };
 };
 
 export const getDotAnnotationMenuOptions = (
@@ -72,8 +142,10 @@ export const getDotAnnotationSelectionAtPointer = (
     pointer: Point,
     center: Point,
     codeLength: number,
+    radiusPx = DOT_ANNOTATION_MENU_RADIUS_PX,
+    hitRadiusPx = DOT_ANNOTATION_MENU_HIT_RADIUS_PX,
 ): DotAnnotationSelection | null => {
-    const options = getDotAnnotationMenuOptions(codeLength);
+    const options = getDotAnnotationMenuOptions(codeLength, radiusPx);
     const bestMatch = options
         .map(option => ({
             selection: option.selection,
@@ -81,6 +153,6 @@ export const getDotAnnotationSelectionAtPointer = (
         }))
         .sort((left, right) => left.distance - right.distance)[0];
 
-    if (!bestMatch || bestMatch.distance > DOT_ANNOTATION_MENU_HIT_RADIUS_PX) return null;
+    if (!bestMatch || bestMatch.distance > hitRadiusPx) return null;
     return bestMatch.selection;
 };

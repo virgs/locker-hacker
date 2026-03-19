@@ -109,6 +109,7 @@ const PatternLock: React.FunctionComponent<PatternLockProps> = ({
             style={{ ...style, width: containerSize, height: containerSize }}
             onMouseDown={onHold}
             onTouchStart={onTouch}
+            onDoubleClick={(event): void => event.preventDefault()}
             ref={wrapperRef}
         >
             {gridLayout.width > 0 && (

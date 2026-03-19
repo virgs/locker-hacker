@@ -5,6 +5,7 @@ import { VerticalHandle, HorizontalHandle, VerticalGrabBar, HorizontalGrabBar } 
 
 interface ResizeHandleProps {
     isMobile: boolean;
+    dimmed?: boolean;
     onPointerDown: (e: PointerEvent) => void;
     onPointerMove: (e: PointerEvent) => void;
     onPointerUp: (e: PointerEvent) => void;
@@ -12,6 +13,7 @@ interface ResizeHandleProps {
 
 const ResizeHandle: FunctionComponent<ResizeHandleProps> = ({
     isMobile,
+    dimmed = false,
     onPointerDown,
     onPointerMove,
     onPointerUp,
@@ -23,15 +25,15 @@ const ResizeHandle: FunctionComponent<ResizeHandleProps> = ({
     return (
         <Tip text={RESIZE_HANDLE_TOOLTIP} placement={placement}>
             <Handle
+                $dimmed={dimmed}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
             >
-                <GrabBar />
+                <GrabBar $dimmed={dimmed} />
             </Handle>
         </Tip>
     );
 };
 
 export default ResizeHandle;
-

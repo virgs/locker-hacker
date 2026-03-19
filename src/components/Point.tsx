@@ -70,7 +70,7 @@ const Point: React.FunctionComponent<PointProps> = ({
     const eliminatedMarker = useAnimatedMarker(highlighted);
     const menuMarker = useAnimatedMarker(annotationMenu !== undefined);
     const innerClass = getPointInnerClassName({ complete, pop, highlighted, hidden, selected });
-    const menuOptions = targetLength ? getDotAnnotationMenuOptions(targetLength) : [];
+    const menuOptions = targetLength ? getDotAnnotationMenuOptions(targetLength, annotationMenu?.radiusPx) : [];
     const menuSelections = annotationMenu?.selectedSelections ?? getAnnotationSelections(annotation, targetLength ?? 0);
 
     return (
@@ -123,11 +123,16 @@ const Point: React.FunctionComponent<PointProps> = ({
                     <div
                         className={`react-pattern-lock__annotation-menu${menuMarker.exiting ? " is-exiting" : ""}`}
                         aria-hidden={true}
+                        style={{
+                            ["--annotation-menu-backdrop-size" as string]: `${annotationMenu?.backdropDiameterPx ?? 164}px`,
+                            transform: `translate(${annotationMenu?.offsetX ?? 0}px, ${annotationMenu?.offsetY ?? 0}px)`,
+                        }}
                     >
                         <div className="react-pattern-lock__annotation-menu-core" />
                         {menuOptions.map(option => (
                             <div
                                 key={option.selection}
+                                data-annotation-selection={option.selection}
                                 className={[
                                     "react-pattern-lock__annotation-menu-option",
                                     `tone-${option.tone}`,

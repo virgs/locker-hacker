@@ -2,20 +2,33 @@ import styled from "styled-components";
 import { BREAKPOINTS } from "./theme/breakpoints.ts";
 import { MOBILE_SIDEBAR_COLLAPSED_HEIGHT_PX, getMobileMainAreaPaddingBottom } from "./App.constants.ts";
 
-export const AppLayout = styled.div`
+export const AppLayout = styled.div<{ $annotationMenuActive?: boolean }>`
     display: flex;
     flex-direction: column;
     height: 100%;
     overflow: hidden;
+    position: relative;
+
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: ${({ $annotationMenuActive }) => $annotationMenuActive ? 110 : -1};
+        opacity: ${({ $annotationMenuActive }) => $annotationMenuActive ? 1 : 0};
+        pointer-events: none;
+        background: rgba(3, 6, 10, 0.42);
+        transition: opacity 140ms ease;
+    }
 `;
 
-export const ContentArea = styled.div`
+export const ContentArea = styled.div<{ $annotationMenuActive?: boolean }>`
     display: flex;
     flex-direction: row;
     flex: 1;
     min-height: 0;
-    overflow: hidden;
+    overflow: ${({ $annotationMenuActive }) => $annotationMenuActive ? "visible" : "hidden"};
     position: relative;
+    z-index: ${({ $annotationMenuActive }) => $annotationMenuActive ? 120 : 1};
 `;
 
 export const MainArea = styled.main<{ $annotationMenuActive?: boolean }>`
@@ -25,10 +38,10 @@ export const MainArea = styled.main<{ $annotationMenuActive?: boolean }>`
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    overflow: ${({ $annotationMenuActive }) => $annotationMenuActive ? "visible" : "hidden"};
     box-sizing: border-box;
     position: relative;
-    z-index: 1;
+    z-index: ${({ $annotationMenuActive }) => $annotationMenuActive ? 30 : 1};
     padding: 24px;
     padding-right: calc(220px + 24px);
 
@@ -51,19 +64,21 @@ export const MainArea = styled.main<{ $annotationMenuActive?: boolean }>`
     }
 `;
 
-export const Sidebar = styled.aside<{ $expanded?: boolean }>`
+export const Sidebar = styled.aside<{ $expanded?: boolean; $annotationMenuActive?: boolean }>`
     position: absolute;
     right: 0;
     top: 0;
     bottom: 0;
     z-index: 10;
     background: var(--bs-body-bg, #060606);
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 1px solid ${({ $annotationMenuActive }) => $annotationMenuActive
+        ? "rgba(255, 255, 255, 0.03)"
+        : "rgba(255, 255, 255, 0.08)"};
     display: flex;
     flex-direction: row;
     box-sizing: border-box;
     width: ${({ $expanded }) => $expanded ? '75%' : '220px'};
-    transition: width 0.3s ease;
+    transition: width 0.3s ease, border-color 140ms ease;
 
     ${BREAKPOINTS.xl} {
         width: ${({ $expanded }) => $expanded ? '75%' : '440px'};
@@ -77,9 +92,11 @@ export const Sidebar = styled.aside<{ $expanded?: boolean }>`
         width: 100%;
         flex-direction: column;
         border-left: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-top: 1px solid ${({ $annotationMenuActive }) => $annotationMenuActive
+            ? "rgba(255, 255, 255, 0.03)"
+            : "rgba(255, 255, 255, 0.08)"};
         height: ${({ $expanded }) => $expanded ? '80%' : `${MOBILE_SIDEBAR_COLLAPSED_HEIGHT_PX}px`};
-        transition: height 0.3s ease;
+        transition: height 0.3s ease, border-color 140ms ease;
     }
 `;
 

@@ -11,7 +11,7 @@ import {
 import { CounterIcon, CounterMetric, CounterValue } from "./PlayAreaCounter.styled.tsx";
 import { formatGuessLabel } from "./GuessCounter.utils.ts";
 
-const MAX_VISIBLE_DOTS = 10;
+const MAX_VISIBLE_DOTS = 8;
 
 const GuessCounter: React.FunctionComponent = (): React.ReactElement | null => {
     const { pathHistory } = useGameContext();

@@ -75,9 +75,7 @@ const HelpModal: React.FunctionComponent<HelpModalProps> = ({
                 Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
             </p>
             <p className="mt-3 mb-0">
-                After your first valid guess starts the round, <strong>double-click and hold a dot</strong> then release on
-                <strong> clear</strong>, <strong>eliminate</strong>, <strong>all positions</strong>, or any
-                <strong> numbered position</strong> to place deduction notes.
+                <strong>Double-click and hold a dot</strong> then release to place deduction notes.
             </p>
             <NotesHelpRow>
                 <NotePreview>

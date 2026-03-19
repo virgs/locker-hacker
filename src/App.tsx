@@ -69,9 +69,9 @@ export const App = (): ReactElement => {
     }, [expanded, pathHistory.length]);
 
     return (
-        <AppLayout>
+        <AppLayout $annotationMenuActive={annotationMenuOpen}>
             <Navbar />
-            <ContentArea>
+            <ContentArea $annotationMenuActive={annotationMenuOpen}>
                 <MainArea ref={mainAreaRef} $annotationMenuActive={annotationMenuOpen}>
                     <GuessCounter />
                     <TimeCounter />
@@ -79,7 +79,7 @@ export const App = (): ReactElement => {
                         <PatternLockSizer
                             $size={lockSize}
                             className="pattern-lock-focus-layer"
-                            style={annotationMenuOpen ? { zIndex: 20 } : undefined}
+                            style={annotationMenuOpen ? { zIndex: 40 } : undefined}
                         >
                             <PatternLock
                                 key={gameKey}
@@ -108,9 +108,10 @@ export const App = (): ReactElement => {
                     )}
                 </MainArea>
                 {expanded && <ClickOutsideOverlay onClick={collapse} />}
-                <Sidebar $expanded={expanded}>
+                <Sidebar $expanded={expanded} $annotationMenuActive={annotationMenuOpen}>
                     <ResizeHandle
                         isMobile={isMobile}
+                        dimmed={annotationMenuOpen}
                         onPointerDown={onPointerDown}
                         onPointerMove={onPointerMove}
                         onPointerUp={onPointerUp}

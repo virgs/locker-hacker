@@ -2,6 +2,32 @@
 
 ## Architectural Decisions
 
+### Mobile Annotation Menu Uses Responsive Sizing And Elevated Play-Layer Stacking
+
+**Decision:** Kept the radial annotation interaction, but made its footprint responsive on compact screens and promoted the active play layer above the navbar, sidebar, and footer while the menu is open.
+
+**Rationale:** The original menu was sized for desktop precision. On phones the targets were too small, fingers covered too much of the board, and the menu could disappear behind surrounding chrome because the lock lived in a lower stacking context. The lock surface also needed stricter browser-gesture suppression so double-tap annotation input would not trigger the browser magnifier/zoom behavior.
+
+**Implementation details:**
+- `getDotAnnotationMenuMetrics()` now derives a larger compact-screen menu radius, hit radius, and backdrop size from the measured board size while preserving the previous desktop sizing; the compact radius was later increased again so numbered choices sit farther from the center on phones
+- `getDotAnnotationMenuOffset()` now shifts the open menu back inside the viewport with a wider edge padding when the pressed dot is near a screen edge, so the enlarged mobile menu stays fully reachable instead of being cut off
+- `usePatternLock` stores those menu metrics on the active menu so rendering geometry and pointer hit-testing stay aligned
+- the menu backdrop size is now driven by a CSS variable, and compact screens also get larger option pills, larger numbered labels, and a larger center core for better finger targeting
+- the pattern-lock surface now suppresses browser double-click behavior and adds stronger iOS-oriented selection/tap-highlight guards
+- `ContentArea` and `MainArea` temporarily switch to visible overflow and higher stacking while the menu is open so it can overlap the sidebar, navbar, and footer instead of being hidden under them
+- helper tests now cover responsive menu sizing and compact-screen hit detection
+
+**Files:**
+- `src/components/DotAnnotationMenu.utils.ts`
+- `src/components/DotAnnotationMenu.utils.test.ts`
+- `src/components/usePatternLock.ts`
+- `src/components/Point.tsx`
+- `src/components/PatternLock.tsx`
+- `src/components/PatternLock.css`
+- `src/App.tsx`
+- `src/App.styled.tsx`
+- `README.md`
+
 ### Counter Build-Type Regression Guard
 
 **Decision:** Kept the shared play-area counter styling strict about its required `$side` prop and made `GuessCounter` pass the left-side prop explicitly at render sites instead of relying on styled-component attribute inference alone.
