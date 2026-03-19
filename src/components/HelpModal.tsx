@@ -62,7 +62,7 @@ export const HelpPanel: React.FunctionComponent = (): React.ReactElement => (
             Dots may <em>not repeat</em>, and lines <em>cannot skip</em> over unvisited dots.
         </p>
         <p className="mt-3 mb-0">
-            <strong>Double-click a dot on desktop, or long-press it on touch screens</strong>, then point toward a note and release to place it.
+            <strong>Long-press a dot</strong>, then point toward a note and release to place it.
         </p>
         <NotesHelpRow>
             <NotePreview>

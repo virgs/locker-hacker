@@ -11,11 +11,6 @@ export interface DotAnnotationMenuOption {
     y: number;
 }
 
-export interface AnnotationPressRecord {
-    index: number;
-    timestamp: number;
-}
-
 export interface DotAnnotationMenuMetrics {
     radiusPx: number;
     hitRadiusPx: number;
@@ -28,11 +23,10 @@ export interface DotAnnotationMenuOffset {
     y: number;
 }
 
-export const DOT_ANNOTATION_DOUBLE_PRESS_MS = 350;
 export const DOT_ANNOTATION_LONG_PRESS_MS = 420;
-export const DOT_ANNOTATION_MENU_RADIUS_PX = 58;
-export const DOT_ANNOTATION_MENU_HIT_RADIUS_PX = 24;
-export const DOT_ANNOTATION_MENU_BACKDROP_PX = 164;
+export const DOT_ANNOTATION_MENU_RADIUS_PX = 74;
+export const DOT_ANNOTATION_MENU_HIT_RADIUS_PX = 28;
+export const DOT_ANNOTATION_MENU_BACKDROP_PX = 196;
 export const DOT_ANNOTATION_MENU_MOBILE_MIN_RADIUS_PX = 108;
 export const DOT_ANNOTATION_MENU_MOBILE_MAX_RADIUS_PX = 148;
 export const DOT_ANNOTATION_MENU_VIEWPORT_PADDING_PX = 28;
@@ -172,16 +166,6 @@ export const getDotAnnotationMenuOptions = (
         },
     ];
 };
-
-export const isRepeatedAnnotationPress = (
-    previousPress: AnnotationPressRecord | null,
-    index: number,
-    timestamp: number,
-    windowMs = DOT_ANNOTATION_DOUBLE_PRESS_MS,
-): boolean =>
-    previousPress !== null &&
-    previousPress.index === index &&
-    timestamp - previousPress.timestamp <= windowMs;
 
 export const getDotAnnotationSelectionAtPointer = (
     pointer: Point,

@@ -40,6 +40,26 @@
 - `src/components/HelpModal.tsx`
 - `README.md`
 
+### Annotation Entry Now Uses One Shared Long Press Gesture
+
+**Decision:** Dot annotations now open from the same long-press gesture on both desktop and touch devices, and the desktop radial menu footprint has been increased.
+
+**Rationale:** Using separate desktop and touch entry gestures added needless mental overhead once the menu moved to angle-based pointing. A shared long press is easier to explain and learn, and the larger desktop menu gives the pointing interaction enough visual spacing to feel intentional on large screens too.
+
+**Implementation details:**
+- `usePatternLock` no longer tracks repeated mouse presses for annotation entry
+- mouse and touch now schedule the same annotation long-press timer when the pressed dot can open the menu
+- moving before the timer fires cancels the pending menu and falls back to normal path drawing from the original press point
+- desktop menu radius, hit radius, and backdrop size were increased while keeping the compact-screen sizing rules intact
+
+**Files:**
+- `src/components/usePatternLock.ts`
+- `src/components/usePatternLock.test.ts`
+- `src/components/DotAnnotationMenu.utils.ts`
+- `src/components/DotAnnotationMenu.utils.test.ts`
+- `src/components/HelpModal.tsx`
+- `README.md`
+
 ### Annotation Menu Edge Clamp Uses A Dedicated Offset Layer
 
 **Decision:** The radial annotation menu now applies its viewport-clamp offset on an inner positioning layer instead of on the animated menu shell itself.

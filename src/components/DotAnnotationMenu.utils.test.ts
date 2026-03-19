@@ -1,5 +1,4 @@
 import {
-    DOT_ANNOTATION_DOUBLE_PRESS_MS,
     DOT_ANNOTATION_MENU_BACKDROP_PX,
     DOT_ANNOTATION_MENU_CLEAR_ANGLE_DEG,
     DOT_ANNOTATION_MENU_HIT_RADIUS_PX,
@@ -13,7 +12,6 @@ import {
     getDotAnnotationMenuOffset,
     getDotAnnotationMenuOptions,
     getDotAnnotationSelectionAtPointer,
-    isRepeatedAnnotationPress,
 } from "./DotAnnotationMenu.utils.ts";
 
 describe("DotAnnotationMenu helpers", () => {
@@ -48,7 +46,7 @@ describe("DotAnnotationMenu helpers", () => {
             radiusPx: DOT_ANNOTATION_MENU_RADIUS_PX,
             hitRadiusPx: DOT_ANNOTATION_MENU_HIT_RADIUS_PX,
             backdropDiameterPx: DOT_ANNOTATION_MENU_BACKDROP_PX,
-            footprintRadiusPx: 100,
+            footprintRadiusPx: 120,
         });
 
         const compactMetrics = getDotAnnotationMenuMetrics(320, true);
@@ -60,12 +58,6 @@ describe("DotAnnotationMenu helpers", () => {
         expect(compactMetrics.hitRadiusPx).toBeGreaterThan(DOT_ANNOTATION_MENU_HIT_RADIUS_PX);
         expect(compactMetrics.footprintRadiusPx).toBeGreaterThan(compactMetrics.backdropDiameterPx / 2);
         expect(compactMetrics.radiusPx).toBe(112);
-    });
-
-    it("detects a valid second press on the same dot within the timing window", () => {
-        expect(isRepeatedAnnotationPress({ index: 4, timestamp: 1_000 }, 4, 1_250)).toBe(true);
-        expect(isRepeatedAnnotationPress({ index: 4, timestamp: 1_000 }, 3, 1_250)).toBe(false);
-        expect(isRepeatedAnnotationPress({ index: 4, timestamp: 1_000 }, 4, 1_000 + DOT_ANNOTATION_DOUBLE_PRESS_MS + 1)).toBe(false);
     });
 
     it("finds the pointed radial option from pointer angle instead of direct overlap", () => {
