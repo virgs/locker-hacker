@@ -18,6 +18,7 @@ export interface DotAnnotationMenuMetrics {
     radiusPx: number;
     hitRadiusPx: number;
     backdropDiameterPx: number;
+    footprintRadiusPx: number;
 }
 
 export interface DotAnnotationMenuOffset {
@@ -67,6 +68,10 @@ export const getDotAnnotationMenuMetrics = (
             radiusPx: DOT_ANNOTATION_MENU_RADIUS_PX,
             hitRadiusPx: DOT_ANNOTATION_MENU_HIT_RADIUS_PX,
             backdropDiameterPx: DOT_ANNOTATION_MENU_BACKDROP_PX,
+            footprintRadiusPx: Math.max(
+                DOT_ANNOTATION_MENU_BACKDROP_PX / 2,
+                DOT_ANNOTATION_MENU_RADIUS_PX + DOT_ANNOTATION_MENU_HIT_RADIUS_PX + 18,
+            ),
         };
     }
 
@@ -76,32 +81,35 @@ export const getDotAnnotationMenuMetrics = (
         DOT_ANNOTATION_MENU_MOBILE_MAX_RADIUS_PX,
     );
 
+    const hitRadiusPx = clamp(Math.round(radiusPx * 0.34), 36, 48);
+    const backdropDiameterPx = clamp(
+        Math.round(safeBoardSizePx * 0.98),
+        radiusPx * 2 + 92,
+        safeBoardSizePx,
+    );
+
     return {
         radiusPx,
-        hitRadiusPx: clamp(Math.round(radiusPx * 0.34), 36, 48),
-        backdropDiameterPx: clamp(
-            Math.round(safeBoardSizePx * 0.98),
-            radiusPx * 2 + 92,
-            safeBoardSizePx,
-        ),
+        hitRadiusPx,
+        backdropDiameterPx,
+        footprintRadiusPx: Math.max(backdropDiameterPx / 2, radiusPx + hitRadiusPx + 26),
     };
 };
 
 export const getDotAnnotationMenuOffset = (
     centerInViewport: Point,
-    backdropDiameterPx: number,
+    footprintRadiusPx: number,
     viewportSize: { width: number; height: number },
     paddingPx = DOT_ANNOTATION_MENU_VIEWPORT_PADDING_PX,
 ): DotAnnotationMenuOffset => {
-    const halfBackdropPx = backdropDiameterPx / 2;
-    const minX = paddingPx + halfBackdropPx;
-    const maxX = viewportSize.width - paddingPx - halfBackdropPx;
-    const minY = paddingPx + halfBackdropPx;
-    const maxY = viewportSize.height - paddingPx - halfBackdropPx;
+    const minX = paddingPx + footprintRadiusPx;
+    const maxX = viewportSize.width - paddingPx - footprintRadiusPx;
+    const minY = paddingPx + footprintRadiusPx;
+    const maxY = viewportSize.height - paddingPx - footprintRadiusPx;
 
     return {
-        x: clamp(clamp(centerInViewport.x, minX, maxX) - centerInViewport.x, -halfBackdropPx, halfBackdropPx),
-        y: clamp(clamp(centerInViewport.y, minY, maxY) - centerInViewport.y, -halfBackdropPx, halfBackdropPx),
+        x: clamp(clamp(centerInViewport.x, minX, maxX) - centerInViewport.x, -footprintRadiusPx, footprintRadiusPx),
+        y: clamp(clamp(centerInViewport.y, minY, maxY) - centerInViewport.y, -footprintRadiusPx, footprintRadiusPx),
     };
 };
 

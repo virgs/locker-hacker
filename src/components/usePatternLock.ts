@@ -46,6 +46,7 @@ export interface ActiveAnnotationMenu {
     radiusPx: number;
     hitRadiusPx: number;
     backdropDiameterPx: number;
+    footprintRadiusPx: number;
     offsetX: number;
     offsetY: number;
 }
@@ -239,7 +240,7 @@ export const usePatternLock = ({
                         x: left + pointCenter.x,
                         y: top + pointCenter.y,
                     },
-                    menuMetrics.backdropDiameterPx,
+                    menuMetrics.footprintRadiusPx,
                     {
                         width: window.innerWidth,
                         height: window.innerHeight,
@@ -255,6 +256,7 @@ export const usePatternLock = ({
                 radiusPx: menuMetrics.radiusPx,
                 hitRadiusPx: menuMetrics.hitRadiusPx,
                 backdropDiameterPx: menuMetrics.backdropDiameterPx,
+                footprintRadiusPx: menuMetrics.footprintRadiusPx,
                 offsetX: menuOffset.x,
                 offsetY: menuOffset.y,
             });

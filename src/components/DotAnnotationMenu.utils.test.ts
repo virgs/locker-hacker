@@ -30,6 +30,7 @@ describe("DotAnnotationMenu helpers", () => {
             radiusPx: DOT_ANNOTATION_MENU_RADIUS_PX,
             hitRadiusPx: DOT_ANNOTATION_MENU_HIT_RADIUS_PX,
             backdropDiameterPx: DOT_ANNOTATION_MENU_BACKDROP_PX,
+            footprintRadiusPx: 100,
         });
 
         const compactMetrics = getDotAnnotationMenuMetrics(320, true);
@@ -39,6 +40,7 @@ describe("DotAnnotationMenu helpers", () => {
         expect(compactMetrics.radiusPx).toBeLessThanOrEqual(DOT_ANNOTATION_MENU_MOBILE_MAX_RADIUS_PX);
         expect(compactMetrics.backdropDiameterPx).toBeGreaterThan(DOT_ANNOTATION_MENU_BACKDROP_PX);
         expect(compactMetrics.hitRadiusPx).toBeGreaterThan(DOT_ANNOTATION_MENU_HIT_RADIUS_PX);
+        expect(compactMetrics.footprintRadiusPx).toBeGreaterThan(compactMetrics.backdropDiameterPx / 2);
         expect(compactMetrics.radiusPx).toBe(112);
     });
 
@@ -75,18 +77,18 @@ describe("DotAnnotationMenu helpers", () => {
         expect(
             getDotAnnotationMenuOffset(
                 { x: 40, y: 44 },
-                220,
+                120,
                 { width: 360, height: 640 },
             ),
         ).toEqual({
-            x: DOT_ANNOTATION_MENU_VIEWPORT_PADDING_PX + 110 - 40,
-            y: DOT_ANNOTATION_MENU_VIEWPORT_PADDING_PX + 110 - 44,
+            x: DOT_ANNOTATION_MENU_VIEWPORT_PADDING_PX + 120 - 40,
+            y: DOT_ANNOTATION_MENU_VIEWPORT_PADDING_PX + 120 - 44,
         });
 
         expect(
             getDotAnnotationMenuOffset(
                 { x: 180, y: 320 },
-                220,
+                120,
                 { width: 360, height: 640 },
             ),
         ).toEqual({ x: 0, y: 0 });
