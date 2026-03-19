@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check, RotateCcw, Slash } from "react-feather";
+import { Check, Trash2, X } from "react-feather";
 import {
     getAnnotationMenuOffsetStyle,
     getConfirmedLabelStyle,
@@ -37,9 +37,9 @@ const useAnimatedMarker = (active: boolean): { visible: boolean; exiting: boolea
 };
 
 const renderAnnotationOptionContent = (selection: string): React.ReactNode => {
-    if (selection === "eliminate") return <Slash size={16} strokeWidth={2.4} />;
+    if (selection === "eliminate") return <X size={16} strokeWidth={2.6} />;
     if (selection === "all") return <Check size={16} strokeWidth={2.6} />;
-    if (selection === "clear") return <RotateCcw size={16} strokeWidth={2.3} />;
+    if (selection === "clear") return <Trash2 size={16} strokeWidth={2.2} />;
     return selection.replace("position-", "");
 };
 
