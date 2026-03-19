@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Check, RotateCcw, Slash } from "react-feather";
 import {
     getAnnotationMenuOffsetStyle,
     getConfirmedLabelStyle,
@@ -33,6 +34,13 @@ const useAnimatedMarker = (active: boolean): { visible: boolean; exiting: boolea
     }, [active, visible]);
 
     return { visible, exiting };
+};
+
+const renderAnnotationOptionContent = (selection: string): React.ReactNode => {
+    if (selection === "eliminate") return <Slash size={16} strokeWidth={2.4} />;
+    if (selection === "all") return <Check size={16} strokeWidth={2.6} />;
+    if (selection === "clear") return <RotateCcw size={16} strokeWidth={2.3} />;
+    return selection.replace("position-", "");
 };
 
 interface PointProps {
@@ -141,6 +149,7 @@ const Point: React.FunctionComponent<PointProps> = ({
                                 <div
                                     key={option.selection}
                                     data-annotation-selection={option.selection}
+                                    data-annotation-kind={option.kind}
                                     className={[
                                         "react-pattern-lock__annotation-menu-option",
                                         `tone-${option.tone}`,
@@ -148,10 +157,11 @@ const Point: React.FunctionComponent<PointProps> = ({
                                         annotationMenu?.highlightedSelection === option.selection ? "is-highlighted" : "",
                                     ].filter(Boolean).join(" ")}
                                     style={{
-                                        transform: `translate(-50%, -50%) translate(${option.x.toFixed(2)}px, ${option.y.toFixed(2)}px)`,
+                                        ["--annotation-menu-option-x" as string]: `${option.x.toFixed(2)}px`,
+                                        ["--annotation-menu-option-y" as string]: `${option.y.toFixed(2)}px`,
                                     }}
                                 >
-                                    {option.label}
+                                    {renderAnnotationOptionContent(option.selection)}
                                 </div>
                             ))}
                         </div>

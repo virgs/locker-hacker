@@ -20,6 +20,26 @@
 - `src/components/HelpModal.tsx`
 - `README.md`
 
+### Annotation Menu Now Uses Top-Flanked Action Icons And Angle-Based Pointing
+
+**Decision:** The radial annotation menu now places `eliminate` and `all` as icon actions flanking the numbered top arc, keeps `clear` as a single centered icon on the bottom arc, and selects by pointer angle instead of direct option overlap.
+
+**Rationale:** On phones the user’s finger was still covering the option pills during selection. Moving the action items out of the lower half creates a cleaner bottom escape target, and angle-based pointing lets the active choice snap into the center where it stays visible before release.
+
+**Implementation details:**
+- `DotAnnotationMenu.utils` now assigns explicit angles to each option and resolves the highlighted selection from the center-to-pointer angle once the pointer moves far enough from the center
+- `Point` now renders icon-only action pills for `eliminate`, `all`, and `clear`
+- highlighted options animate into the menu center instead of only scaling in place, so touch selection feedback stays visible under the finger
+- help and README copy now describe pointing toward a note rather than sliding onto it
+
+**Files:**
+- `src/components/DotAnnotationMenu.utils.ts`
+- `src/components/DotAnnotationMenu.utils.test.ts`
+- `src/components/Point.tsx`
+- `src/components/PatternLock.css`
+- `src/components/HelpModal.tsx`
+- `README.md`
+
 ### Annotation Menu Edge Clamp Uses A Dedicated Offset Layer
 
 **Decision:** The radial annotation menu now applies its viewport-clamp offset on an inner positioning layer instead of on the animated menu shell itself.

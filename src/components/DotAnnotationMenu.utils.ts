@@ -4,7 +4,9 @@ import type { DotAnnotationSelection } from "../game/dotAnnotations.ts";
 export interface DotAnnotationMenuOption {
     selection: DotAnnotationSelection;
     label: string;
+    kind: "action" | "position";
     tone: "neutral" | "danger" | "success";
+    angleDeg: number;
     x: number;
     y: number;
 }
@@ -34,6 +36,10 @@ export const DOT_ANNOTATION_MENU_BACKDROP_PX = 164;
 export const DOT_ANNOTATION_MENU_MOBILE_MIN_RADIUS_PX = 108;
 export const DOT_ANNOTATION_MENU_MOBILE_MAX_RADIUS_PX = 148;
 export const DOT_ANNOTATION_MENU_VIEWPORT_PADDING_PX = 28;
+export const DOT_ANNOTATION_MENU_TOP_LEFT_ACTION_ANGLE_DEG = -170;
+export const DOT_ANNOTATION_MENU_TOP_RIGHT_ACTION_ANGLE_DEG = -10;
+export const DOT_ANNOTATION_MENU_CLEAR_ANGLE_DEG = 90;
+export const DOT_ANNOTATION_MENU_POINTING_MIN_DISTANCE_RATIO = 0.24;
 
 const clamp = (
     value: number,
@@ -49,12 +55,19 @@ const toOffset = (angleDeg: number, radiusPx: number): Point => {
     };
 };
 
+const normalizeAngleDeg = (angleDeg: number): number => ((angleDeg + 180) % 360 + 360) % 360 - 180;
+
+const getAngleDeltaDeg = (
+    left: number,
+    right: number,
+): number => normalizeAngleDeg(left - right);
+
 const getPositionAngles = (codeLength: number): number[] => {
     if (codeLength <= 1) return [-90];
 
     return Array.from({ length: codeLength }, (_, index) => {
         const ratio = index / (codeLength - 1);
-        return -150 + ratio * 120;
+        return -138 + ratio * 96;
     });
 };
 
@@ -123,17 +136,40 @@ export const getDotAnnotationMenuOptions = (
         return {
             selection: `position-${index + 1}` as const,
             label: `${index + 1}`,
+            kind: "position" as const,
             tone: "success" as const,
+            angleDeg: angle,
             x: offset.x,
             y: offset.y,
         };
     });
 
     return [
+        {
+            selection: "eliminate",
+            label: "Eliminate",
+            kind: "action",
+            tone: "danger",
+            angleDeg: DOT_ANNOTATION_MENU_TOP_LEFT_ACTION_ANGLE_DEG,
+            ...toOffset(DOT_ANNOTATION_MENU_TOP_LEFT_ACTION_ANGLE_DEG, radiusPx),
+        },
         ...positionOptions,
-        { selection: "clear", label: "Clear", tone: "neutral", ...toOffset(150, radiusPx) },
-        { selection: "eliminate", label: "Off", tone: "danger", ...toOffset(90, radiusPx) },
-        { selection: "all", label: "All", tone: "success", ...toOffset(30, radiusPx) },
+        {
+            selection: "all",
+            label: "All",
+            kind: "action",
+            tone: "success",
+            angleDeg: DOT_ANNOTATION_MENU_TOP_RIGHT_ACTION_ANGLE_DEG,
+            ...toOffset(DOT_ANNOTATION_MENU_TOP_RIGHT_ACTION_ANGLE_DEG, radiusPx),
+        },
+        {
+            selection: "clear",
+            label: "Clear",
+            kind: "action",
+            tone: "neutral",
+            angleDeg: DOT_ANNOTATION_MENU_CLEAR_ANGLE_DEG,
+            ...toOffset(DOT_ANNOTATION_MENU_CLEAR_ANGLE_DEG, radiusPx),
+        },
     ];
 };
 
@@ -155,13 +191,19 @@ export const getDotAnnotationSelectionAtPointer = (
     hitRadiusPx = DOT_ANNOTATION_MENU_HIT_RADIUS_PX,
 ): DotAnnotationSelection | null => {
     const options = getDotAnnotationMenuOptions(codeLength, radiusPx);
+    const distanceFromCenter = Math.hypot(pointer.x - center.x, pointer.y - center.y);
+    const minPointingDistance = Math.max(hitRadiusPx * 0.75, radiusPx * DOT_ANNOTATION_MENU_POINTING_MIN_DISTANCE_RATIO);
+
+    if (distanceFromCenter < minPointingDistance) return null;
+
+    const pointerAngleDeg = Math.atan2(pointer.y - center.y, pointer.x - center.x) * (180 / Math.PI);
     const bestMatch = options
         .map(option => ({
             selection: option.selection,
-            distance: Math.hypot(pointer.x - (center.x + option.x), pointer.y - (center.y + option.y)),
+            angleDistance: Math.abs(getAngleDeltaDeg(pointerAngleDeg, option.angleDeg)),
         }))
-        .sort((left, right) => left.distance - right.distance)[0];
+        .sort((left, right) => left.angleDistance - right.angleDistance)[0];
 
-    if (!bestMatch || bestMatch.distance > hitRadiusPx) return null;
+    if (!bestMatch) return null;
     return bestMatch.selection;
 };
