@@ -135,6 +135,7 @@ const Point: React.FunctionComponent<PointProps> = ({
                             className="react-pattern-lock__annotation-menu-offset"
                             style={getAnnotationMenuOffsetStyle(annotationMenu?.offsetX, annotationMenu?.offsetY)}
                         >
+                            <div className="react-pattern-lock__annotation-menu-backdrop" />
                             <div className="react-pattern-lock__annotation-menu-core" />
                             {menuOptions.map(option => (
                                 <div

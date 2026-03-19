@@ -11,6 +11,7 @@
 **Implementation details:**
 - `Point` now renders a `.react-pattern-lock__annotation-menu-offset` child that owns the clamp translation
 - the outer `.react-pattern-lock__annotation-menu` keeps only opacity/scale animation concerns
+- the circular gradient/backdrop was also moved off the shell `::before` pseudo-element and into that same translated layer so the visual halo, core, and radial options stay aligned near screen edges
 - `Point.utils` now exposes `getAnnotationMenuOffsetStyle()` so the translation format is shared and testable
 - helper tests now cover the offset style contract alongside the other point-layout helpers
 

@@ -112,8 +112,7 @@
     inset: 0;
 }
 
-.react-pattern-lock__annotation-menu::before {
-    content: "";
+.react-pattern-lock__annotation-menu-backdrop {
     position: absolute;
     top: 50%;
     left: 50%;
