@@ -21,6 +21,7 @@ interface UseSinglePlayerStatsPersistenceResult {
     activeRecordId : string | null;
     markStarted    : (movesOverride?: number) => void;
     finalizeActive : (options: FinalizeOptions) => void;
+    resumeActive   : (recordId: string, movesOverride?: number) => void;
     resetActive    : () => void;
 }
 
@@ -63,10 +64,17 @@ export const useSinglePlayerStatsPersistence = ({
         setActiveRecordId(null);
     }, [getSnapshot, playerCount, trackerRef]);
 
+    const resumeActive = React.useCallback((recordId: string, movesOverride?: number): void => {
+        if (playerCount !== PlayerCount.One || recordId.length === 0) return;
+        updateRecord(recordId, { ...getSnapshot(movesOverride), completed: false });
+        trackerRef.current.start(recordId);
+        setActiveRecordId(recordId);
+    }, [getSnapshot, playerCount, trackerRef]);
+
     const resetActive = React.useCallback((): void => {
         trackerRef.current.reset();
         setActiveRecordId(null);
     }, [trackerRef]);
 
-    return { activeRecordId, markStarted, finalizeActive, resetActive };
+    return { activeRecordId, markStarted, finalizeActive, resumeActive, resetActive };
 };

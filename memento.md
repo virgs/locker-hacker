@@ -96,6 +96,24 @@
 - `src/App.utils.test.ts`
 - `README.md`
 
+### Auto-Finalized Pagehide Losses Now Reopen When The Page Returns
+
+**Decision:** A single-player game that was auto-finalized as a loss on `pagehide` is now restored if the same page becomes visible again.
+
+**Rationale:** Phones can emit `pagehide` during normal app switching, which made temporary backgrounding look like a real abandonment. Restoring the provisional loss when the page is visible again prevents those false abandons while keeping the pagehide safety net for genuine exits.
+
+**Implementation details:**
+- `GameContext` now remembers the active record id before provisional pagehide finalization
+- when the document becomes visible again in the same app session, the stats persistence hook reopens that record as the active unfinished game
+- `useSinglePlayerStatsPersistence` now exposes `resumeActive()` to mark an existing record incomplete again and rebind it to the active tracker
+- helper tests cover the provisional pagehide record capture and visibility-based restore rule
+
+**Files:**
+- `src/context/GameContext.tsx`
+- `src/context/GameContext.utils.ts`
+- `src/context/GameContext.utils.test.ts`
+- `src/context/useSinglePlayerStatsPersistence.ts`
+
 ### Annotation Menu Edge Clamp Uses A Dedicated Offset Layer
 
 **Decision:** The radial annotation menu now applies its viewport-clamp offset on an inner positioning layer instead of on the animated menu shell itself.

@@ -6,6 +6,10 @@ import { GameSessionStatsTracker } from "./GameSessionStatsTracker.ts";
 import { useSinglePlayerStatsPersistence } from "./useSinglePlayerStatsPersistence.ts";
 import { pickEliminationHint } from "../game/HintService.ts";
 import {
+    getAutoFinalizedRecordId,
+    shouldRestoreAutoFinalizedRecord,
+} from "./GameContext.utils.ts";
+import {
     getAnnotatedDotIndices,
     getConfirmedDotAnnotations,
     applyDotAnnotationSelection,
@@ -97,7 +101,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
     const invalidGuessListenerRef                = React.useRef<(() => void) | null>(null);
     const gridConfig = LEVEL_CONFIGS[level];
     const isRunning  = pathHistory.length > 0;
-    const { activeRecordId, markStarted, finalizeActive, resetActive } = useSinglePlayerStatsPersistence({
+    const { activeRecordId, markStarted, finalizeActive, resumeActive, resetActive } = useSinglePlayerStatsPersistence({
         trackerRef: sessionTrackerRef,
         playerCount,
         level,
@@ -105,6 +109,7 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         pathHistorySize: pathHistory.length,
         hintsUsed: revealedHints.length,
     });
+    const autoFinalizedRecordIdRef = React.useRef<string | null>(null);
 
     React.useEffect(() => {
         if (!isRunning || phase === GamePhase.Revealing) return;
@@ -116,10 +121,26 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
         saveConfig({ level, playerCount, annotationsEnabled });
     }, [annotationsEnabled, level, playerCount]);
     React.useEffect(() => {
-        const onPageHide = (): void => finalizeActive({ won: false });
+        const onPageHide = (): void => {
+            autoFinalizedRecordIdRef.current = getAutoFinalizedRecordId(activeRecordId);
+            finalizeActive({ won: false });
+        };
+        const onVisibilityChange = (): void => {
+            if (!shouldRestoreAutoFinalizedRecord(
+                autoFinalizedRecordIdRef.current,
+                activeRecordId,
+                document.visibilityState,
+            )) return;
+            resumeActive(autoFinalizedRecordIdRef.current);
+            autoFinalizedRecordIdRef.current = null;
+        };
         window.addEventListener("pagehide", onPageHide);
-        return () => window.removeEventListener("pagehide", onPageHide);
-    }, [finalizeActive]);
+        document.addEventListener("visibilitychange", onVisibilityChange);
+        return () => {
+            window.removeEventListener("pagehide", onPageHide);
+            document.removeEventListener("visibilitychange", onVisibilityChange);
+        };
+    }, [activeRecordId, finalizeActive, resumeActive]);
     const onLevelChange = React.useCallback((newLevel: Level): void => {
         finalizeActive({ won: false });
         setLevel(newLevel);
