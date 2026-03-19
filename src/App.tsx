@@ -20,7 +20,7 @@ import useEndGameColor from "./components/useEndGameColor.ts";
 import useConfetti from "./components/useConfetti.ts";
 import GuessCounter from "./components/GuessCounter.tsx";
 import TimeCounter from "./components/TimeCounter.tsx";
-import { shouldScrollHistoryToBottom } from "./App.utils.ts";
+import { preventContextMenu, shouldScrollHistoryToBottom } from "./App.utils.ts";
 
 export const App = (): ReactElement => {
     const {
@@ -67,6 +67,12 @@ export const App = (): ReactElement => {
         wasExpandedRef.current = expanded;
         previousGuessCountRef.current = pathHistory.length;
     }, [expanded, pathHistory.length]);
+
+    useEffect(() => {
+        window.addEventListener("contextmenu", preventContextMenu);
+
+        return () => window.removeEventListener("contextmenu", preventContextMenu);
+    }, []);
 
     return (
         <AppLayout $annotationMenuActive={annotationMenuOpen}>

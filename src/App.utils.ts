@@ -9,3 +9,9 @@ export const shouldScrollHistoryToBottom = (
 
     return (guessCountChanged && collapsed) || (wasExpanded && collapsed);
 };
+
+export const preventContextMenu = (
+    event: Pick<MouseEvent, "preventDefault">,
+): void => {
+    event.preventDefault();
+};

@@ -60,6 +60,23 @@
 - `src/components/HelpModal.tsx`
 - `README.md`
 
+### Browser Context Menu Is Disabled App-Wide
+
+**Decision:** The browser context menu is now suppressed globally throughout the app.
+
+**Rationale:** Long-press and right-click browser menus compete directly with the pattern-lock and annotation interactions. Disabling them app-wide keeps input predictable and prevents the browser from interrupting gameplay with native menus.
+
+**Implementation details:**
+- `App` now registers one global `contextmenu` listener on `window`
+- `App.utils` exposes `preventContextMenu()` so the suppression behavior is explicit and unit tested
+- the listener is added on mount and removed on unmount
+
+**Files:**
+- `src/App.tsx`
+- `src/App.utils.ts`
+- `src/App.utils.test.ts`
+- `README.md`
+
 ### Annotation Menu Edge Clamp Uses A Dedicated Offset Layer
 
 **Decision:** The radial annotation menu now applies its viewport-clamp offset on an inner positioning layer instead of on the animated menu shell itself.
