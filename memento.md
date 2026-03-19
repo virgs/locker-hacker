@@ -2,6 +2,20 @@
 
 ## Architectural Decisions
 
+### Auto-Finalized Restore Build Fix Uses An Explicit Local Null Guard
+
+**Decision:** The visibility-restore path in `GameContext` now copies the provisional auto-finalized record id into a local constant and exits early when it is `null` before calling `resumeActive()`.
+
+**Rationale:** CircleCI type-checking rejected the previous direct `ref.current` call because the helper returned only `boolean`, so TypeScript could not prove the record id was non-null at the call site. Guarding the local value preserves the existing behavior and makes the nullability contract explicit.
+
+**Implementation details:**
+- `onVisibilityChange()` now reads `autoFinalizedRecordIdRef.current` once into `autoFinalizedRecordId`
+- the handler returns immediately when that local value is `null`
+- `resumeActive()` is now called only with the narrowed string value, which satisfies the build without changing runtime behavior
+
+**Files:**
+- `src/context/GameContext.tsx`
+
 ### Game Menu Now Uses One Accordion Under A Single Modal Title
 
 **Decision:** Replaced the tab strip inside the shared game menu modal with an accordion whose sections are ordered `Game stats`, `Settings`, and `How to play`, each with a left-aligned icon, while the modal title is now always `Menu`.

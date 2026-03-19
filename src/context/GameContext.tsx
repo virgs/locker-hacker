@@ -126,12 +126,14 @@ export const GameProvider = ({ children }: React.PropsWithChildren): React.React
             finalizeActive({ won: false });
         };
         const onVisibilityChange = (): void => {
+            const autoFinalizedRecordId = autoFinalizedRecordIdRef.current;
+            if (autoFinalizedRecordId === null) return;
             if (!shouldRestoreAutoFinalizedRecord(
-                autoFinalizedRecordIdRef.current,
+                autoFinalizedRecordId,
                 activeRecordId,
                 document.visibilityState,
             )) return;
-            resumeActive(autoFinalizedRecordIdRef.current);
+            resumeActive(autoFinalizedRecordId);
             autoFinalizedRecordIdRef.current = null;
         };
         window.addEventListener("pagehide", onPageHide);
